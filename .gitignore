@@ -1,0 +1,45 @@
+# Dependencies
+node_modules/
+
+# Next.js
+.next/
+out/
+next-env.d.ts
+
+# Build output
+build/
+dist/
+
+# Environment files (`.env.example` is committed; real values are not)
+.env
+.env.local
+.env.*.local
+.env.production
+
+# Testing
+coverage/
+playwright-report/
+test-results/
+blob-report/
+
+# Docker volumes / local data
+.docker-data/
+
+# Database dumps and backups (never commit production data)
+*.dump
+dumps/
+backups/
+
+# Generated publish artifacts (local previews)
+artifacts/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
