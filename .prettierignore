@@ -1,0 +1,10 @@
+.next/
+node_modules/
+public/
+package-lock.json
+
+# Planning content — hand-formatted, not part of the app's tooling scope
+docs/
+openspec/
+.claude/
+README.md

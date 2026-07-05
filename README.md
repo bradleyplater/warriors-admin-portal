@@ -6,6 +6,26 @@ A single Next.js full-stack application for managing the Peterborough Warriors i
 
 The current setup uses two separate services to manage data and export JSON files that are committed into the website repo. It is clunky and error prone — analysis of the live database found season-stat drift in three of four seasons caused by the same data being hand-maintained in multiple places. This portal eliminates that class of bug by making game records the single source of truth and computing all aggregate stats from them.
 
+## Getting started
+
+Prerequisites: Node.js (version pinned in [.nvmrc](.nvmrc); `nvm use` if you use nvm) and npm.
+
+```bash
+npm install
+npm run dev   # http://localhost:3000
+```
+
+This runs the portal shell only — no database or object storage is required yet. Docker services (MongoDB, MinIO) and seed data arrive with [KAN-9](docs/06-local-development.md) and KAN-10; once those land, `docker compose up -d` will provide the full local stack described there.
+
+Other scripts:
+
+| Command | Does |
+|---|---|
+| `npm run build` | Production build |
+| `npm run lint` | ESLint |
+| `npm run format` / `npm run format:check` | Prettier write / verify |
+| `npm run typecheck` | TypeScript check (`tsc --noEmit`) |
+
 ## Planning documents
 
 | Doc | Contents |
