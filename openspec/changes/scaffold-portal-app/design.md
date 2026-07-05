@@ -13,7 +13,7 @@ Decisions below marked *(confirmed)* were signed off by Bradley during explorati
 - A runnable Next.js + TypeScript app at the repo root with a portal shell (nav to Players / Games / Seasons placeholders).
 - Lint, format, type-check, and production-build commands that pass on a clean checkout.
 - README "Getting started" that takes a fresh clone to a running dev server.
-- The day-one auth seam: pass-through `middleware.ts`.
+- The day-one auth seam: pass-through `proxy.ts` (Next 16's renamed `middleware.ts`).
 - Zero dependence on any running service — no database, no S3.
 
 **Non-Goals:**
@@ -33,7 +33,7 @@ Decisions below marked *(confirmed)* were signed off by Bradley during explorati
 5. **npm as package manager** *(confirmed)*. All planning docs write `npm install` / `npm run …`; no reason to diverge.
 6. **Scripts**: `dev`, `build`, `start` (Next defaults) plus `lint` (ESLint), `format` / `format:check` (Prettier write/check), and `typecheck` (`tsc --noEmit`). Type-checking is a standalone script rather than build-only so CI (KAN-11) can run it as a distinct stage.
 7. **TypeScript strict mode on** (create-next-app default). Loosening later is easy; tightening later is a slog.
-8. **`middleware.ts` with a pass-through matcher covering all portal routes.** Required "from day one" by the architecture doc's auth seam. It does nothing but forward requests; implementing auth later means filling in this one file plus a login page.
+8. **`proxy.ts` with a pass-through matcher covering all portal routes.** Required "from day one" by the architecture doc's auth seam (written as `middleware.ts`; renamed here to `proxy.ts` because the installed Next.js 16 deprecated the `middleware` file convention in favour of `proxy` — same mechanism, current framework name). It does nothing but forward requests; implementing auth later means filling in this one file plus a login page.
 9. **Node version pinned** via `engines` in `package.json` and an `.nvmrc`, so "fresh clone follows README" is deterministic. Pin to the current active LTS at implementation time.
 10. **Shell layout reserves a publish-status slot.** The architecture doc puts a publish status area in the shell (KAN-32). The layout leaves an obvious, commented placement rather than building anything.
 

@@ -27,12 +27,12 @@ The portal SHALL render a landing page at `/` inside the shared shell, identifyi
 - **WHEN** a user opens `/`
 - **THEN** the landing page renders with the shell navigation visible
 
-### Requirement: Pass-through middleware seam
-The application SHALL include a `middleware.ts` whose matcher covers all portal routes and which forwards every request unchanged, so that authentication can later be added by implementing this single file.
+### Requirement: Pass-through proxy seam
+The application SHALL include a `proxy.ts` (Next.js 16's file convention for the former `middleware.ts`) whose matcher covers all portal routes and which forwards every request unchanged, so that authentication can later be added by implementing this single file.
 
 #### Scenario: Requests pass through unchanged
 - **WHEN** any portal route is requested
-- **THEN** the middleware forwards the request without redirects, rewrites, or blocking
+- **THEN** the proxy forwards the request without redirects, rewrites, or blocking
 
 ### Requirement: Runs without backing services
 The portal shell SHALL start and render all of its pages with no database, object storage, or other external service available.
