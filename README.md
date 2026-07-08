@@ -8,14 +8,15 @@ The current setup uses two separate services to manage data and export JSON file
 
 ## Getting started
 
-Prerequisites: Node.js (version pinned in [.nvmrc](.nvmrc); `nvm use` if you use nvm) and npm.
+Prerequisites: Node.js (version pinned in [.nvmrc](.nvmrc); `nvm use` if you use nvm), npm, and Docker.
 
 ```bash
+cp .env.example .env.local   # defaults already point at the Docker services
 npm install
-npm run dev   # http://localhost:3000
+npm run dev   # starts MongoDB + MinIO via Docker Compose, then http://localhost:3000
 ```
 
-This runs the portal shell only — no database or object storage is required yet. Docker services (MongoDB, MinIO) and seed data arrive with [KAN-9](docs/06-local-development.md) and KAN-10; once those land, `docker compose up -d` will provide the full local stack described there.
+`npm run dev` brings up the local MongoDB and MinIO containers automatically (`docker compose up -d`) before starting the Next.js dev server — no separate step needed. Check `http://localhost:3000/api/health` to confirm both services are reachable. See [06 — Local Development](docs/06-local-development.md) for ports, credentials, and how to point at production instead. Seed data arrives with KAN-10.
 
 Other scripts:
 
