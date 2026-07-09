@@ -13,7 +13,9 @@
     "lint": "eslint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "db:seed": "tsx seed/seed-cli.ts",
+    "db:reset": "tsx seed/reset-cli.ts"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1079.0",
@@ -32,6 +34,7 @@
     "eslint-config-prettier": "^10.1.8",
     "prettier": "^3.9.4",
     "tailwindcss": "^4",
+    "tsx": "^4.23.0",
     "typescript": "^5"
   }
 }
