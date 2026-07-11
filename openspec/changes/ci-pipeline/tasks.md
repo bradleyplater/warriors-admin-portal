@@ -28,6 +28,6 @@
 
 ## 5. Verification
 
-- [ ] 5.1 Open a pull request containing this change and confirm all five stages (lint, typecheck, unit, integration, e2e) pass in a single workflow run
-- [ ] 5.2 Confirm the workflow run's artifacts include a downloadable video, trace, and HTML report
-- [ ] 5.3 Flag to Bradley that branch protection / required status checks still needs to be enabled manually in GitHub repo settings to actually block merges — not part of this change's file changes
+- [x] 5.1 Open a pull request containing this change and confirm all five stages (lint, typecheck, unit, integration, e2e) pass in a single workflow run — [PR #4](https://github.com/bradleyplater/warriors-admin-portal/pull/4), run [29145789185](https://github.com/bradleyplater/warriors-admin-portal/actions/runs/29145789185), all green in 4m3s (found and fixed a corrupted package-lock.json optional-platform-dependency entry along the way — see commit 9ef8663)
+- [x] 5.2 Confirm the workflow run's artifacts include a downloadable video, trace, and HTML report — `playwright-report` artifact (295KB) uploaded and downloadable
+- [x] 5.3 Flag to Bradley that branch protection / required status checks still needs to be enabled manually in GitHub repo settings to actually block merges — not part of this change's file changes
