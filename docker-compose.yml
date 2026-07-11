@@ -5,6 +5,22 @@ services:
       - "27017:27017"
     volumes:
       - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  mongo-seed:
+    build:
+      context: .
+      dockerfile: seed/Dockerfile
+    depends_on:
+      mongo:
+        condition: service_healthy
+    environment:
+      MONGODB_URI: mongodb://mongo:27017/HockeyTracker
+    restart: "no"
 
   minio:
     image: minio/minio
