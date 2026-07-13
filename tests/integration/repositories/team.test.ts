@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getTeam, updateTeam } from "../../../lib/repositories";
+import { getTeam, getTheTeam, updateTeam } from "../../../lib/repositories";
 import * as teamRepository from "../../../lib/repositories/team";
 
 // Seeded fixture team (seed/data/constants.ts) — the team repository has no
@@ -31,5 +31,10 @@ describe("team repository", () => {
 
   it("has no create operation", () => {
     expect("createTeam" in teamRepository).toBe(false);
+  });
+
+  it("reads the sole team without requiring its id", async () => {
+    const team = await getTheTeam();
+    expect(team?._id).toBe(TEAM_ID);
   });
 });

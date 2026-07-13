@@ -9,8 +9,8 @@ const PlayerShape = z.object({
   // unique partial index on { number: 1 } where active: true (KAN-14) —
   // it needs every other active player's document, not just this one.
   number: z
-    .number()
-    .int()
+    .number({ error: "Number must be between 1 and 99" })
+    .int("Number must be between 1 and 99")
     .min(1, "Number must be between 1 and 99")
     .max(99, "Number must be between 1 and 99"),
   positions: z
@@ -18,7 +18,10 @@ const PlayerShape = z.object({
     .min(1, "At least one position is required"),
   active: z.boolean(),
   nickname: z.string().min(1).optional(),
-  imageUrl: z.url().optional(),
+  // Bare S3 object key/filename (e.g. "plr100010.jpg"), not a full URL —
+  // keeps stored documents portable across environments with different
+  // S3 hosts/buckets (local MinIO vs prod).
+  imagePath: z.string().min(1).optional(),
   teamId: z.string(), // "TM######"
   createdAt: z.date(),
   updatedAt: z.date(),

@@ -18,6 +18,15 @@ export async function getTeam(id: string): Promise<Team | null> {
   return doc ? TeamSchema.parse(doc) : null;
 }
 
+// The app is single-team (see the "no create" note above) — callers that
+// need the team's id (e.g. to stamp a new player's teamId) but don't have
+// it yet read the sole document directly rather than hardcoding an id.
+export async function getTheTeam(): Promise<Team | null> {
+  const col = await collection();
+  const doc = await col.findOne({});
+  return doc ? TeamSchema.parse(doc) : null;
+}
+
 export async function updateTeam(
   id: string,
   input: TeamUpdateInput,

@@ -23,6 +23,24 @@ describe("PlayerSchema", () => {
     expect(result.success).toBe(false);
   });
 
+  it("rejects a non-numeric number with the same clear message as an out-of-range one", () => {
+    const nonNumeric = PlayerSchema.safeParse({
+      ...validPlayer,
+      number: Number("abc"),
+    });
+    const outOfRange = PlayerSchema.safeParse({ ...validPlayer, number: 0 });
+    expect(nonNumeric.success).toBe(false);
+    expect(outOfRange.success).toBe(false);
+    if (!nonNumeric.success && !outOfRange.success) {
+      expect(nonNumeric.error.issues[0].message).toBe(
+        "Number must be between 1 and 99",
+      );
+      expect(nonNumeric.error.issues[0].message).toBe(
+        outOfRange.error.issues[0].message,
+      );
+    }
+  });
+
   it.each([1, 99])("accepts number %d at the boundary", (number) => {
     const result = PlayerSchema.safeParse({ ...validPlayer, number });
     expect(result.success).toBe(true);
@@ -33,13 +51,21 @@ describe("PlayerSchema", () => {
     expect(result.success).toBe(false);
   });
 
-  it("accepts optional nickname and imageUrl", () => {
+  it("accepts optional nickname and imagePath", () => {
     const result = PlayerSchema.safeParse({
       ...validPlayer,
       nickname: "Smitty",
-      imageUrl: "https://example.com/players/smitty.jpg",
+      imagePath: "smitty.jpg",
     });
     expect(result.success).toBe(true);
+  });
+
+  it("rejects an empty imagePath", () => {
+    const result = PlayerSchema.safeParse({
+      ...validPlayer,
+      imagePath: "",
+    });
+    expect(result.success).toBe(false);
   });
 
   it("does not check number uniqueness across documents", () => {

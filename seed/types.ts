@@ -57,7 +57,7 @@ export interface Player {
   positions: Position[];
   active: boolean;
   nickname?: string;
-  imageUrl?: string;
+  imagePath?: string;
   teamId: string;
   createdAt: Date;
   updatedAt: Date;
