@@ -1,9 +1,7 @@
 ## Purpose
 
 Defines the Zod schemas, enums, and single-document validation rules for Season, Player, Team, Game, and Publishes, shared between client and server so forms and server actions validate identically. See [03-data-model.md](../../../docs/03-data-model.md) for the canonical data model these schemas implement. Cross-document rules (`number` uniqueness, blocked roster removal) and ID generation/audit timestamps are out of scope here — see the data-access layer.
-
 ## Requirements
-
 ### Requirement: Shared enum definitions
 The system SHALL provide Zod enums for `Position`, `GameType`, `GoalType`, and `PenaltyCode` matching `docs/03-data-model.md` exactly, importable by both client and server code.
 
@@ -39,7 +37,7 @@ The system SHALL provide a Zod schema for `Season` enforcing the id/name format 
 - **THEN** validation fails with a field-level error identifying the mismatch
 
 ### Requirement: Player schema and validation
-The system SHALL provide a Zod schema for `Player` enforcing number range, non-empty positions, and optional fields (`nickname`, `imageUrl`) from `docs/03-data-model.md`. Uniqueness of `number` among active players is explicitly NOT enforced by this schema.
+The system SHALL provide a Zod schema for `Player` enforcing number range, non-empty positions, and optional fields (`nickname`, `imagePath`) from `docs/03-data-model.md`. Uniqueness of `number` among active players is explicitly NOT enforced by this schema. `imagePath` is a bare S3 object key/filename (e.g. `"plr100010.jpg"`), not a full URL, so that stored documents remain portable across environments with different S3 hosts/buckets.
 
 #### Scenario: Valid player passes
 - **WHEN** a document with `number: 42`, `positions: ["Forward"]`, and required identity fields is validated
@@ -56,6 +54,10 @@ The system SHALL provide a Zod schema for `Player` enforcing number range, non-e
 #### Scenario: Schema does not check number uniqueness
 - **WHEN** two separate documents both validated independently share the same `number`
 - **THEN** both validate successfully in isolation (uniqueness is enforced elsewhere, not by this schema)
+
+#### Scenario: imagePath accepts a bare identifier, not a full URL
+- **WHEN** a document's `imagePath` is `"plr100010.jpg"`
+- **THEN** validation succeeds, and a full URL such as `"https://example.com/plr100010.jpg"` is not required and is not treated specially
 
 ### Requirement: Team schema
 The system SHALL provide a Zod schema for `Team` covering identity fields only (`_id`, `name`, audit timestamps), per the slimmed target shape in `docs/03-data-model.md`.
@@ -159,3 +161,4 @@ The system SHALL expose every schema from a single module importable by both cli
 #### Scenario: Same invalid input produces the same error on both sides
 - **WHEN** the same invalid payload is validated using the same schema once in a client context and once in a server context
 - **THEN** both produce equivalent field-level error messages, because both call the identical schema
+

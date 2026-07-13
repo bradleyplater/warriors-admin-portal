@@ -113,7 +113,7 @@ export const players: Player[] = [
     number: 27,
     positions: ["Defence"],
     active: true,
-    imageUrl: "https://warriors-local.s3.amazonaws.com/players/plr100010.jpg",
+    imagePath: "plr100010.jpg",
     teamId: TEAM_ID,
     createdAt: now,
     updatedAt: now,

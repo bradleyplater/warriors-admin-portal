@@ -27,7 +27,7 @@ All documents gain `createdAt` / `updatedAt` audit timestamps (used by the unpub
   positions: Position[],     // ≥1 of "Forward" | "Defence" | "Goaltender"
   active: boolean,
   nickname?: string,         // single value (D10)
-  imageUrl?: string,         // link to the player's image in S3
+  imagePath?: string,        // bare S3 object key/filename for the player's image
   teamId: string,            // "TM551420"
   createdAt: Date, updatedAt: Date
 }
@@ -41,7 +41,7 @@ Changes from today:
 | `teams: [{ teamId, number }]` | `teamId` + top-level `number` | D9 — one team exists; the array indirection only created a second place for numbers to live |
 | `stats: [...]` per season | **removed** | D6 — computed from games (see Derived stats) |
 | — | `active` | D8 — PRD requirement, backfilled by manual review |
-| — | `imageUrl` | PRD extra feature |
+| — | `imagePath` | PRD extra feature |
 
 ### Team — slimmed to identity only
 
