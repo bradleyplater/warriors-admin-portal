@@ -1,3 +1,4 @@
+import { MongoServerError } from "mongodb";
 import { getDb } from "../mongodb";
 import {
   PlayerSchema,
@@ -58,8 +59,17 @@ export async function updatePlayer(
       { returnDocument: "after" },
     );
   } catch (error) {
-    if (isDuplicateKeyErrorForField(error, "number") && input.number !== undefined) {
-      throw new DuplicateShirtNumberError(input.number);
+    // The number causing the collision may not be in `input` at all — e.g.
+    // reactivating a player (`{ active: true }`) collides on their existing,
+    // unchanged `number`. Fall back to the error's own `keyValue` so that
+    // case is still translated into the typed error instead of leaking a
+    // raw MongoServerError.
+    if (isDuplicateKeyErrorForField(error, "number") && error instanceof MongoServerError) {
+      const number =
+        input.number ?? (error.keyValue as { number?: number } | undefined)?.number;
+      if (number !== undefined) {
+        throw new DuplicateShirtNumberError(number);
+      }
     }
     throw error;
   }
