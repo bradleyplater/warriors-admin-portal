@@ -1,4 +1,5 @@
 import { getDb } from "../lib/mongodb";
+import { ensureIndexes } from "../lib/repositories";
 import type { Season, Team, Player, Game } from "./types";
 import { seasons } from "./data/seasons";
 import { team } from "./data/team";
@@ -7,6 +8,11 @@ import { games } from "./data/games";
 
 export async function runSeed(): Promise<void> {
   const db = await getDb();
+
+  // Unconditional and idempotent — must run whether or not fixtures get
+  // inserted below, since this is also how the future production migration
+  // establishes the same indexes (see data-access-layer design.md).
+  await ensureIndexes(db);
 
   const seasonsCollection = db.collection<Season>("seasons");
   const teamCollection = db.collection<Team>("team");
