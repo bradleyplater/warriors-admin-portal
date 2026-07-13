@@ -1,7 +1,7 @@
-export type CreatePlayerFormState = {
+export type PlayerFormState = {
   errors: Record<string, string[] | undefined>;
 };
 
-export const initialCreatePlayerFormState: CreatePlayerFormState = {
+export const initialPlayerFormState: PlayerFormState = {
   errors: {},
 };

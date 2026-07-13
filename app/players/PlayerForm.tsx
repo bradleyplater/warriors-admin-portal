@@ -2,8 +2,9 @@
 
 import { useActionState } from "react";
 import { PositionSchema } from "@/lib/schemas/enums";
-import { createPlayerAction } from "./actions";
-import { initialCreatePlayerFormState } from "./form-state";
+import type { Player } from "@/lib/schemas";
+import { createPlayerAction, updatePlayerAction } from "./actions";
+import { initialPlayerFormState, type PlayerFormState } from "./form-state";
 
 function FieldErrors({ messages }: { messages?: string[] }) {
   if (!messages || messages.length === 0) return null;
@@ -18,10 +19,19 @@ function FieldErrors({ messages }: { messages?: string[] }) {
   );
 }
 
-export function PlayerForm() {
-  const [state, formAction, pending] = useActionState(
-    createPlayerAction,
-    initialCreatePlayerFormState,
+type PlayerFormProps = {
+  initialValues?: Player;
+};
+
+export function PlayerForm({ initialValues }: PlayerFormProps) {
+  const isEdit = initialValues !== undefined;
+  const action = isEdit
+    ? updatePlayerAction.bind(null, initialValues._id)
+    : createPlayerAction;
+
+  const [state, formAction, pending] = useActionState<PlayerFormState, FormData>(
+    action,
+    initialPlayerFormState,
   );
 
   return (
@@ -31,6 +41,7 @@ export function PlayerForm() {
         <input
           id="firstName"
           name="firstName"
+          defaultValue={initialValues?.firstName}
           className="border border-black/20 rounded px-2 py-1 dark:border-white/20"
         />
         <FieldErrors messages={state.errors.firstName} />
@@ -41,6 +52,7 @@ export function PlayerForm() {
         <input
           id="surname"
           name="surname"
+          defaultValue={initialValues?.surname}
           className="border border-black/20 rounded px-2 py-1 dark:border-white/20"
         />
         <FieldErrors messages={state.errors.surname} />
@@ -53,6 +65,7 @@ export function PlayerForm() {
           name="number"
           type="text"
           inputMode="numeric"
+          defaultValue={initialValues?.number}
           className="border border-black/20 rounded px-2 py-1 dark:border-white/20"
         />
         <FieldErrors messages={state.errors.number} />
@@ -62,7 +75,12 @@ export function PlayerForm() {
         <legend>Positions</legend>
         {PositionSchema.options.map((position) => (
           <label key={position} className="flex items-center gap-2">
-            <input type="checkbox" name="positions" value={position} />
+            <input
+              type="checkbox"
+              name="positions"
+              value={position}
+              defaultChecked={initialValues?.positions.includes(position)}
+            />
             {position}
           </label>
         ))}
@@ -70,7 +88,11 @@ export function PlayerForm() {
       </fieldset>
 
       <label className="flex items-center gap-2">
-        <input type="checkbox" name="active" defaultChecked />
+        <input
+          type="checkbox"
+          name="active"
+          defaultChecked={initialValues ? initialValues.active : true}
+        />
         Active
       </label>
 
@@ -79,6 +101,7 @@ export function PlayerForm() {
         <input
           id="nickname"
           name="nickname"
+          defaultValue={initialValues?.nickname}
           className="border border-black/20 rounded px-2 py-1 dark:border-white/20"
         />
         <FieldErrors messages={state.errors.nickname} />
@@ -90,6 +113,7 @@ export function PlayerForm() {
           id="imagePath"
           name="imagePath"
           placeholder="e.g. plr100010.jpg"
+          defaultValue={initialValues?.imagePath}
           className="border border-black/20 rounded px-2 py-1 dark:border-white/20"
         />
         <FieldErrors messages={state.errors.imagePath} />
@@ -102,7 +126,13 @@ export function PlayerForm() {
         disabled={pending}
         className="rounded border border-black/20 px-3 py-1.5 font-medium disabled:opacity-50 dark:border-white/20"
       >
-        {pending ? "Creating…" : "Create player"}
+        {pending
+          ? isEdit
+            ? "Saving…"
+            : "Creating…"
+          : isEdit
+            ? "Save changes"
+            : "Create player"}
       </button>
     </form>
   );

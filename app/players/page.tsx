@@ -15,6 +15,7 @@ function RosterTable({ players }: { players: Player[] }) {
           <th className="py-2 pr-4 font-medium">Name</th>
           <th className="py-2 pr-4 font-medium">Position(s)</th>
           <th className="py-2 pr-4 font-medium">Nickname</th>
+          <th className="py-2 pr-4 font-medium" />
         </tr>
       </thead>
       <tbody>
@@ -29,6 +30,16 @@ function RosterTable({ players }: { players: Player[] }) {
             </td>
             <td className="py-2 pr-4">{player.positions.join(", ")}</td>
             <td className="py-2 pr-4">{player.nickname ?? ""}</td>
+            <td className="py-2 pr-4 text-right">
+              <Link
+                href={`/players/${player._id}/edit`}
+                aria-label={`Edit ${player.firstName} ${player.surname}`}
+                title="Edit"
+                className="text-black/60 hover:text-black dark:text-white/60 dark:hover:text-white"
+              >
+                ✎
+              </Link>
+            </td>
           </tr>
         ))}
       </tbody>

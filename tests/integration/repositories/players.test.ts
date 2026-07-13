@@ -76,6 +76,38 @@ describe("players repository", () => {
     ).rejects.toThrow(DuplicateShirtNumberError);
   });
 
+  it("rejects updating a player into a number already held by another active player", async () => {
+    await ensureIndexes(await getDb());
+
+    const first = await createPlayer(testPlayerInput({ number: 94 }));
+    createdIds.push(first._id);
+
+    const second = await createPlayer(
+      testPlayerInput({ number: 95, surname: "Second" }),
+    );
+    createdIds.push(second._id);
+
+    await expect(updatePlayer(second._id, { number: 94 })).rejects.toThrow(
+      DuplicateShirtNumberError,
+    );
+  });
+
+  it("rejects reactivating a player whose number is now held by another active player", async () => {
+    await ensureIndexes(await getDb());
+
+    const active = await createPlayer(testPlayerInput({ number: 96 }));
+    createdIds.push(active._id);
+
+    const inactive = await createPlayer(
+      testPlayerInput({ number: 96, active: false, surname: "Benched" }),
+    );
+    createdIds.push(inactive._id);
+
+    await expect(
+      updatePlayer(inactive._id, { active: true }),
+    ).rejects.toThrow(DuplicateShirtNumberError);
+  });
+
   it("allows the same number across an active and an inactive player", async () => {
     await ensureIndexes(await getDb());
 
