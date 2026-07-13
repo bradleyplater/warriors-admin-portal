@@ -4,11 +4,11 @@
 TBD - created by archiving change create-a-player. Update Purpose after archive.
 ## Requirements
 ### Requirement: Admin can create a player via a form
-The system SHALL provide a form at `/players` capturing first name, surname, shirt number, one or more positions, an active flag, an optional nickname, and an optional image identifier, and SHALL create a new player document when the form is submitted with valid data.
+The system SHALL provide a form at `/players/new` capturing first name, surname, shirt number, one or more positions, an active flag, an optional nickname, and an optional image identifier, and SHALL create a new player document when the form is submitted with valid data.
 
 #### Scenario: Valid submission creates a player
 - **WHEN** the form is submitted with a first name, surname, a shirt number between 1 and 99, at least one position, and no other active player using that number
-- **THEN** a new player document is created and the admin sees confirmation that it was created
+- **THEN** a new player document is created and the admin is redirected to `/players`, where the new player appears in the roster list
 
 #### Scenario: Optional fields may be omitted
 - **WHEN** the form is submitted without a nickname and without an image identifier
@@ -54,15 +54,4 @@ The system SHALL reject a submission with no position selected, identifying the 
 #### Scenario: Multiple positions are accepted
 - **WHEN** the form is submitted with more than one position checked
 - **THEN** the created player's positions include all of the checked values
-
-### Requirement: Minimal player list confirms creation
-The system SHALL render, on the same `/players` page, a list of every existing player's name and shirt number, and SHALL reflect a newly created player in that list without requiring the admin to manually navigate away and back.
-
-#### Scenario: Created player appears in the list
-- **WHEN** a player is successfully created
-- **THEN** that player's name and shirt number appear in the `/players` list without a manual page reload initiated by the admin
-
-#### Scenario: List shows name and number only
-- **WHEN** the `/players` list renders
-- **THEN** each entry shows only the player's name and shirt number; positions, active status, nickname, and image are not part of this list's rendering (see the separate roster-list capability for the fuller view)
 

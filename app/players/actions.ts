@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { PlayerCreateInputSchema } from "@/lib/schemas";
 import { createPlayer, getTheTeam, DuplicateShirtNumberError } from "@/lib/repositories";
 import type { CreatePlayerFormState } from "./form-state";
@@ -18,8 +19,6 @@ export async function createPlayerAction(
   if (!team) {
     return {
       errors: { form: ["No team is configured — cannot create a player."] },
-      success: false,
-      resetToken: _prevState.resetToken,
     };
   }
 
@@ -43,8 +42,6 @@ export async function createPlayerAction(
   if (!parsed.success) {
     return {
       errors: parsed.error.flatten().fieldErrors,
-      success: false,
-      resetToken: _prevState.resetToken,
     };
   }
 
@@ -54,13 +51,11 @@ export async function createPlayerAction(
     if (error instanceof DuplicateShirtNumberError) {
       return {
         errors: { number: [error.message] },
-        success: false,
-        resetToken: _prevState.resetToken,
       };
     }
     throw error;
   }
 
   revalidatePath("/players");
-  return { errors: {}, success: true, resetToken: _prevState.resetToken + 1 };
+  redirect("/players");
 }

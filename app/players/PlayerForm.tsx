@@ -25,11 +25,7 @@ export function PlayerForm() {
   );
 
   return (
-    <form
-      key={state.resetToken}
-      action={formAction}
-      className="flex max-w-sm flex-col gap-4"
-    >
+    <form action={formAction} className="flex max-w-sm flex-col gap-4">
       <div className="flex flex-col gap-1">
         <label htmlFor="firstName">First name</label>
         <input
@@ -100,12 +96,6 @@ export function PlayerForm() {
       </div>
 
       <FieldErrors messages={state.errors.form} />
-
-      {state.success && (
-        <p className="text-sm text-green-700 dark:text-green-500">
-          Player created.
-        </p>
-      )}
 
       <button
         type="submit"
