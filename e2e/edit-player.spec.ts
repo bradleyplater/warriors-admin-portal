@@ -27,7 +27,7 @@ test.describe("edit and deactivate a player", () => {
     });
 
     const row = page.getByRole("row", { name: /Editable Player/ });
-    await row.getByRole("link", { name: /Edit/ }).click();
+    await row.getByRole("link", { name: /^Edit / }).click();
 
     await expect(page).toHaveURL(/\/players\/PLR\d{6}\/edit$/);
     await expect(page.getByLabel("First name")).toHaveValue("Editable");
@@ -51,7 +51,7 @@ test.describe("edit and deactivate a player", () => {
     });
 
     const row = page.getByRole("row", { name: /Invalid Edit/ });
-    await row.getByRole("link", { name: /Edit/ }).click();
+    await row.getByRole("link", { name: /^Edit / }).click();
 
     await page.getByLabel("Shirt number").fill("0");
     await page.getByRole("button", { name: "Save changes" }).click();
@@ -76,7 +76,7 @@ test.describe("edit and deactivate a player", () => {
 
     await activeSection
       .getByRole("row", { name: /Deactivate Me/ })
-      .getByRole("link", { name: /Edit/ })
+      .getByRole("link", { name: /^Edit / })
       .click();
 
     await page.getByRole("checkbox", { name: "Active" }).uncheck();
@@ -114,7 +114,7 @@ test.describe("edit and deactivate a player", () => {
     const inactiveSection = page.getByTestId("inactive-section");
     await page
       .getByRole("row", { name: /Blocked Reactivate/ })
-      .getByRole("link", { name: /Edit/ })
+      .getByRole("link", { name: /^Edit / })
       .click();
     await page.getByRole("checkbox", { name: "Active" }).uncheck();
     await page.getByRole("button", { name: "Save changes" }).click();
@@ -125,7 +125,7 @@ test.describe("edit and deactivate a player", () => {
 
     await inactiveSection
       .getByRole("row", { name: /Blocked Reactivate/ })
-      .getByRole("link", { name: /Edit/ })
+      .getByRole("link", { name: /^Edit / })
       .click();
     await page.getByLabel("Shirt number").fill("9");
     await page.getByRole("checkbox", { name: "Active" }).check();

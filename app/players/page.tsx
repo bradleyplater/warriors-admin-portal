@@ -22,9 +22,16 @@ function RosterTable({ players }: { players: Player[] }) {
         {players.map((player) => (
           <tr
             key={player._id}
-            className="border-b border-black/5 hover:bg-black/[0.03] dark:border-white/10 dark:hover:bg-white/[0.05]"
+            className="relative border-b border-black/5 hover:bg-black/[0.03] dark:border-white/10 dark:hover:bg-white/[0.05]"
           >
-            <td className="py-2 pr-4">{player.number}</td>
+            <td className="py-2 pr-4">
+              <Link
+                href={`/players/${player._id}`}
+                className="absolute inset-0"
+                aria-label={`View ${player.firstName} ${player.surname}`}
+              />
+              {player.number}
+            </td>
             <td className="py-2 pr-4">
               {player.firstName} {player.surname}
             </td>
@@ -35,7 +42,7 @@ function RosterTable({ players }: { players: Player[] }) {
                 href={`/players/${player._id}/edit`}
                 aria-label={`Edit ${player.firstName} ${player.surname}`}
                 title="Edit"
-                className="text-black/60 hover:text-black dark:text-white/60 dark:hover:text-white"
+                className="relative z-10 text-black/60 hover:text-black dark:text-white/60 dark:hover:text-white"
               >
                 ✎
               </Link>
