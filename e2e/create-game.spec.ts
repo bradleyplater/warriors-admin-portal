@@ -114,4 +114,35 @@ test.describe("create a game", () => {
       page.getByRole("row", { name: /Player Count Test Opponent/ }),
     ).toBeVisible();
   });
+
+  test("missing date is rejected", async ({ page }) => {
+    await page.goto("/games/new");
+
+    await page.getByLabel("Season").selectOption({ label: "23/24" });
+    await page.getByLabel("Opponent").fill("Missing Date Test Opponent");
+    await page.getByRole("checkbox", { name: /Jamie Ashworth/ }).check();
+    await page.getByRole("button", { name: "Create game" }).click();
+
+    await expect(page).toHaveURL(/\/games\/new$/);
+    await expect(
+      page.getByText("Invalid input: expected date, received undefined"),
+    ).toBeVisible();
+
+    await page.goto("/games");
+    await expect(page.getByText("Missing Date Test Opponent")).toHaveCount(0);
+  });
+
+  test("missing opponent name is rejected", async ({ page }) => {
+    await page.goto("/games/new");
+
+    await page.getByLabel("Date").fill("2024-10-01");
+    await page.getByLabel("Season").selectOption({ label: "23/24" });
+    await page.getByRole("checkbox", { name: /Jamie Ashworth/ }).check();
+    await page.getByRole("button", { name: "Create game" }).click();
+
+    await expect(page).toHaveURL(/\/games\/new$/);
+    await expect(
+      page.getByText("Too small: expected string to have >=1 characters"),
+    ).toBeVisible();
+  });
 });
