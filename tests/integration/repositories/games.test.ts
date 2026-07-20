@@ -5,6 +5,8 @@ import {
   deleteGame,
   getGame,
   updateGame,
+  updateGameRoster,
+  RosterPlayerReferencedError,
 } from "../../../lib/repositories";
 import type { GameCreateInput } from "../../../lib/schemas";
 
@@ -149,5 +151,130 @@ describe("games repository", () => {
     } finally {
       randomSpy.mockRestore();
     }
+  });
+
+  describe("updateGameRoster", () => {
+    it("removes an unreferenced player", async () => {
+      const created = await createGame(testGameInput());
+      createdIds.push(created._id);
+
+      const updated = await updateGameRoster(created._id, [
+        { playerId: "PLRTEST1" },
+      ]);
+      expect(updated.team.roster.map((entry) => entry.playerId)).toEqual([
+        "PLRTEST1",
+      ]);
+    });
+
+    it("adds a new player to the roster", async () => {
+      const created = await createGame(testGameInput());
+      createdIds.push(created._id);
+
+      const updated = await updateGameRoster(created._id, [
+        { playerId: "PLRTEST1" },
+        { playerId: "PLRTEST2" },
+        { playerId: "PLRTEST3" },
+      ]);
+      expect(
+        updated.team.roster.map((entry) => entry.playerId).sort(),
+      ).toEqual(["PLRTEST1", "PLRTEST2", "PLRTEST3"]);
+    });
+
+    it("blocks removal of a referenced player, leaves them on the roster, and reports what references them", async () => {
+      const created = await createGame(
+        testGameInput({
+          team: {
+            id: "TM551420",
+            roster: [{ playerId: "PLRTEST1" }, { playerId: "PLRTEST2" }],
+            goals: [
+              { scoredBy: "PLRTEST1", minute: 5, second: 0, type: "EVEN" },
+              {
+                scoredBy: "PLRTEST2",
+                assist1: "PLRTEST1",
+                minute: 10,
+                second: 0,
+                type: "EVEN",
+              },
+            ],
+            penalties: [
+              {
+                offender: "PLRTEST1",
+                minute: 2,
+                second: 0,
+                type: "TRIP",
+                duration: 2,
+              },
+            ],
+          },
+          netminderPlayerId: "PLRTEST1",
+        }),
+      );
+      createdIds.push(created._id);
+
+      await expect(
+        updateGameRoster(created._id, [{ playerId: "PLRTEST2" }]),
+      ).rejects.toMatchObject({
+        name: "RosterPlayerReferencedError",
+        blocked: [
+          {
+            playerId: "PLRTEST1",
+            goalCount: 1,
+            assistCount: 1,
+            penaltyCount: 1,
+            isNetminder: true,
+            isManOfTheMatch: false,
+            isWarriorOfTheGame: false,
+          },
+        ],
+      });
+
+      // The player stays on the roster despite being requested for removal.
+      const after = await getGame(created._id);
+      expect(
+        after?.team.roster.map((entry) => entry.playerId).sort(),
+      ).toEqual(["PLRTEST1", "PLRTEST2"]);
+    });
+
+    it("applies a safe removal and an addition in the same call that also blocks a different removal", async () => {
+      const created = await createGame(
+        testGameInput({
+          team: {
+            id: "TM551420",
+            roster: [
+              { playerId: "PLRTEST1" },
+              { playerId: "PLRTEST2" },
+              { playerId: "PLRTEST3" },
+            ],
+            goals: [
+              { scoredBy: "PLRTEST1", minute: 5, second: 0, type: "EVEN" },
+            ],
+            penalties: [],
+          },
+        }),
+      );
+      createdIds.push(created._id);
+
+      let error: unknown;
+      try {
+        // Remove PLRTEST1 (blocked, scored a goal) and PLRTEST2 (safe),
+        // keep PLRTEST3, add PLRTEST4.
+        await updateGameRoster(created._id, [
+          { playerId: "PLRTEST3" },
+          { playerId: "PLRTEST4" },
+        ]);
+      } catch (caught) {
+        error = caught;
+      }
+
+      expect(error).toBeInstanceOf(RosterPlayerReferencedError);
+      expect((error as RosterPlayerReferencedError).blocked).toEqual([
+        expect.objectContaining({ playerId: "PLRTEST1", goalCount: 1 }),
+      ]);
+
+      const after = await getGame(created._id);
+      expect(
+        after?.team.roster.map((entry) => entry.playerId).sort(),
+      ).toEqual(["PLRTEST1", "PLRTEST3", "PLRTEST4"]);
+    });
   });
 });

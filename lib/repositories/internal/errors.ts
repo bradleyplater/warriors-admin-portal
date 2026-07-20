@@ -24,3 +24,32 @@ export class NotFoundError extends Error {
     this.name = "NotFoundError";
   }
 }
+
+export interface BlockedRosterPlayer {
+  playerId: string;
+  goalCount: number; // as scorer
+  assistCount: number; // as assist1 or assist2
+  penaltyCount: number; // as offender
+  isNetminder: boolean;
+  isManOfTheMatch: boolean;
+  isWarriorOfTheGame: boolean;
+}
+
+// Thrown by updateGameRoster AFTER the safe part of a roster change has
+// already been written — see design.md's "throw after commit" decision.
+// `blocked` carries structured counts, not a pre-formatted message: the
+// action layer has the player list loaded (for the picker) and composes
+// the human-readable message from this data.
+export class RosterPlayerReferencedError extends Error {
+  readonly blocked: BlockedRosterPlayer[];
+
+  constructor(blocked: BlockedRosterPlayer[]) {
+    super(
+      `Cannot remove player(s) still referenced by this game: ${blocked
+        .map((entry) => entry.playerId)
+        .join(", ")}`,
+    );
+    this.name = "RosterPlayerReferencedError";
+    this.blocked = blocked;
+  }
+}

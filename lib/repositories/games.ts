@@ -11,7 +11,11 @@ import {
 } from "../schemas";
 import { stampCreate, stampUpdate } from "./internal/audit";
 import { generateTopLevelId, generateEmbeddedId } from "./internal/ids";
-import { NotFoundError } from "./internal/errors";
+import {
+  NotFoundError,
+  RosterPlayerReferencedError,
+  type BlockedRosterPlayer,
+} from "./internal/errors";
 
 export interface GameUpdateInput {
   date?: Date;
@@ -135,6 +139,86 @@ export async function updateGame(
 
   const validated = GameSchema.parse(merged);
   await col.replaceOne({ _id: id }, validated);
+  return validated;
+}
+
+// Counts every place `playerId` is referenced within `game` (goals as
+// scorer or assist, penalties as offender, and the three award fields).
+// Returns null when the player isn't referenced anywhere, so callers can
+// filter with a type guard.
+function referencesFor(game: Game, playerId: string): BlockedRosterPlayer | null {
+  const goalCount = game.team.goals.filter((goal) => goal.scoredBy === playerId).length;
+  const assistCount = game.team.goals.filter(
+    (goal) => goal.assist1 === playerId || goal.assist2 === playerId,
+  ).length;
+  const penaltyCount = game.team.penalties.filter(
+    (penalty) => penalty.offender === playerId,
+  ).length;
+  const isNetminder = game.netminderPlayerId === playerId;
+  const isManOfTheMatch = game.manOfTheMatchPlayerId === playerId;
+  const isWarriorOfTheGame = game.warriorOfTheGamePlayerId === playerId;
+
+  const isReferenced =
+    goalCount > 0 ||
+    assistCount > 0 ||
+    penaltyCount > 0 ||
+    isNetminder ||
+    isManOfTheMatch ||
+    isWarriorOfTheGame;
+
+  if (!isReferenced) return null;
+
+  return {
+    playerId,
+    goalCount,
+    assistCount,
+    penaltyCount,
+    isNetminder,
+    isManOfTheMatch,
+    isWarriorOfTheGame,
+  };
+}
+
+// Applies a requested roster change, but blocks removal only of players
+// still referenced by a goal/assist/penalty/award — every other requested
+// removal or addition is applied. The write always happens first (blocked
+// players are added back into the roster before validating), then
+// RosterPlayerReferencedError is thrown afterward if anything was blocked
+// — see design.md for why this intentionally differs from every other
+// domain error in this file, which is thrown before any write occurs.
+export async function updateGameRoster(
+  gameId: string,
+  requestedRoster: { playerId: string }[],
+): Promise<Game> {
+  const col = await collection();
+  const existing = await loadExisting(col, gameId);
+
+  const requestedIds = new Set(requestedRoster.map((entry) => entry.playerId));
+  const removedIds = existing.team.roster
+    .map((entry) => entry.playerId)
+    .filter((playerId) => !requestedIds.has(playerId));
+
+  const blocked = removedIds
+    .map((playerId) => referencesFor(existing, playerId))
+    .filter((entry): entry is BlockedRosterPlayer => entry !== null);
+  const blockedIds = new Set(blocked.map((entry) => entry.playerId));
+
+  const appliedRoster = [
+    ...requestedRoster,
+    ...existing.team.roster.filter((entry) => blockedIds.has(entry.playerId)),
+  ];
+
+  const merged: Game = {
+    ...existing,
+    team: { ...existing.team, roster: appliedRoster },
+    ...stampUpdate(),
+  };
+  const validated = GameSchema.parse(merged);
+  await col.replaceOne({ _id: gameId }, validated);
+
+  if (blocked.length > 0) {
+    throw new RosterPlayerReferencedError(blocked);
+  }
   return validated;
 }
 
