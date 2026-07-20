@@ -85,3 +85,10 @@ The system SHALL treat the `active` flag as an editable field on the edit form, 
 - **WHEN** the edit form is submitted with the active control checked for a previously inactive player, and another active player currently holds that shirt number
 - **THEN** the server action catches the repository's `DuplicateShirtNumberError` and returns it as a field-level error on the shirt number field, and the player is not reactivated
 
+### Requirement: Unknown player id on the edit form renders a 404
+The system SHALL render Next.js's default not-found response when `/players/[id]/edit` is requested for an id that does not correspond to an existing player document.
+
+#### Scenario: Unknown player id 404s on the edit form
+- **WHEN** `/players/[id]/edit` is opened for an id that does not match any player document
+- **THEN** the response is a 404 not-found page, not a crash or an empty edit form
+
