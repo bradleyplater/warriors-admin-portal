@@ -3,9 +3,12 @@ import {
   addGoal,
   createGame,
   deleteGame,
+  deleteGoal,
+  editGoal,
   getGame,
   updateGame,
   updateGameRoster,
+  NotFoundError,
   RosterPlayerReferencedError,
 } from "../../../lib/repositories";
 import type { GameCreateInput } from "../../../lib/schemas";
@@ -151,6 +154,149 @@ describe("games repository", () => {
     } finally {
       randomSpy.mockRestore();
     }
+  });
+
+  describe("editGoal", () => {
+    it("updates a goal's fields in place", async () => {
+      const created = await createGame(
+        testGameInput({
+          team: {
+            id: "TM551420",
+            roster: [{ playerId: "PLRTEST1" }, { playerId: "PLRTEST2" }],
+            goals: [
+              { scoredBy: "PLRTEST1", minute: 5, second: 0, type: "EVEN" },
+            ],
+            penalties: [],
+          },
+        }),
+      );
+      createdIds.push(created._id);
+      const goalId = created.team.goals[0]._id;
+
+      const updated = await editGoal(created._id, goalId, {
+        scoredBy: "PLRTEST1",
+        assist1: "PLRTEST2",
+        minute: 12,
+        second: 34,
+        type: "PP",
+      });
+
+      expect(updated.team.goals).toHaveLength(1);
+      expect(updated.team.goals[0]).toMatchObject({
+        _id: goalId,
+        scoredBy: "PLRTEST1",
+        assist1: "PLRTEST2",
+        minute: 12,
+        second: 34,
+        type: "PP",
+      });
+    });
+
+    it("moves the goal to a different rostered scorer", async () => {
+      const created = await createGame(
+        testGameInput({
+          team: {
+            id: "TM551420",
+            roster: [{ playerId: "PLRTEST1" }, { playerId: "PLRTEST2" }],
+            goals: [
+              { scoredBy: "PLRTEST1", minute: 5, second: 0, type: "EVEN" },
+            ],
+            penalties: [],
+          },
+        }),
+      );
+      createdIds.push(created._id);
+      const goalId = created.team.goals[0]._id;
+
+      const updated = await editGoal(created._id, goalId, {
+        scoredBy: "PLRTEST2",
+        minute: 5,
+        second: 0,
+        type: "EVEN",
+      });
+
+      expect(updated.team.goals[0].scoredBy).toBe("PLRTEST2");
+    });
+
+    it("rejects an edit that violates assist/roster rules and leaves the goal unchanged", async () => {
+      const created = await createGame(
+        testGameInput({
+          team: {
+            id: "TM551420",
+            roster: [{ playerId: "PLRTEST1" }, { playerId: "PLRTEST2" }],
+            goals: [
+              { scoredBy: "PLRTEST1", minute: 5, second: 0, type: "EVEN" },
+            ],
+            penalties: [],
+          },
+        }),
+      );
+      createdIds.push(created._id);
+      const goalId = created.team.goals[0]._id;
+
+      await expect(
+        editGoal(created._id, goalId, {
+          scoredBy: "PLRTEST1",
+          assist1: "PLRTEST1", // same as scorer — invalid
+          minute: 5,
+          second: 0,
+          type: "EVEN",
+        }),
+      ).rejects.toThrow();
+
+      const after = await getGame(created._id);
+      expect(after?.team.goals[0].assist1).toBeUndefined();
+    });
+
+    it("throws NotFoundError for an unknown goal id on an existing game", async () => {
+      const created = await createGame(testGameInput());
+      createdIds.push(created._id);
+
+      await expect(
+        editGoal(created._id, "GOL999999", {
+          scoredBy: "PLRTEST1",
+          minute: 1,
+          second: 0,
+          type: "EVEN",
+        }),
+      ).rejects.toThrow(NotFoundError);
+    });
+  });
+
+  describe("deleteGoal", () => {
+    it("removes the goal from the game", async () => {
+      const created = await createGame(
+        testGameInput({
+          team: {
+            id: "TM551420",
+            roster: [{ playerId: "PLRTEST1" }],
+            goals: [
+              { scoredBy: "PLRTEST1", minute: 5, second: 0, type: "EVEN" },
+              { scoredBy: "PLRTEST1", minute: 10, second: 0, type: "PP" },
+            ],
+            penalties: [],
+          },
+        }),
+      );
+      createdIds.push(created._id);
+      const [firstGoalId, secondGoalId] = created.team.goals.map(
+        (goal) => goal._id,
+      );
+
+      const updated = await deleteGoal(created._id, firstGoalId);
+      expect(updated.team.goals.map((goal) => goal._id)).toEqual([
+        secondGoalId,
+      ]);
+    });
+
+    it("throws NotFoundError for an unknown goal id on an existing game", async () => {
+      const created = await createGame(testGameInput());
+      createdIds.push(created._id);
+
+      await expect(
+        deleteGoal(created._id, "GOL999999"),
+      ).rejects.toThrow(NotFoundError);
+    });
   });
 
   describe("updateGameRoster", () => {
