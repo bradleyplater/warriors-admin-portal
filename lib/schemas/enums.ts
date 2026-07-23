@@ -9,7 +9,18 @@ export type Position = z.infer<typeof PositionSchema>;
 export const GameTypeSchema = z.enum(["CHALLENGE", "BOTBC", "LLIHC", "NIHC"]);
 export type GameType = z.infer<typeof GameTypeSchema>;
 
-export const GoalTypeSchema = z.enum(["EVEN", "PP", "SH", "PS", "EN", "SO"]);
+export const GOAL_TYPE_LABELS = {
+  EVEN: "Even Strength",
+  PP: "Power Play",
+  SH: "Short Handed",
+  PS: "Penalty Shot",
+  EN: "Empty Net",
+  SO: "Shootout",
+} as const satisfies Record<string, string>;
+
+export const GoalTypeSchema = z.enum(
+  Object.keys(GOAL_TYPE_LABELS) as [string, ...string[]],
+);
 export type GoalType = z.infer<typeof GoalTypeSchema>;
 
 // Extracted from live data (docs/03-data-model.md). HOST's label is marked

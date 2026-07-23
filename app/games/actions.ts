@@ -3,7 +3,10 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import {
+  addGoal,
   createGame,
+  deleteGoal,
+  editGoal,
   getGame,
   getTheTeam,
   listPlayers,
@@ -17,6 +20,7 @@ import {
   mapFieldErrors,
   parseGameDetailsFormData,
   parseGameFormData,
+  parseGoalFormData,
 } from "./form-parsing";
 
 export async function createGameAction(
@@ -74,6 +78,58 @@ export async function updateGameAction(
   revalidatePath("/games");
   revalidatePath(`/games/${id}`);
   redirect(`/games/${id}`);
+}
+
+// Goal add/edit/delete are their own actions, separate from the details and
+// roster forms above — same "one concern per form/action" split as roster
+// management. GoalCreateInputSchema (via parseGoalFormData) is the same
+// schema addGoal/editGoal re-validate against at the repository layer, so
+// there's nothing to duplicate here beyond parsing the form fields.
+export async function addGoalAction(
+  gameId: string,
+  _prevState: GameFormState,
+  formData: FormData,
+): Promise<GameFormState> {
+  const parsed = parseGoalFormData(formData);
+
+  if (!parsed.success) {
+    return { errors: mapFieldErrors(parsed.error) };
+  }
+
+  await addGoal(gameId, parsed.data);
+
+  revalidatePath(`/games/${gameId}`);
+  redirect(`/games/${gameId}`);
+}
+
+export async function updateGoalAction(
+  gameId: string,
+  goalId: string,
+  _prevState: GameFormState,
+  formData: FormData,
+): Promise<GameFormState> {
+  const parsed = parseGoalFormData(formData);
+
+  if (!parsed.success) {
+    return { errors: mapFieldErrors(parsed.error) };
+  }
+
+  await editGoal(gameId, goalId, parsed.data);
+
+  revalidatePath(`/games/${gameId}`);
+  redirect(`/games/${gameId}`);
+}
+
+// Bound directly to a <form action={...}> with no fields — a delete needs no
+// client state, unlike add/edit, so this skips useActionState entirely.
+export async function deleteGoalAction(
+  gameId: string,
+  goalId: string,
+): Promise<void> {
+  await deleteGoal(gameId, goalId);
+
+  revalidatePath(`/games/${gameId}`);
+  redirect(`/games/${gameId}`);
 }
 
 // Roster-only edit, its own route (/games/[id]/roster) and its own action —

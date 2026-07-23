@@ -238,6 +238,51 @@ export async function addGoal(
   return validated;
 }
 
+export async function editGoal(
+  gameId: string,
+  goalId: string,
+  goal: GoalCreateInput,
+): Promise<Game> {
+  const col = await collection();
+  const existing = await loadExisting(col, gameId);
+
+  const index = existing.team.goals.findIndex((entry) => entry._id === goalId);
+  if (index === -1) {
+    throw new NotFoundError("goal", goalId);
+  }
+
+  const goals = [...existing.team.goals];
+  goals[index] = { _id: goalId, ...goal };
+
+  const merged: Game = {
+    ...existing,
+    team: { ...existing.team, goals },
+    ...stampUpdate(),
+  };
+  const validated = GameSchema.parse(merged);
+  await col.replaceOne({ _id: gameId }, validated);
+  return validated;
+}
+
+export async function deleteGoal(gameId: string, goalId: string): Promise<Game> {
+  const col = await collection();
+  const existing = await loadExisting(col, gameId);
+
+  const goals = existing.team.goals.filter((entry) => entry._id !== goalId);
+  if (goals.length === existing.team.goals.length) {
+    throw new NotFoundError("goal", goalId);
+  }
+
+  const merged: Game = {
+    ...existing,
+    team: { ...existing.team, goals },
+    ...stampUpdate(),
+  };
+  const validated = GameSchema.parse(merged);
+  await col.replaceOne({ _id: gameId }, validated);
+  return validated;
+}
+
 export async function addPenalty(
   gameId: string,
   penalty: PenaltyCreateInput,

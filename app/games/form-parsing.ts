@@ -1,5 +1,5 @@
 import type { z } from "zod";
-import { GameCreateInputSchema } from "@/lib/schemas";
+import { GameCreateInputSchema, GoalCreateInputSchema } from "@/lib/schemas";
 import type { Game, Player } from "@/lib/schemas";
 import type { BlockedRosterPlayer } from "@/lib/repositories";
 
@@ -79,6 +79,27 @@ export function parseGameDetailsFormData(formData: FormData, existing: Game) {
       penalties: existing.opponentTeam.penalties,
     },
   });
+}
+
+// Both the new-goal and edit-goal forms share this parser — GoalCreateInputSchema's
+// issue paths (e.g. ["assist1"]) are already flat field names, so the existing
+// fieldKeyFor/mapFieldErrors above apply unchanged, no goal-specific mapping needed.
+export function parseGoalFormData(formData: FormData) {
+  const assist1 = optionalFormString(formData.get("assist1"));
+  const assist2 = optionalFormString(formData.get("assist2"));
+
+  return GoalCreateInputSchema.safeParse({
+    scoredBy: formData.get("scoredBy"),
+    ...(assist1 !== undefined ? { assist1 } : {}),
+    ...(assist2 !== undefined ? { assist2 } : {}),
+    minute: Number(formData.get("minute")),
+    second: Number(formData.get("second")),
+    type: formData.get("type"),
+  });
+}
+
+function optionalFormString(value: FormDataEntryValue | null): string | undefined {
+  return typeof value === "string" && value !== "" ? value : undefined;
 }
 
 function pluralize(count: number, singular: string, plural = `${singular}s`): string {

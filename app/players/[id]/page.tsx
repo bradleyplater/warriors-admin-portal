@@ -1,15 +1,41 @@
 import { notFound } from "next/navigation";
 import { getPlayer, listGames, listSeasons } from "@/lib/repositories";
 import { sortSeasonsAscending } from "@/lib/derived/season-order";
+import {
+  derivePlayerSeasonStats,
+  type PlayerSeasonStats,
+} from "@/lib/derived/player-stats";
 import { GamesTable } from "@/app/games/GamesTable";
 import type { Game, Season } from "@/lib/schemas";
 
-function SeasonSection({ season, games }: { season: Season; games: Game[] }) {
+function SeasonSection({
+  season,
+  games,
+  stats,
+}: {
+  season: Season;
+  games: Game[];
+  stats: PlayerSeasonStats;
+}) {
   return (
     <div className="flex flex-col gap-3" data-testid={`season-${season._id}`}>
       <h3 className="text-lg font-semibold">
         {season.name} ({games.length})
       </h3>
+      <dl className="grid max-w-sm grid-cols-2 gap-y-1 text-sm">
+        <dt className="text-black/60 dark:text-white/60">Goals</dt>
+        <dd data-testid="stat-goals">{stats.goals}</dd>
+        <dt className="text-black/60 dark:text-white/60">Assists</dt>
+        <dd data-testid="stat-assists">{stats.assists}</dd>
+        <dt className="text-black/60 dark:text-white/60">Points</dt>
+        <dd data-testid="stat-points">{stats.points}</dd>
+        <dt className="text-black/60 dark:text-white/60">PIMs</dt>
+        <dd data-testid="stat-pims">{stats.pims}</dd>
+        <dt className="text-black/60 dark:text-white/60">Man of the Match</dt>
+        <dd data-testid="stat-man-of-the-match">{stats.manOfTheMatch}</dd>
+        <dt className="text-black/60 dark:text-white/60">Warrior of the Game</dt>
+        <dd data-testid="stat-warrior-of-the-game">{stats.warriorOfTheGame}</dd>
+      </dl>
       <GamesTable games={games} />
     </div>
   );
@@ -52,6 +78,7 @@ export default async function PlayerProfilePage({
             games={playerGames
               .filter((game) => game.seasonId === season._id)
               .sort((a, b) => a.date.getTime() - b.date.getTime())}
+            stats={derivePlayerSeasonStats(playerGames, player._id, season._id)}
           />
         ))}
       </div>

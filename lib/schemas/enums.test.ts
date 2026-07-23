@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   GameTypeSchema,
+  GOAL_TYPE_LABELS,
   GoalTypeSchema,
   PENALTY_CODE_LABELS,
   PenaltyCodeSchema,
@@ -37,6 +38,17 @@ describe("GoalTypeSchema", () => {
 
   it("rejects an unknown value", () => {
     expect(GoalTypeSchema.safeParse("OT").success).toBe(false);
+  });
+
+  it("has a human-readable label for every documented code", () => {
+    expect(GOAL_TYPE_LABELS).toEqual({
+      EVEN: "Even Strength",
+      PP: "Power Play",
+      SH: "Short Handed",
+      PS: "Penalty Shot",
+      EN: "Empty Net",
+      SO: "Shootout",
+    });
   });
 });
 

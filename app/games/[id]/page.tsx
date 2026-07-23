@@ -2,6 +2,20 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getGame, getSeason, listPlayers } from "@/lib/repositories";
 import { deriveScore } from "@/lib/derived/score";
+import { GOAL_TYPE_LABELS } from "@/lib/schemas";
+import type { Player } from "@/lib/schemas";
+import { deleteGoalAction } from "../actions";
+
+function playerLabel(players: Player[], playerId: string): string {
+  const player = players.find((entry) => entry._id === playerId);
+  return player
+    ? `#${player.number} ${player.firstName} ${player.surname}`
+    : playerId;
+}
+
+function formatGoalTime(minute: number, second: number): string {
+  return `${minute}:${second.toString().padStart(2, "0")}`;
+}
 
 export default async function GameDetailPage({
   params,
@@ -75,6 +89,55 @@ export default async function GameDetailPage({
                 #{player.number} {player.firstName} {player.surname}
               </li>
             ))}
+          </ul>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold">
+            Goals ({game.team.goals.length})
+          </h2>
+          <Link
+            href={`/games/${game._id}/goals/new`}
+            className="rounded border border-black/20 px-3 py-1.5 text-sm font-medium hover:bg-black/[0.03] dark:border-white/20 dark:hover:bg-white/[0.05]"
+          >
+            Record goal
+          </Link>
+        </div>
+        {game.team.goals.length === 0 ? (
+          <p className="text-sm text-black/60 dark:text-white/60">None.</p>
+        ) : (
+          <ul className="flex flex-col gap-2 text-sm">
+            {game.team.goals.map((goal) => {
+              const assists = [goal.assist1, goal.assist2]
+                .filter((playerId): playerId is string => playerId !== undefined)
+                .map((playerId) => playerLabel(players, playerId));
+
+              return (
+                <li key={goal._id} className="flex items-center justify-between gap-2">
+                  <span>
+                    {formatGoalTime(goal.minute, goal.second)} —{" "}
+                    {playerLabel(players, goal.scoredBy)}
+                    {assists.length > 0 && ` (${assists.join(", ")})`} —{" "}
+                    {GOAL_TYPE_LABELS[goal.type as keyof typeof GOAL_TYPE_LABELS]}
+                  </span>
+                  <span className="flex items-center gap-2">
+                    <Link
+                      href={`/games/${game._id}/goals/${goal._id}/edit`}
+                      className="text-sm underline"
+                    >
+                      Edit goal
+                    </Link>
+                    <form action={deleteGoalAction.bind(null, game._id, goal._id)}>
+                      <button type="submit" className="text-sm text-red-600 underline">
+                        Delete goal
+                      </button>
+                    </form>
+                  </span>
+                </li>
+              );
+            })}
           </ul>
         )}
       </div>
