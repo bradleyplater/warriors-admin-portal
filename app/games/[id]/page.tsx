@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getGame, getSeason, listPlayers } from "@/lib/repositories";
 import { deriveScore } from "@/lib/derived/score";
@@ -27,9 +28,25 @@ export default async function GameDetailPage({
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-semibold">
-        vs {game.opponentTeam.name} — {score.team}-{score.opponent}
-      </h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-semibold">
+          vs {game.opponentTeam.name} — {score.team}-{score.opponent}
+        </h1>
+        <div className="flex gap-2">
+          <Link
+            href={`/games/${game._id}/edit`}
+            className="rounded border border-black/20 px-3 py-1.5 text-sm font-medium hover:bg-black/[0.03] dark:border-white/20 dark:hover:bg-white/[0.05]"
+          >
+            Edit details
+          </Link>
+          <Link
+            href={`/games/${game._id}/roster`}
+            className="rounded border border-black/20 px-3 py-1.5 text-sm font-medium hover:bg-black/[0.03] dark:border-white/20 dark:hover:bg-white/[0.05]"
+          >
+            Manage roster
+          </Link>
+        </div>
+      </div>
 
       <dl className="grid max-w-md grid-cols-2 gap-y-2 text-sm">
         <dt className="text-black/60 dark:text-white/60">Date</dt>
