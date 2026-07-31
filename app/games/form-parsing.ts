@@ -1,5 +1,9 @@
 import type { z } from "zod";
-import { GameCreateInputSchema, GoalCreateInputSchema } from "@/lib/schemas";
+import {
+  GameCreateInputSchema,
+  GoalCreateInputSchema,
+  PenaltyCreateInputSchema,
+} from "@/lib/schemas";
 import type { Game, Player } from "@/lib/schemas";
 import type { BlockedRosterPlayer } from "@/lib/repositories";
 
@@ -95,6 +99,19 @@ export function parseGoalFormData(formData: FormData) {
     minute: Number(formData.get("minute")),
     second: Number(formData.get("second")),
     type: formData.get("type"),
+  });
+}
+
+// Both the new-penalty and edit-penalty forms share this parser — same
+// reasoning as parseGoalFormData: PenaltyCreateInputSchema's issue paths are
+// already flat field names, so fieldKeyFor/mapFieldErrors apply unchanged.
+export function parsePenaltyFormData(formData: FormData) {
+  return PenaltyCreateInputSchema.safeParse({
+    offender: formData.get("offender"),
+    minute: Number(formData.get("minute")),
+    second: Number(formData.get("second")),
+    type: formData.get("type"),
+    duration: Number(formData.get("duration")),
   });
 }
 
