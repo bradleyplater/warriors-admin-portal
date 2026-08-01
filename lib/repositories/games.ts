@@ -302,6 +302,58 @@ export async function addPenalty(
   return validated;
 }
 
+export async function editPenalty(
+  gameId: string,
+  penaltyId: string,
+  penalty: PenaltyCreateInput,
+): Promise<Game> {
+  const col = await collection();
+  const existing = await loadExisting(col, gameId);
+
+  const index = existing.team.penalties.findIndex(
+    (entry) => entry._id === penaltyId,
+  );
+  if (index === -1) {
+    throw new NotFoundError("penalty", penaltyId);
+  }
+
+  const penalties = [...existing.team.penalties];
+  penalties[index] = { _id: penaltyId, ...penalty };
+
+  const merged: Game = {
+    ...existing,
+    team: { ...existing.team, penalties },
+    ...stampUpdate(),
+  };
+  const validated = GameSchema.parse(merged);
+  await col.replaceOne({ _id: gameId }, validated);
+  return validated;
+}
+
+export async function deletePenalty(
+  gameId: string,
+  penaltyId: string,
+): Promise<Game> {
+  const col = await collection();
+  const existing = await loadExisting(col, gameId);
+
+  const penalties = existing.team.penalties.filter(
+    (entry) => entry._id !== penaltyId,
+  );
+  if (penalties.length === existing.team.penalties.length) {
+    throw new NotFoundError("penalty", penaltyId);
+  }
+
+  const merged: Game = {
+    ...existing,
+    team: { ...existing.team, penalties },
+    ...stampUpdate(),
+  };
+  const validated = GameSchema.parse(merged);
+  await col.replaceOne({ _id: gameId }, validated);
+  return validated;
+}
+
 export async function addOpponentGoal(
   gameId: string,
   goal: OpponentGoalCreateInput,

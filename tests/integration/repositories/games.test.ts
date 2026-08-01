@@ -4,7 +4,9 @@ import {
   createGame,
   deleteGame,
   deleteGoal,
+  deletePenalty,
   editGoal,
+  editPenalty,
   getGame,
   updateGame,
   updateGameRoster,
@@ -295,6 +297,178 @@ describe("games repository", () => {
 
       await expect(
         deleteGoal(created._id, "GOL999999"),
+      ).rejects.toThrow(NotFoundError);
+    });
+  });
+
+  describe("editPenalty", () => {
+    it("updates a penalty's fields in place", async () => {
+      const created = await createGame(
+        testGameInput({
+          team: {
+            id: "TM551420",
+            roster: [{ playerId: "PLRTEST1" }],
+            goals: [],
+            penalties: [
+              { offender: "PLRTEST1", minute: 2, second: 0, type: "TRIP", duration: 2 },
+            ],
+          },
+        }),
+      );
+      createdIds.push(created._id);
+      const penaltyId = created.team.penalties[0]._id;
+
+      const updated = await editPenalty(created._id, penaltyId, {
+        offender: "PLRTEST1",
+        minute: 30,
+        second: 45,
+        type: "SLASH",
+        duration: 4,
+      });
+
+      expect(updated.team.penalties).toHaveLength(1);
+      expect(updated.team.penalties[0]).toMatchObject({
+        _id: penaltyId,
+        offender: "PLRTEST1",
+        minute: 30,
+        second: 45,
+        type: "SLASH",
+        duration: 4,
+      });
+    });
+
+    it("reassigns the offender from a player to BENCH", async () => {
+      const created = await createGame(
+        testGameInput({
+          team: {
+            id: "TM551420",
+            roster: [{ playerId: "PLRTEST1" }],
+            goals: [],
+            penalties: [
+              { offender: "PLRTEST1", minute: 2, second: 0, type: "TRIP", duration: 2 },
+            ],
+          },
+        }),
+      );
+      createdIds.push(created._id);
+      const penaltyId = created.team.penalties[0]._id;
+
+      const updated = await editPenalty(created._id, penaltyId, {
+        offender: "BENCH",
+        minute: 2,
+        second: 0,
+        type: "TRIP",
+        duration: 2,
+      });
+
+      expect(updated.team.penalties[0].offender).toBe("BENCH");
+    });
+
+    it("reassigns the offender from BENCH to a rostered player", async () => {
+      const created = await createGame(
+        testGameInput({
+          team: {
+            id: "TM551420",
+            roster: [{ playerId: "PLRTEST1" }],
+            goals: [],
+            penalties: [
+              { offender: "BENCH", minute: 5, second: 0, type: "TOOM", duration: 2 },
+            ],
+          },
+        }),
+      );
+      createdIds.push(created._id);
+      const penaltyId = created.team.penalties[0]._id;
+
+      const updated = await editPenalty(created._id, penaltyId, {
+        offender: "PLRTEST1",
+        minute: 5,
+        second: 0,
+        type: "TOOM",
+        duration: 2,
+      });
+
+      expect(updated.team.penalties[0].offender).toBe("PLRTEST1");
+    });
+
+    it("rejects an edit with an offender that is neither rostered nor BENCH", async () => {
+      const created = await createGame(
+        testGameInput({
+          team: {
+            id: "TM551420",
+            roster: [{ playerId: "PLRTEST1" }],
+            goals: [],
+            penalties: [
+              { offender: "PLRTEST1", minute: 2, second: 0, type: "TRIP", duration: 2 },
+            ],
+          },
+        }),
+      );
+      createdIds.push(created._id);
+      const penaltyId = created.team.penalties[0]._id;
+
+      await expect(
+        editPenalty(created._id, penaltyId, {
+          offender: "PLRTEST2", // not on the roster, not BENCH
+          minute: 2,
+          second: 0,
+          type: "TRIP",
+          duration: 2,
+        }),
+      ).rejects.toThrow();
+
+      const after = await getGame(created._id);
+      expect(after?.team.penalties[0].offender).toBe("PLRTEST1");
+    });
+
+    it("throws NotFoundError for an unknown penalty id on an existing game", async () => {
+      const created = await createGame(testGameInput());
+      createdIds.push(created._id);
+
+      await expect(
+        editPenalty(created._id, "PEN999999", {
+          offender: "PLRTEST1",
+          minute: 1,
+          second: 0,
+          type: "TRIP",
+          duration: 2,
+        }),
+      ).rejects.toThrow(NotFoundError);
+    });
+  });
+
+  describe("deletePenalty", () => {
+    it("removes the penalty from the game", async () => {
+      const created = await createGame(
+        testGameInput({
+          team: {
+            id: "TM551420",
+            roster: [{ playerId: "PLRTEST1" }],
+            goals: [],
+            penalties: [
+              { offender: "PLRTEST1", minute: 2, second: 0, type: "TRIP", duration: 2 },
+              { offender: "BENCH", minute: 10, second: 0, type: "TOOM", duration: 2 },
+            ],
+          },
+        }),
+      );
+      createdIds.push(created._id);
+      const [firstPenaltyId, secondPenaltyId] = created.team.penalties.map(
+        (penalty) => penalty._id,
+      );
+
+      const updated = await deletePenalty(created._id, firstPenaltyId);
+      expect(updated.team.penalties.map((penalty) => penalty._id)).toEqual([
+        secondPenaltyId,
+      ]);
+    });
+
+    it("throws NotFoundError for an unknown penalty id on an existing game", async () => {
+      const created = await createGame(testGameInput());
+      createdIds.push(created._id);
+
+      await expect(
+        deletePenalty(created._id, "PEN999999"),
       ).rejects.toThrow(NotFoundError);
     });
   });

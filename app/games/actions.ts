@@ -4,9 +4,12 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import {
   addGoal,
+  addPenalty,
   createGame,
   deleteGoal,
+  deletePenalty,
   editGoal,
+  editPenalty,
   getGame,
   getTheTeam,
   listPlayers,
@@ -21,6 +24,7 @@ import {
   parseGameDetailsFormData,
   parseGameFormData,
   parseGoalFormData,
+  parsePenaltyFormData,
 } from "./form-parsing";
 
 export async function createGameAction(
@@ -127,6 +131,57 @@ export async function deleteGoalAction(
   goalId: string,
 ): Promise<void> {
   await deleteGoal(gameId, goalId);
+
+  revalidatePath(`/games/${gameId}`);
+  redirect(`/games/${gameId}`);
+}
+
+// Penalty add/edit/delete mirror the goal actions above exactly — same
+// "one concern per form/action" split, same shared-schema reasoning
+// (PenaltyCreateInputSchema via parsePenaltyFormData is the same schema
+// addPenalty/editPenalty re-validate against at the repository layer).
+export async function addPenaltyAction(
+  gameId: string,
+  _prevState: GameFormState,
+  formData: FormData,
+): Promise<GameFormState> {
+  const parsed = parsePenaltyFormData(formData);
+
+  if (!parsed.success) {
+    return { errors: mapFieldErrors(parsed.error) };
+  }
+
+  await addPenalty(gameId, parsed.data);
+
+  revalidatePath(`/games/${gameId}`);
+  redirect(`/games/${gameId}`);
+}
+
+export async function updatePenaltyAction(
+  gameId: string,
+  penaltyId: string,
+  _prevState: GameFormState,
+  formData: FormData,
+): Promise<GameFormState> {
+  const parsed = parsePenaltyFormData(formData);
+
+  if (!parsed.success) {
+    return { errors: mapFieldErrors(parsed.error) };
+  }
+
+  await editPenalty(gameId, penaltyId, parsed.data);
+
+  revalidatePath(`/games/${gameId}`);
+  redirect(`/games/${gameId}`);
+}
+
+// Bound directly to a <form action={...}> with no fields, same as
+// deleteGoalAction.
+export async function deletePenaltyAction(
+  gameId: string,
+  penaltyId: string,
+): Promise<void> {
+  await deletePenalty(gameId, penaltyId);
 
   revalidatePath(`/games/${gameId}`);
   redirect(`/games/${gameId}`);

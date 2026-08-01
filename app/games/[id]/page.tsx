@@ -2,9 +2,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getGame, getSeason, listPlayers } from "@/lib/repositories";
 import { deriveScore } from "@/lib/derived/score";
-import { GOAL_TYPE_LABELS } from "@/lib/schemas";
+import { GOAL_TYPE_LABELS, PENALTY_CODE_LABELS } from "@/lib/schemas";
 import type { Player } from "@/lib/schemas";
-import { deleteGoalAction } from "../actions";
+import { deleteGoalAction, deletePenaltyAction } from "../actions";
 
 function playerLabel(players: Player[], playerId: string): string {
   const player = players.find((entry) => entry._id === playerId);
@@ -13,7 +13,11 @@ function playerLabel(players: Player[], playerId: string): string {
     : playerId;
 }
 
-function formatGoalTime(minute: number, second: number): string {
+function offenderLabel(players: Player[], offender: string): string {
+  return offender === "BENCH" ? "Bench" : playerLabel(players, offender);
+}
+
+function formatMinuteSecond(minute: number, second: number): string {
   return `${minute}:${second.toString().padStart(2, "0")}`;
 }
 
@@ -117,7 +121,7 @@ export default async function GameDetailPage({
               return (
                 <li key={goal._id} className="flex items-center justify-between gap-2">
                   <span>
-                    {formatGoalTime(goal.minute, goal.second)} —{" "}
+                    {formatMinuteSecond(goal.minute, goal.second)} —{" "}
                     {playerLabel(players, goal.scoredBy)}
                     {assists.length > 0 && ` (${assists.join(", ")})`} —{" "}
                     {GOAL_TYPE_LABELS[goal.type as keyof typeof GOAL_TYPE_LABELS]}
@@ -138,6 +142,49 @@ export default async function GameDetailPage({
                 </li>
               );
             })}
+          </ul>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold">
+            Penalties ({game.team.penalties.length})
+          </h2>
+          <Link
+            href={`/games/${game._id}/penalties/new`}
+            className="rounded border border-black/20 px-3 py-1.5 text-sm font-medium hover:bg-black/[0.03] dark:border-white/20 dark:hover:bg-white/[0.05]"
+          >
+            Record penalty
+          </Link>
+        </div>
+        {game.team.penalties.length === 0 ? (
+          <p className="text-sm text-black/60 dark:text-white/60">None.</p>
+        ) : (
+          <ul className="flex flex-col gap-2 text-sm">
+            {game.team.penalties.map((penalty) => (
+              <li key={penalty._id} className="flex items-center justify-between gap-2">
+                <span>
+                  {formatMinuteSecond(penalty.minute, penalty.second)} —{" "}
+                  {offenderLabel(players, penalty.offender)} —{" "}
+                  {PENALTY_CODE_LABELS[penalty.type as keyof typeof PENALTY_CODE_LABELS]}{" "}
+                  ({penalty.duration} min)
+                </span>
+                <span className="flex items-center gap-2">
+                  <Link
+                    href={`/games/${game._id}/penalties/${penalty._id}/edit`}
+                    className="text-sm underline"
+                  >
+                    Edit penalty
+                  </Link>
+                  <form action={deletePenaltyAction.bind(null, game._id, penalty._id)}>
+                    <button type="submit" className="text-sm text-red-600 underline">
+                      Delete penalty
+                    </button>
+                  </form>
+                </span>
+              </li>
+            ))}
           </ul>
         )}
       </div>
