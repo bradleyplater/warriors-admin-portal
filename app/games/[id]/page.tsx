@@ -4,7 +4,12 @@ import { getGame, getSeason, listPlayers } from "@/lib/repositories";
 import { deriveScore } from "@/lib/derived/score";
 import { GOAL_TYPE_LABELS, PENALTY_CODE_LABELS } from "@/lib/schemas";
 import type { Player } from "@/lib/schemas";
-import { deleteGoalAction, deletePenaltyAction } from "../actions";
+import {
+  deleteGoalAction,
+  deleteOpponentGoalAction,
+  deleteOpponentPenaltyAction,
+  deletePenaltyAction,
+} from "../actions";
 
 function playerLabel(players: Player[], playerId: string): string {
   const player = players.find((entry) => entry._id === playerId);
@@ -180,6 +185,92 @@ export default async function GameDetailPage({
                   <form action={deletePenaltyAction.bind(null, game._id, penalty._id)}>
                     <button type="submit" className="text-sm text-red-600 underline">
                       Delete penalty
+                    </button>
+                  </form>
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold">
+            Opponent goals ({game.opponentTeam.goals.length})
+          </h2>
+          <Link
+            href={`/games/${game._id}/opponent-goals/new`}
+            className="rounded border border-black/20 px-3 py-1.5 text-sm font-medium hover:bg-black/[0.03] dark:border-white/20 dark:hover:bg-white/[0.05]"
+          >
+            Record opponent goal
+          </Link>
+        </div>
+        {game.opponentTeam.goals.length === 0 ? (
+          <p className="text-sm text-black/60 dark:text-white/60">None.</p>
+        ) : (
+          <ul className="flex flex-col gap-2 text-sm">
+            {game.opponentTeam.goals.map((goal) => (
+              <li key={goal._id} className="flex items-center justify-between gap-2">
+                <span>
+                  {formatMinuteSecond(goal.minute, goal.second)} — {goal.scoredBy} —{" "}
+                  {GOAL_TYPE_LABELS[goal.type as keyof typeof GOAL_TYPE_LABELS]}
+                </span>
+                <span className="flex items-center gap-2">
+                  <Link
+                    href={`/games/${game._id}/opponent-goals/${goal._id}/edit`}
+                    className="text-sm underline"
+                  >
+                    Edit opponent goal
+                  </Link>
+                  <form action={deleteOpponentGoalAction.bind(null, game._id, goal._id)}>
+                    <button type="submit" className="text-sm text-red-600 underline">
+                      Delete opponent goal
+                    </button>
+                  </form>
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold">
+            Opponent penalties ({game.opponentTeam.penalties.length})
+          </h2>
+          <Link
+            href={`/games/${game._id}/opponent-penalties/new`}
+            className="rounded border border-black/20 px-3 py-1.5 text-sm font-medium hover:bg-black/[0.03] dark:border-white/20 dark:hover:bg-white/[0.05]"
+          >
+            Record opponent penalty
+          </Link>
+        </div>
+        {game.opponentTeam.penalties.length === 0 ? (
+          <p className="text-sm text-black/60 dark:text-white/60">None.</p>
+        ) : (
+          <ul className="flex flex-col gap-2 text-sm">
+            {game.opponentTeam.penalties.map((penalty) => (
+              <li key={penalty._id} className="flex items-center justify-between gap-2">
+                <span>
+                  {formatMinuteSecond(penalty.minute, penalty.second)} —{" "}
+                  {penalty.offender} —{" "}
+                  {PENALTY_CODE_LABELS[penalty.type as keyof typeof PENALTY_CODE_LABELS]}{" "}
+                  ({penalty.duration} min)
+                </span>
+                <span className="flex items-center gap-2">
+                  <Link
+                    href={`/games/${game._id}/opponent-penalties/${penalty._id}/edit`}
+                    className="text-sm underline"
+                  >
+                    Edit opponent penalty
+                  </Link>
+                  <form
+                    action={deleteOpponentPenaltyAction.bind(null, game._id, penalty._id)}
+                  >
+                    <button type="submit" className="text-sm text-red-600 underline">
+                      Delete opponent penalty
                     </button>
                   </form>
                 </span>

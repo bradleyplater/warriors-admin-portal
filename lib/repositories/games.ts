@@ -392,6 +392,110 @@ export async function addOpponentPenalty(
   return validated;
 }
 
+export async function editOpponentGoal(
+  gameId: string,
+  opponentGoalId: string,
+  goal: OpponentGoalCreateInput,
+): Promise<Game> {
+  const col = await collection();
+  const existing = await loadExisting(col, gameId);
+
+  const index = existing.opponentTeam.goals.findIndex(
+    (entry) => entry._id === opponentGoalId,
+  );
+  if (index === -1) {
+    throw new NotFoundError("opponent goal", opponentGoalId);
+  }
+
+  const goals = [...existing.opponentTeam.goals];
+  goals[index] = { _id: opponentGoalId, ...goal };
+
+  const merged: Game = {
+    ...existing,
+    opponentTeam: { ...existing.opponentTeam, goals },
+    ...stampUpdate(),
+  };
+  const validated = GameSchema.parse(merged);
+  await col.replaceOne({ _id: gameId }, validated);
+  return validated;
+}
+
+export async function deleteOpponentGoal(
+  gameId: string,
+  opponentGoalId: string,
+): Promise<Game> {
+  const col = await collection();
+  const existing = await loadExisting(col, gameId);
+
+  const goals = existing.opponentTeam.goals.filter(
+    (entry) => entry._id !== opponentGoalId,
+  );
+  if (goals.length === existing.opponentTeam.goals.length) {
+    throw new NotFoundError("opponent goal", opponentGoalId);
+  }
+
+  const merged: Game = {
+    ...existing,
+    opponentTeam: { ...existing.opponentTeam, goals },
+    ...stampUpdate(),
+  };
+  const validated = GameSchema.parse(merged);
+  await col.replaceOne({ _id: gameId }, validated);
+  return validated;
+}
+
+export async function editOpponentPenalty(
+  gameId: string,
+  opponentPenaltyId: string,
+  penalty: OpponentPenaltyCreateInput,
+): Promise<Game> {
+  const col = await collection();
+  const existing = await loadExisting(col, gameId);
+
+  const index = existing.opponentTeam.penalties.findIndex(
+    (entry) => entry._id === opponentPenaltyId,
+  );
+  if (index === -1) {
+    throw new NotFoundError("opponent penalty", opponentPenaltyId);
+  }
+
+  const penalties = [...existing.opponentTeam.penalties];
+  penalties[index] = { _id: opponentPenaltyId, ...penalty };
+
+  const merged: Game = {
+    ...existing,
+    opponentTeam: { ...existing.opponentTeam, penalties },
+    ...stampUpdate(),
+  };
+  const validated = GameSchema.parse(merged);
+  await col.replaceOne({ _id: gameId }, validated);
+  return validated;
+}
+
+export async function deleteOpponentPenalty(
+  gameId: string,
+  opponentPenaltyId: string,
+): Promise<Game> {
+  const col = await collection();
+  const existing = await loadExisting(col, gameId);
+
+  const penalties = existing.opponentTeam.penalties.filter(
+    (entry) => entry._id !== opponentPenaltyId,
+  );
+  if (penalties.length === existing.opponentTeam.penalties.length) {
+    throw new NotFoundError("opponent penalty", opponentPenaltyId);
+  }
+
+  const merged: Game = {
+    ...existing,
+    opponentTeam: { ...existing.opponentTeam, penalties },
+    ...stampUpdate(),
+  };
+  const validated = GameSchema.parse(merged);
+  await col.replaceOne({ _id: gameId }, validated);
+  return validated;
+}
+
 export async function deleteGame(id: string): Promise<void> {
   const col = await collection();
   const result = await col.deleteOne({ _id: id });

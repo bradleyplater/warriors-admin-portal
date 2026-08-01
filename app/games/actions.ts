@@ -4,11 +4,17 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import {
   addGoal,
+  addOpponentGoal,
+  addOpponentPenalty,
   addPenalty,
   createGame,
   deleteGoal,
+  deleteOpponentGoal,
+  deleteOpponentPenalty,
   deletePenalty,
   editGoal,
+  editOpponentGoal,
+  editOpponentPenalty,
   editPenalty,
   getGame,
   getTheTeam,
@@ -24,6 +30,8 @@ import {
   parseGameDetailsFormData,
   parseGameFormData,
   parseGoalFormData,
+  parseOpponentGoalFormData,
+  parseOpponentPenaltyFormData,
   parsePenaltyFormData,
 } from "./form-parsing";
 
@@ -182,6 +190,107 @@ export async function deletePenaltyAction(
   penaltyId: string,
 ): Promise<void> {
   await deletePenalty(gameId, penaltyId);
+
+  revalidatePath(`/games/${gameId}`);
+  redirect(`/games/${gameId}`);
+}
+
+// Opponent goal add/edit/delete mirror the team goal actions above exactly —
+// same "one concern per form/action" split, same shared-schema reasoning
+// (OpponentGoalCreateInputSchema via parseOpponentGoalFormData is the same
+// schema addOpponentGoal/editOpponentGoal re-validate against at the
+// repository layer).
+export async function addOpponentGoalAction(
+  gameId: string,
+  _prevState: GameFormState,
+  formData: FormData,
+): Promise<GameFormState> {
+  const parsed = parseOpponentGoalFormData(formData);
+
+  if (!parsed.success) {
+    return { errors: mapFieldErrors(parsed.error) };
+  }
+
+  await addOpponentGoal(gameId, parsed.data);
+
+  revalidatePath(`/games/${gameId}`);
+  redirect(`/games/${gameId}`);
+}
+
+export async function updateOpponentGoalAction(
+  gameId: string,
+  opponentGoalId: string,
+  _prevState: GameFormState,
+  formData: FormData,
+): Promise<GameFormState> {
+  const parsed = parseOpponentGoalFormData(formData);
+
+  if (!parsed.success) {
+    return { errors: mapFieldErrors(parsed.error) };
+  }
+
+  await editOpponentGoal(gameId, opponentGoalId, parsed.data);
+
+  revalidatePath(`/games/${gameId}`);
+  redirect(`/games/${gameId}`);
+}
+
+// Bound directly to a <form action={...}> with no fields, same as
+// deleteGoalAction.
+export async function deleteOpponentGoalAction(
+  gameId: string,
+  opponentGoalId: string,
+): Promise<void> {
+  await deleteOpponentGoal(gameId, opponentGoalId);
+
+  revalidatePath(`/games/${gameId}`);
+  redirect(`/games/${gameId}`);
+}
+
+// Opponent penalty add/edit/delete mirror the team penalty actions above
+// exactly — same reasoning as the opponent goal actions.
+export async function addOpponentPenaltyAction(
+  gameId: string,
+  _prevState: GameFormState,
+  formData: FormData,
+): Promise<GameFormState> {
+  const parsed = parseOpponentPenaltyFormData(formData);
+
+  if (!parsed.success) {
+    return { errors: mapFieldErrors(parsed.error) };
+  }
+
+  await addOpponentPenalty(gameId, parsed.data);
+
+  revalidatePath(`/games/${gameId}`);
+  redirect(`/games/${gameId}`);
+}
+
+export async function updateOpponentPenaltyAction(
+  gameId: string,
+  opponentPenaltyId: string,
+  _prevState: GameFormState,
+  formData: FormData,
+): Promise<GameFormState> {
+  const parsed = parseOpponentPenaltyFormData(formData);
+
+  if (!parsed.success) {
+    return { errors: mapFieldErrors(parsed.error) };
+  }
+
+  await editOpponentPenalty(gameId, opponentPenaltyId, parsed.data);
+
+  revalidatePath(`/games/${gameId}`);
+  redirect(`/games/${gameId}`);
+}
+
+// Bound directly to a <form action={...}> with no fields, same as
+// deletePenaltyAction.
+export async function deleteOpponentPenaltyAction(
+  gameId: string,
+  opponentPenaltyId: string,
+): Promise<void> {
+  await deleteOpponentPenalty(gameId, opponentPenaltyId);
 
   revalidatePath(`/games/${gameId}`);
   redirect(`/games/${gameId}`);
