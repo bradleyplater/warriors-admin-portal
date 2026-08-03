@@ -2,6 +2,8 @@ import type { z } from "zod";
 import {
   GameCreateInputSchema,
   GoalCreateInputSchema,
+  OpponentGoalCreateInputSchema,
+  OpponentPenaltyCreateInputSchema,
   PenaltyCreateInputSchema,
 } from "@/lib/schemas";
 import type { Game, Player } from "@/lib/schemas";
@@ -107,6 +109,31 @@ export function parseGoalFormData(formData: FormData) {
 // already flat field names, so fieldKeyFor/mapFieldErrors apply unchanged.
 export function parsePenaltyFormData(formData: FormData) {
   return PenaltyCreateInputSchema.safeParse({
+    offender: formData.get("offender"),
+    minute: Number(formData.get("minute")),
+    second: Number(formData.get("second")),
+    type: formData.get("type"),
+    duration: Number(formData.get("duration")),
+  });
+}
+
+// Both the new-opponent-goal and edit-opponent-goal forms share this parser —
+// same reasoning as parseGoalFormData, but there are no assist fields and the
+// scorer is free text (OpponentGoalCreateInputSchema), not a roster playerId.
+export function parseOpponentGoalFormData(formData: FormData) {
+  return OpponentGoalCreateInputSchema.safeParse({
+    scoredBy: formData.get("scoredBy"),
+    minute: Number(formData.get("minute")),
+    second: Number(formData.get("second")),
+    type: formData.get("type"),
+  });
+}
+
+// Both the new-opponent-penalty and edit-opponent-penalty forms share this
+// parser — same reasoning as parsePenaltyFormData, but the offender is free
+// text (OpponentPenaltyCreateInputSchema), not a roster playerId or BENCH.
+export function parseOpponentPenaltyFormData(formData: FormData) {
+  return OpponentPenaltyCreateInputSchema.safeParse({
     offender: formData.get("offender"),
     minute: Number(formData.get("minute")),
     second: Number(formData.get("second")),

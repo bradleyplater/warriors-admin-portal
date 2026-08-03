@@ -4,8 +4,12 @@ import {
   createGame,
   deleteGame,
   deleteGoal,
+  deleteOpponentGoal,
+  deleteOpponentPenalty,
   deletePenalty,
   editGoal,
+  editOpponentGoal,
+  editOpponentPenalty,
   editPenalty,
   getGame,
   updateGame,
@@ -469,6 +473,254 @@ describe("games repository", () => {
 
       await expect(
         deletePenalty(created._id, "PEN999999"),
+      ).rejects.toThrow(NotFoundError);
+    });
+  });
+
+  describe("editOpponentGoal", () => {
+    it("updates an opponent goal's fields in place", async () => {
+      const created = await createGame(
+        testGameInput({
+          opponentTeam: {
+            name: "Test Opponents",
+            goals: [{ scoredBy: "J. Smith", minute: 5, second: 0, type: "EVEN" }],
+            penalties: [],
+          },
+        }),
+      );
+      createdIds.push(created._id);
+      const opponentGoalId = created.opponentTeam.goals[0]._id;
+
+      const updated = await editOpponentGoal(created._id, opponentGoalId, {
+        scoredBy: "A. Jones",
+        minute: 12,
+        second: 34,
+        type: "PP",
+      });
+
+      expect(updated.opponentTeam.goals).toHaveLength(1);
+      expect(updated.opponentTeam.goals[0]).toMatchObject({
+        _id: opponentGoalId,
+        scoredBy: "A. Jones",
+        minute: 12,
+        second: 34,
+        type: "PP",
+      });
+    });
+
+    it("rejects an edit that fails OpponentGoalCreateInputSchema and leaves the goal unchanged", async () => {
+      const created = await createGame(
+        testGameInput({
+          opponentTeam: {
+            name: "Test Opponents",
+            goals: [{ scoredBy: "J. Smith", minute: 5, second: 0, type: "EVEN" }],
+            penalties: [],
+          },
+        }),
+      );
+      createdIds.push(created._id);
+      const opponentGoalId = created.opponentTeam.goals[0]._id;
+
+      await expect(
+        editOpponentGoal(created._id, opponentGoalId, {
+          scoredBy: "", // empty — invalid
+          minute: 5,
+          second: 0,
+          type: "EVEN",
+        }),
+      ).rejects.toThrow();
+
+      const after = await getGame(created._id);
+      expect(after?.opponentTeam.goals[0].scoredBy).toBe("J. Smith");
+    });
+
+    it("throws NotFoundError for an unknown opponent goal id on an existing game", async () => {
+      const created = await createGame(testGameInput());
+      createdIds.push(created._id);
+
+      await expect(
+        editOpponentGoal(created._id, "OGL999999", {
+          scoredBy: "J. Smith",
+          minute: 1,
+          second: 0,
+          type: "EVEN",
+        }),
+      ).rejects.toThrow(NotFoundError);
+    });
+  });
+
+  describe("deleteOpponentGoal", () => {
+    it("removes the opponent goal from the game", async () => {
+      const created = await createGame(
+        testGameInput({
+          opponentTeam: {
+            name: "Test Opponents",
+            goals: [
+              { scoredBy: "J. Smith", minute: 5, second: 0, type: "EVEN" },
+              { scoredBy: "A. Jones", minute: 10, second: 0, type: "PP" },
+            ],
+            penalties: [],
+          },
+        }),
+      );
+      createdIds.push(created._id);
+      const [firstGoalId, secondGoalId] = created.opponentTeam.goals.map(
+        (goal) => goal._id,
+      );
+
+      const updated = await deleteOpponentGoal(created._id, firstGoalId);
+      expect(updated.opponentTeam.goals.map((goal) => goal._id)).toEqual([
+        secondGoalId,
+      ]);
+    });
+
+    it("throws NotFoundError for an unknown opponent goal id on an existing game", async () => {
+      const created = await createGame(testGameInput());
+      createdIds.push(created._id);
+
+      await expect(
+        deleteOpponentGoal(created._id, "OGL999999"),
+      ).rejects.toThrow(NotFoundError);
+    });
+  });
+
+  describe("editOpponentPenalty", () => {
+    it("updates an opponent penalty's fields in place", async () => {
+      const created = await createGame(
+        testGameInput({
+          opponentTeam: {
+            name: "Test Opponents",
+            goals: [],
+            penalties: [
+              { offender: "J. Smith", minute: 2, second: 0, type: "TRIP", duration: 2 },
+            ],
+          },
+        }),
+      );
+      createdIds.push(created._id);
+      const opponentPenaltyId = created.opponentTeam.penalties[0]._id;
+
+      const updated = await editOpponentPenalty(created._id, opponentPenaltyId, {
+        offender: "A. Jones",
+        minute: 30,
+        second: 45,
+        type: "SLASH",
+        duration: 4,
+      });
+
+      expect(updated.opponentTeam.penalties).toHaveLength(1);
+      expect(updated.opponentTeam.penalties[0]).toMatchObject({
+        _id: opponentPenaltyId,
+        offender: "A. Jones",
+        minute: 30,
+        second: 45,
+        type: "SLASH",
+        duration: 4,
+      });
+    });
+
+    it("rejects an edit with a non-positive duration and leaves the penalty unchanged", async () => {
+      const created = await createGame(
+        testGameInput({
+          opponentTeam: {
+            name: "Test Opponents",
+            goals: [],
+            penalties: [
+              { offender: "J. Smith", minute: 2, second: 0, type: "TRIP", duration: 2 },
+            ],
+          },
+        }),
+      );
+      createdIds.push(created._id);
+      const opponentPenaltyId = created.opponentTeam.penalties[0]._id;
+
+      await expect(
+        editOpponentPenalty(created._id, opponentPenaltyId, {
+          offender: "J. Smith",
+          minute: 2,
+          second: 0,
+          type: "TRIP",
+          duration: 0, // non-positive — invalid
+        }),
+      ).rejects.toThrow();
+
+      const after = await getGame(created._id);
+      expect(after?.opponentTeam.penalties[0].duration).toBe(2);
+    });
+
+    it("rejects an edit with an empty offender name", async () => {
+      const created = await createGame(
+        testGameInput({
+          opponentTeam: {
+            name: "Test Opponents",
+            goals: [],
+            penalties: [
+              { offender: "J. Smith", minute: 2, second: 0, type: "TRIP", duration: 2 },
+            ],
+          },
+        }),
+      );
+      createdIds.push(created._id);
+      const opponentPenaltyId = created.opponentTeam.penalties[0]._id;
+
+      await expect(
+        editOpponentPenalty(created._id, opponentPenaltyId, {
+          offender: "", // empty — invalid
+          minute: 2,
+          second: 0,
+          type: "TRIP",
+          duration: 2,
+        }),
+      ).rejects.toThrow();
+    });
+
+    it("throws NotFoundError for an unknown opponent penalty id on an existing game", async () => {
+      const created = await createGame(testGameInput());
+      createdIds.push(created._id);
+
+      await expect(
+        editOpponentPenalty(created._id, "OPP999999", {
+          offender: "J. Smith",
+          minute: 1,
+          second: 0,
+          type: "TRIP",
+          duration: 2,
+        }),
+      ).rejects.toThrow(NotFoundError);
+    });
+  });
+
+  describe("deleteOpponentPenalty", () => {
+    it("removes the opponent penalty from the game", async () => {
+      const created = await createGame(
+        testGameInput({
+          opponentTeam: {
+            name: "Test Opponents",
+            goals: [],
+            penalties: [
+              { offender: "J. Smith", minute: 2, second: 0, type: "TRIP", duration: 2 },
+              { offender: "A. Jones", minute: 10, second: 0, type: "TOOM", duration: 2 },
+            ],
+          },
+        }),
+      );
+      createdIds.push(created._id);
+      const [firstPenaltyId, secondPenaltyId] = created.opponentTeam.penalties.map(
+        (penalty) => penalty._id,
+      );
+
+      const updated = await deleteOpponentPenalty(created._id, firstPenaltyId);
+      expect(updated.opponentTeam.penalties.map((penalty) => penalty._id)).toEqual([
+        secondPenaltyId,
+      ]);
+    });
+
+    it("throws NotFoundError for an unknown opponent penalty id on an existing game", async () => {
+      const created = await createGame(testGameInput());
+      createdIds.push(created._id);
+
+      await expect(
+        deleteOpponentPenalty(created._id, "OPP999999"),
       ).rejects.toThrow(NotFoundError);
     });
   });
