@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import type { Game, Player, Season } from "@/lib/schemas";
 import { createGameAction, updateGameAction } from "./actions";
 import { initialGameFormState, type GameFormState } from "./form-state";
+import { RosterSelect } from "./RosterSelect";
 
 const GAME_TYPES = ["CHALLENGE", "BOTBC", "LLIHC"] as const;
 
@@ -29,10 +30,18 @@ type GameFormProps = {
   // Only needed in create mode — the edit form doesn't touch the roster,
   // that's handled by RosterForm on its own route.
   activePlayers?: Player[];
+  // Only needed in edit mode, for the netminder picker — the game's current
+  // roster, resolved to Player records.
+  rosterPlayers?: Player[];
   initialValues?: Game;
 };
 
-export function GameForm({ seasons, activePlayers, initialValues }: GameFormProps) {
+export function GameForm({
+  seasons,
+  activePlayers,
+  rosterPlayers,
+  initialValues,
+}: GameFormProps) {
   const isEdit = initialValues !== undefined;
   const action = isEdit
     ? updateGameAction.bind(null, initialValues._id)
@@ -129,6 +138,17 @@ export function GameForm({ seasons, activePlayers, initialValues }: GameFormProp
         </label>
         <FieldErrors messages={state.errors.location} />
       </fieldset>
+
+      {isEdit && rosterPlayers && (
+        <RosterSelect
+          id="netminderPlayerId"
+          name="netminderPlayerId"
+          label="Netminder"
+          rosterPlayers={rosterPlayers}
+          defaultValue={initialValues?.netminderPlayerId}
+          errors={state.errors.netminderPlayerId}
+        />
+      )}
 
       {!isEdit && activePlayers && (
         <fieldset className="flex flex-col gap-1">

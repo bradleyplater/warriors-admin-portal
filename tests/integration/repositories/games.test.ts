@@ -725,6 +725,40 @@ describe("games repository", () => {
     });
   });
 
+  describe("updateGame award fields", () => {
+    it("sets and then clears an award, and the cleared game still reads back cleanly", async () => {
+      const created = await createGame(testGameInput());
+      createdIds.push(created._id);
+
+      const withAward = await updateGame(created._id, {
+        manOfTheMatchPlayerId: "PLRTEST1",
+      });
+      expect(withAward.manOfTheMatchPlayerId).toBe("PLRTEST1");
+
+      const cleared = await updateGame(created._id, {
+        manOfTheMatchPlayerId: null,
+      });
+      expect(cleared.manOfTheMatchPlayerId).toBeUndefined();
+
+      // Regression check: clearing must delete the field rather than store
+      // BSON null, or GameSchema's z.string().optional() throws here.
+      const reread = await getGame(created._id);
+      expect(reread?.manOfTheMatchPlayerId).toBeUndefined();
+    });
+
+    it("leaves an award untouched when the patch omits it", async () => {
+      const created = await createGame(
+        testGameInput({ netminderPlayerId: "PLRTEST1" }),
+      );
+      createdIds.push(created._id);
+
+      const updated = await updateGame(created._id, {
+        opponentName: "Renamed Opponents",
+      });
+      expect(updated.netminderPlayerId).toBe("PLRTEST1");
+    });
+  });
+
   describe("updateGameRoster", () => {
     it("removes an unreferenced player", async () => {
       const created = await createGame(testGameInput());

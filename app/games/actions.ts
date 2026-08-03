@@ -27,6 +27,7 @@ import type { GameFormState } from "./form-state";
 import {
   describeBlockedPlayer,
   mapFieldErrors,
+  parseGameAwardsFormData,
   parseGameDetailsFormData,
   parseGameFormData,
   parseGoalFormData,
@@ -62,7 +63,10 @@ export async function createGameAction(
 // unchanged from the existing game and re-validated as part of the same
 // GameCreateInputSchema used at creation, but this action never writes
 // `roster`: roster changes go through updateGameRosterAction on its own
-// route (/games/[id]/roster), not this form.
+// route (/games/[id]/roster), not this form. Netminder is included here
+// (not on the awards route) because it isn't an award; this form always
+// submits the netminder select, so an empty selection maps to updateGame's
+// `null` clear-sentinel, same reasoning as updateGameAwardsAction.
 export async function updateGameAction(
   id: string,
   _prevState: GameFormState,
@@ -85,6 +89,7 @@ export async function updateGameAction(
     type: parsed.data.type,
     location: parsed.data.location,
     opponentName: parsed.data.opponentTeam.name,
+    netminderPlayerId: parsed.data.netminderPlayerId ?? null,
   });
 
   revalidatePath("/games");
@@ -330,5 +335,38 @@ export async function updateGameRosterAction(
 
   revalidatePath("/games");
   revalidatePath(`/games/${id}`);
+  redirect(`/games/${id}`);
+}
+
+// Awards-only edit, its own route (/games/[id]/awards) and its own action —
+// same "one concern per form/action" split as roster vs. details. Covers
+// Player of the Game and Warrior of the Game only — netminder isn't an
+// award, so it's edited via updateGameAction/GameForm instead. This form
+// always submits both selects at once, so an empty select means "cleared"
+// (updateGame's `null` sentinel), not "leave unchanged" (`undefined`) — see
+// updateGame's GameUpdateInput for why that distinction matters.
+export async function updateGameAwardsAction(
+  id: string,
+  _prevState: GameFormState,
+  formData: FormData,
+): Promise<GameFormState> {
+  const existing = await getGame(id);
+  if (!existing) {
+    return { errors: { form: ["Game not found."] } };
+  }
+
+  const parsed = parseGameAwardsFormData(formData, existing);
+
+  if (!parsed.success) {
+    return { errors: mapFieldErrors(parsed.error) };
+  }
+
+  await updateGame(id, {
+    manOfTheMatchPlayerId: parsed.data.manOfTheMatchPlayerId ?? null,
+    warriorOfTheGamePlayerId: parsed.data.warriorOfTheGamePlayerId ?? null,
+  });
+
+  revalidatePath(`/games/${id}`);
+  revalidatePath(`/games/${id}/awards`);
   redirect(`/games/${id}`);
 }

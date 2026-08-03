@@ -7,6 +7,7 @@ import {
   fieldKeyFor,
   mapFieldErrors,
   parseDateInput,
+  parseGameAwardsFormData,
   parseGameDetailsFormData,
   parseGameFormData,
 } from "./form-parsing";
@@ -155,6 +156,18 @@ function detailsFormData(overrides: Record<string, string> = {}): FormData {
   return formData;
 }
 
+function gameWithTwoRosteredPlayers(overrides: Partial<Game> = {}): Game {
+  return baseGame({
+    team: {
+      id: "TM551420",
+      roster: [{ playerId: "PLR000001" }, { playerId: "PLR000002" }],
+      goals: [],
+      penalties: [],
+    },
+    ...overrides,
+  });
+}
+
 describe("parseGameDetailsFormData", () => {
   it("parses a valid details submission, carrying over the existing roster/goals/penalties untouched", () => {
     const existing = baseGame();
@@ -182,6 +195,126 @@ describe("parseGameDetailsFormData", () => {
       const issue = result.error.issues.find(
         (candidate) =>
           candidate.path[0] === "opponentTeam" && candidate.path[1] === "name",
+      );
+      expect(issue).toBeDefined();
+    }
+  });
+
+  it("sets the netminder to a rostered player", () => {
+    const result = parseGameDetailsFormData(
+      detailsFormData({ netminderPlayerId: "PLR000001" }),
+      gameWithTwoRosteredPlayers(),
+    );
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.netminderPlayerId).toBe("PLR000001");
+    }
+  });
+
+  it("treats an empty netminder select as clearing it", () => {
+    const result = parseGameDetailsFormData(
+      detailsFormData({ netminderPlayerId: "" }),
+      gameWithTwoRosteredPlayers({ netminderPlayerId: "PLR000001" }),
+    );
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.netminderPlayerId).toBeUndefined();
+    }
+  });
+
+  it("rejects a non-rostered netminder (defense-in-depth against a tampered submission)", () => {
+    const result = parseGameDetailsFormData(
+      detailsFormData({ netminderPlayerId: "PLR999999" }),
+      gameWithTwoRosteredPlayers(),
+    );
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      const issue = result.error.issues.find(
+        (candidate) => candidate.path[0] === "netminderPlayerId",
+      );
+      expect(issue).toBeDefined();
+    }
+  });
+});
+
+function awardsFormData(overrides: Record<string, string> = {}): FormData {
+  const formData = new FormData();
+  for (const [key, value] of Object.entries(overrides)) {
+    formData.set(key, value);
+  }
+  return formData;
+}
+
+describe("parseGameAwardsFormData", () => {
+  it("sets each award to a rostered player", () => {
+    const result = parseGameAwardsFormData(
+      awardsFormData({
+        manOfTheMatchPlayerId: "PLR000002",
+        warriorOfTheGamePlayerId: "PLR000001",
+      }),
+      gameWithTwoRosteredPlayers(),
+    );
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.manOfTheMatchPlayerId).toBe("PLR000002");
+      expect(result.data.warriorOfTheGamePlayerId).toBe("PLR000001");
+    }
+  });
+
+  it("treats an empty select as clearing that award", () => {
+    const result = parseGameAwardsFormData(
+      awardsFormData({
+        manOfTheMatchPlayerId: "",
+        warriorOfTheGamePlayerId: "",
+      }),
+      gameWithTwoRosteredPlayers({ manOfTheMatchPlayerId: "PLR000001" }),
+    );
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.manOfTheMatchPlayerId).toBeUndefined();
+      expect(result.data.warriorOfTheGamePlayerId).toBeUndefined();
+    }
+  });
+
+  it("does not touch the netminder field", () => {
+    const result = parseGameAwardsFormData(
+      awardsFormData({ manOfTheMatchPlayerId: "PLR000001" }),
+      gameWithTwoRosteredPlayers({ netminderPlayerId: "PLR000002" }),
+    );
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.netminderPlayerId).toBe("PLR000002");
+    }
+  });
+
+  it("allows the same player to hold more than one award", () => {
+    const result = parseGameAwardsFormData(
+      awardsFormData({
+        manOfTheMatchPlayerId: "PLR000001",
+        warriorOfTheGamePlayerId: "PLR000001",
+      }),
+      gameWithTwoRosteredPlayers(),
+    );
+
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects a non-rostered playerId (defense-in-depth against a tampered submission)", () => {
+    const result = parseGameAwardsFormData(
+      awardsFormData({ manOfTheMatchPlayerId: "PLR999999" }),
+      gameWithTwoRosteredPlayers(),
+    );
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      const issue = result.error.issues.find(
+        (candidate) => candidate.path[0] === "manOfTheMatchPlayerId",
       );
       expect(issue).toBeDefined();
     }

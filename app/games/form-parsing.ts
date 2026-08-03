@@ -62,20 +62,26 @@ export function parseGameFormData(formData: FormData, teamId: string) {
   });
 }
 
-// Details-only edit — team/roster/goals/penalties are carried over
-// unchanged from the existing game and re-validated as part of the same
-// GameCreateInputSchema used at creation, but the caller (updateGameAction)
-// never writes `roster` from this: roster changes go through
-// updateGameRosterAction on its own route (/games/[id]/roster).
+// Details-only edit — team/goals/penalties are carried over unchanged from
+// the existing game and re-validated as part of the same GameCreateInputSchema
+// used at creation, but the caller (updateGameAction) never writes `roster`
+// from this: roster changes go through updateGameRosterAction on its own
+// route (/games/[id]/roster), and Player of the Game/Warrior of the Game go
+// through updateGameAwardsAction on /games/[id]/awards. Netminder lives here
+// rather than on the awards route because it isn't an award — it's a factual
+// detail of the game, like date or opponent — and this form always submits
+// the select, so an empty selection unambiguously means "cleared" (mapped to
+// updateGame's `null` clear-sentinel by updateGameAction, not by this parser).
 export function parseGameDetailsFormData(formData: FormData, existing: Game) {
   const date = parseDateInput(formData);
+  const netminderPlayerId = optionalFormString(formData.get("netminderPlayerId"));
 
   return GameCreateInputSchema.safeParse({
     date,
     seasonId: formData.get("seasonId"),
     type: formData.get("type"),
     location: formData.get("location"),
-    netminderPlayerId: existing.netminderPlayerId,
+    ...(netminderPlayerId !== undefined && { netminderPlayerId }),
     manOfTheMatchPlayerId: existing.manOfTheMatchPlayerId,
     warriorOfTheGamePlayerId: existing.warriorOfTheGamePlayerId,
     team: existing.team,
@@ -84,6 +90,36 @@ export function parseGameDetailsFormData(formData: FormData, existing: Game) {
       goals: existing.opponentTeam.goals,
       penalties: existing.opponentTeam.penalties,
     },
+  });
+}
+
+// Awards-only edit — separate route (/games/[id]/awards) and separate action
+// from both parseGameDetailsFormData and updateGameRosterAction, same "one
+// concern per form/action" split. Covers Player of the Game and Warrior of
+// the Game only — netminder is handled by parseGameDetailsFormData/GameForm
+// instead, since it isn't an award. Unlike the details form, this one always
+// submits both award selects at once, so an empty select unambiguously means
+// "cleared", not "leave unchanged" (that distinction is handled by
+// updateGameAwardsAction mapping undefined here to updateGame's `null`
+// clear-sentinel, not by this parser).
+export function parseGameAwardsFormData(formData: FormData, existing: Game) {
+  const manOfTheMatchPlayerId = optionalFormString(
+    formData.get("manOfTheMatchPlayerId"),
+  );
+  const warriorOfTheGamePlayerId = optionalFormString(
+    formData.get("warriorOfTheGamePlayerId"),
+  );
+
+  return GameCreateInputSchema.safeParse({
+    date: existing.date,
+    seasonId: existing.seasonId,
+    type: existing.type,
+    location: existing.location,
+    netminderPlayerId: existing.netminderPlayerId,
+    ...(manOfTheMatchPlayerId !== undefined && { manOfTheMatchPlayerId }),
+    ...(warriorOfTheGamePlayerId !== undefined && { warriorOfTheGamePlayerId }),
+    team: existing.team,
+    opponentTeam: existing.opponentTeam,
   });
 }
 
