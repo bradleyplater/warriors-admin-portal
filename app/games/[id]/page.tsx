@@ -84,6 +84,68 @@ export default async function GameDetailPage({
         </div>
       </div>
 
+      <div className="flex flex-col gap-2" data-testid="score-breakdown">
+        <table className="w-full max-w-md text-left text-sm">
+          <thead>
+            <tr className="border-b border-black/10 dark:border-white/15">
+              <th className="py-1 pr-4 font-medium"></th>
+              <th className="py-1 pr-4 text-center font-medium">P1</th>
+              <th className="py-1 pr-4 text-center font-medium">P2</th>
+              <th className="py-1 pr-4 text-center font-medium">P3</th>
+              <th className="py-1 pr-4 text-center font-medium">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td className="py-1 pr-4 font-medium">Team</td>
+              {score.periods.map((period, index) => (
+                <td
+                  key={index}
+                  className="py-1 pr-4 text-center"
+                  data-testid={`period-${index + 1}-team`}
+                >
+                  {period.team}
+                </td>
+              ))}
+              <td className="py-1 pr-4 text-center font-medium">
+                {score.team}
+              </td>
+            </tr>
+            <tr>
+              <td className="py-1 pr-4 font-medium">
+                {game.opponentTeam.name}
+              </td>
+              {score.periods.map((period, index) => (
+                <td
+                  key={index}
+                  className="py-1 pr-4 text-center"
+                  data-testid={`period-${index + 1}-opponent`}
+                >
+                  {period.opponent}
+                </td>
+              ))}
+              <td className="py-1 pr-4 text-center font-medium">
+                {score.opponent}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        {score.shootout && (
+          <p
+            className="text-sm text-black/60 dark:text-white/60"
+            data-testid="shootout-note"
+          >
+            {score.shootout.team === score.shootout.opponent
+              ? `Shootout goals recorded (${score.shootout.team}-${score.shootout.opponent}) — no winner determined`
+              : `Decided by shootout — ${
+                  score.shootout.team > score.shootout.opponent
+                    ? "Team"
+                    : game.opponentTeam.name
+                } won ${Math.max(score.shootout.team, score.shootout.opponent)}-${Math.min(score.shootout.team, score.shootout.opponent)}`}
+          </p>
+        )}
+      </div>
+
       <dl className="grid max-w-md grid-cols-2 gap-y-2 text-sm">
         <dt className="text-black/60 dark:text-white/60">Date</dt>
         <dd>{game.date.toISOString().slice(0, 10)}</dd>
