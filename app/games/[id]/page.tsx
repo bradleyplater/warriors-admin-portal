@@ -22,6 +22,13 @@ function offenderLabel(players: Player[], offender: string): string {
   return offender === "BENCH" ? "Bench" : playerLabel(players, offender);
 }
 
+function optionalPlayerLabel(
+  players: Player[],
+  playerId: string | undefined,
+): string {
+  return playerId === undefined ? "Not set" : playerLabel(players, playerId);
+}
+
 function formatMinuteSecond(minute: number, second: number): string {
   return `${minute}:${second.toString().padStart(2, "0")}`;
 }
@@ -68,6 +75,12 @@ export default async function GameDetailPage({
           >
             Manage roster
           </Link>
+          <Link
+            href={`/games/${game._id}/awards`}
+            className="rounded border border-black/20 px-3 py-1.5 text-sm font-medium hover:bg-black/[0.03] dark:border-white/20 dark:hover:bg-white/[0.05]"
+          >
+            Manage awards
+          </Link>
         </div>
       </div>
 
@@ -83,7 +96,25 @@ export default async function GameDetailPage({
 
         <dt className="text-black/60 dark:text-white/60">Location</dt>
         <dd>{game.location === "HOME" ? "Home" : "Away"}</dd>
+
+        <dt className="text-black/60 dark:text-white/60">Netminder</dt>
+        <dd>{optionalPlayerLabel(players, game.netminderPlayerId)}</dd>
       </dl>
+
+      <div className="flex flex-col gap-3">
+        <h2 className="text-xl font-semibold">Awards</h2>
+        <dl className="grid max-w-md grid-cols-2 gap-y-2 text-sm">
+          <dt className="text-black/60 dark:text-white/60">
+            Player of the Game
+          </dt>
+          <dd>{optionalPlayerLabel(players, game.manOfTheMatchPlayerId)}</dd>
+
+          <dt className="text-black/60 dark:text-white/60">
+            Warrior of the Game
+          </dt>
+          <dd>{optionalPlayerLabel(players, game.warriorOfTheGamePlayerId)}</dd>
+        </dl>
+      </div>
 
       <div className="flex flex-col gap-3">
         <h2 className="text-xl font-semibold">

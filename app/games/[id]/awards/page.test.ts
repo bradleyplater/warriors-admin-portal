@@ -10,22 +10,21 @@ const { notFoundMock, getGameMock } = vi.hoisted(() => ({
 vi.mock("next/navigation", () => ({ notFound: notFoundMock }));
 vi.mock("@/lib/repositories", () => ({
   getGame: getGameMock,
-  listSeasons: vi.fn(),
   listPlayers: vi.fn(),
 }));
 
-import EditGamePage from "./page";
+import GameAwardsPage from "./page";
 
 beforeEach(() => {
   vi.clearAllMocks();
 });
 
-describe("EditGamePage", () => {
+describe("GameAwardsPage", () => {
   it("renders a 404 (calls notFound()) for an id with no matching game", async () => {
     getGameMock.mockResolvedValue(null);
 
     await expect(
-      EditGamePage({ params: Promise.resolve({ id: "GME999999" }) }),
+      GameAwardsPage({ params: Promise.resolve({ id: "GME999999" }) }),
     ).rejects.toThrow("NEXT_NOT_FOUND");
     expect(notFoundMock).toHaveBeenCalledTimes(1);
   });

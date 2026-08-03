@@ -24,9 +24,33 @@ export interface GameUpdateInput {
   location?: Game["location"];
   roster?: { playerId: string }[];
   opponentName?: string;
-  netminderPlayerId?: string;
-  manOfTheMatchPlayerId?: string;
-  warriorOfTheGamePlayerId?: string;
+  // undefined = leave unchanged; null = explicitly clear. These three are
+  // the only genuinely optional, clearable fields on Game — the merge below
+  // must delete the key rather than set it to `undefined`, since the
+  // mongodb driver's default ignoreUndefined:false would otherwise
+  // serialize an explicit undefined as BSON null, which GameSchema's
+  // z.string().optional() rejects on the next read.
+  netminderPlayerId?: string | null;
+  manOfTheMatchPlayerId?: string | null;
+  warriorOfTheGamePlayerId?: string | null;
+}
+
+type AwardField =
+  | "netminderPlayerId"
+  | "manOfTheMatchPlayerId"
+  | "warriorOfTheGamePlayerId";
+
+function applyAwardPatch(
+  game: Game,
+  field: AwardField,
+  value: string | null | undefined,
+): void {
+  if (value === undefined) return;
+  if (value === null) {
+    delete game[field];
+  } else {
+    game[field] = value;
+  }
 }
 
 async function collection() {
@@ -117,15 +141,6 @@ export async function updateGame(
     ...(patch.seasonId !== undefined && { seasonId: patch.seasonId }),
     ...(patch.type !== undefined && { type: patch.type }),
     ...(patch.location !== undefined && { location: patch.location }),
-    ...(patch.netminderPlayerId !== undefined && {
-      netminderPlayerId: patch.netminderPlayerId,
-    }),
-    ...(patch.manOfTheMatchPlayerId !== undefined && {
-      manOfTheMatchPlayerId: patch.manOfTheMatchPlayerId,
-    }),
-    ...(patch.warriorOfTheGamePlayerId !== undefined && {
-      warriorOfTheGamePlayerId: patch.warriorOfTheGamePlayerId,
-    }),
     team: {
       ...existing.team,
       ...(patch.roster !== undefined && { roster: patch.roster }),
@@ -136,6 +151,14 @@ export async function updateGame(
     },
     ...stampUpdate(),
   };
+
+  applyAwardPatch(merged, "netminderPlayerId", patch.netminderPlayerId);
+  applyAwardPatch(merged, "manOfTheMatchPlayerId", patch.manOfTheMatchPlayerId);
+  applyAwardPatch(
+    merged,
+    "warriorOfTheGamePlayerId",
+    patch.warriorOfTheGamePlayerId,
+  );
 
   const validated = GameSchema.parse(merged);
   await col.replaceOne({ _id: id }, validated);
