@@ -20,7 +20,7 @@ function SeasonSection({
   return (
     <div className="flex flex-col gap-3" data-testid={`season-${season._id}`}>
       <h3 className="text-lg font-semibold">
-        {season.name} ({games.length})
+        {season.name} ({stats.gamesPlayed})
       </h3>
       <dl className="grid max-w-sm grid-cols-2 gap-y-1 text-sm">
         <dt className="text-black/60 dark:text-white/60">Goals</dt>
@@ -78,7 +78,7 @@ export default async function PlayerProfilePage({
             games={playerGames
               .filter((game) => game.seasonId === season._id)
               .sort((a, b) => a.date.getTime() - b.date.getTime())}
-            stats={derivePlayerSeasonStats(playerGames, player._id, season._id)}
+            stats={derivePlayerSeasonStats(games, player._id, season._id)}
           />
         ))}
       </div>

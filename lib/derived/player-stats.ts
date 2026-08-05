@@ -1,6 +1,7 @@
 import type { Game } from "../schemas";
 
 export interface PlayerSeasonStats {
+  gamesPlayed: number;
   goals: number;
   assists: number;
   points: number;
@@ -9,13 +10,15 @@ export interface PlayerSeasonStats {
   warriorOfTheGame: number;
 }
 
-// docs/03-data-model.md "Derived stats" → Player season stats: goals =
-// goals with scoredBy = player; assists = goals where player is
-// assist1/assist2; points = goals + assists; PIMs = sum of the player's own
-// penalty durations (bench penalties are a team-only total, never
-// attributed to an individual — see deriveTeamSeasonStats); award counts =
-// games in the season where the player was awarded. Fully derived from
-// Game documents on every call, never stored.
+// docs/03-data-model.md "Derived stats" → Player season stats: games played
+// = games rostered; goals = goals with scoredBy = player; assists = goals
+// where player is assist1/assist2; points = goals + assists; PIMs = sum of
+// the player's own penalty durations (bench penalties are a team-only
+// total, never attributed to an individual — see deriveTeamSeasonStats);
+// award counts = games in the season where the player was awarded. Fully
+// derived from Game documents on every call, never stored. Roster
+// membership is checked internally so callers can pass any games list,
+// not just one pre-filtered to the player.
 export function derivePlayerSeasonStats(
   games: Game[],
   playerId: string,
@@ -23,6 +26,7 @@ export function derivePlayerSeasonStats(
 ): PlayerSeasonStats {
   const seasonGames = games.filter((game) => game.seasonId === seasonId);
 
+  let gamesPlayed = 0;
   let goals = 0;
   let assists = 0;
   let pims = 0;
@@ -30,6 +34,9 @@ export function derivePlayerSeasonStats(
   let warriorOfTheGame = 0;
 
   for (const game of seasonGames) {
+    if (game.team.roster.some((entry) => entry.playerId === playerId)) {
+      gamesPlayed += 1;
+    }
     for (const goal of game.team.goals) {
       if (goal.scoredBy === playerId) goals += 1;
       if (goal.assist1 === playerId || goal.assist2 === playerId) {
@@ -44,6 +51,7 @@ export function derivePlayerSeasonStats(
   }
 
   return {
+    gamesPlayed,
     goals,
     assists,
     points: goals + assists,

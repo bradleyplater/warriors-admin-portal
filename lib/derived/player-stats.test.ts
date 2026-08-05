@@ -26,6 +26,25 @@ describe("derivePlayerSeasonStats", () => {
   it("returns all zeros when the player has no goals, assists, penalties, or awards", () => {
     const games = [game()];
     expect(derivePlayerSeasonStats(games, "PLR1", "SSN2526")).toEqual({
+      gamesPlayed: 1,
+      goals: 0,
+      assists: 0,
+      points: 0,
+      pims: 0,
+      manOfTheMatch: 0,
+      warriorOfTheGame: 0,
+    });
+  });
+
+  it("counts a rostered game toward gamesPlayed even with no goals, assists, penalties, or awards", () => {
+    const games = [game({ _id: "GME000001" }), game({ _id: "GME000002" })];
+    expect(derivePlayerSeasonStats(games, "PLR1", "SSN2526").gamesPlayed).toBe(2);
+  });
+
+  it("returns gamesPlayed 0 for a player never rostered in the season, alongside zero for every other stat", () => {
+    const games = [game()];
+    expect(derivePlayerSeasonStats(games, "PLR3", "SSN2526")).toEqual({
+      gamesPlayed: 0,
       goals: 0,
       assists: 0,
       points: 0,
@@ -146,6 +165,7 @@ describe("derivePlayerSeasonStats", () => {
     ];
 
     expect(derivePlayerSeasonStats(games, "PLR1", "SSN2526").goals).toBe(0);
+    expect(derivePlayerSeasonStats(games, "PLR1", "SSN2526").gamesPlayed).toBe(1);
   });
 
   it("moves a goal's stat from the original scorer to the new scorer when the goal is edited", () => {
