@@ -25,6 +25,18 @@ function game(overrides: Partial<Game> = {}): Game {
 describe("deriveTeamSeasonStats", () => {
   it("returns all zeros when no games have recorded goals or penalties", () => {
     expect(deriveTeamSeasonStats([game()], "SSN2526")).toEqual({
+      gamesPlayed: 1,
+      goals: 0,
+      assists: 0,
+      pims: 0,
+    });
+  });
+
+  it("returns gamesPlayed 0 for a season with no recorded games, alongside zero for every other stat", () => {
+    const games = [game({ _id: "GME000001", seasonId: "SSN2425" })];
+
+    expect(deriveTeamSeasonStats(games, "SSN2526")).toEqual({
+      gamesPlayed: 0,
       goals: 0,
       assists: 0,
       pims: 0,
@@ -67,6 +79,7 @@ describe("deriveTeamSeasonStats", () => {
     ];
 
     expect(deriveTeamSeasonStats(games, "SSN2526")).toEqual({
+      gamesPlayed: 2,
       goals: 2,
       assists: 1,
       pims: 2,
@@ -130,6 +143,8 @@ describe("deriveTeamSeasonStats", () => {
       game({ _id: "GME000002", seasonId: "SSN2526" }),
     ];
 
-    expect(deriveTeamSeasonStats(games, "SSN2526").goals).toBe(0);
+    const stats = deriveTeamSeasonStats(games, "SSN2526");
+    expect(stats.goals).toBe(0);
+    expect(stats.gamesPlayed).toBe(1);
   });
 });

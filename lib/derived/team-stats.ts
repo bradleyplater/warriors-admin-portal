@@ -1,15 +1,16 @@
 import type { Game } from "../schemas";
 
 export interface TeamSeasonStats {
+  gamesPlayed: number;
   goals: number;
   assists: number;
   pims: number;
 }
 
-// docs/03-data-model.md "Derived stats" → Team season stats: goals/assists/
-// PIMs summed across every game in the season, bench PIMs included (unlike
-// derivePlayerSeasonStats, which never attributes a bench penalty to an
-// individual).
+// docs/03-data-model.md "Derived stats" → Team season stats: games played =
+// games in season; goals/assists/PIMs summed across every game in the
+// season, bench PIMs included (unlike derivePlayerSeasonStats, which never
+// attributes a bench penalty to an individual).
 export function deriveTeamSeasonStats(
   games: Game[],
   seasonId: string,
@@ -31,5 +32,5 @@ export function deriveTeamSeasonStats(
     }
   }
 
-  return { goals, assists, pims };
+  return { gamesPlayed: seasonGames.length, goals, assists, pims };
 }

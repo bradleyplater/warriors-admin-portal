@@ -27,11 +27,19 @@ The system SHALL provide a pure function that computes, for a given player and s
 - **THEN** games played is zero, alongside zero for every other stat
 
 ### Requirement: Per-team season totals are derived from games
-The system SHALL provide a pure function that computes, for a given team and season, total goals, assists, and PIMs across all games in that season, including bench PIMs, following the same derivation source as per-player stats.
+The system SHALL provide a pure function that computes, for a given team and season, games played (count of games in the season), total goals, assists, and PIMs across all games in that season, including bench PIMs, following the same derivation source as per-player stats.
 
 #### Scenario: Team totals sum across all games in a season
 - **WHEN** multiple games have been recorded in a season with goals and penalties
 - **THEN** the team's derived totals for that season sum goals, assists, and PIMs (including bench PIMs) across all of them
+
+#### Scenario: Games played counts every game in the season
+- **WHEN** a team has games recorded in a season
+- **THEN** games played equals the number of games in that season, regardless of whether any goals or penalties were recorded in them
+
+#### Scenario: A season with no games returns all-zero totals
+- **WHEN** the derived stats function is called for a season with no recorded games
+- **THEN** games played is zero, alongside zero for goals, assists, and PIMs
 
 ### Requirement: Goal changes are reflected without special-case logic
 The system SHALL derive player and team stats fresh from the current state of `Game` documents on every computation, so that adding, editing, or deleting any goal — including changing a goal's scorer — is reflected in derived stats immediately, with no migration step or stored-value patch.
