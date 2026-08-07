@@ -80,6 +80,31 @@ describe("deriveScore", () => {
     ]);
   });
 
+  it("buckets a goal at minute 20 into P2, not P1", () => {
+    const teamGoals = [{ type: "EVEN", minute: 20 }] as const;
+
+    const score = deriveScore([...teamGoals], []);
+    expect(score.periods).toEqual([
+      { team: 0, opponent: 0 },
+      { team: 1, opponent: 0 },
+      { team: 0, opponent: 0 },
+    ]);
+  });
+
+  it("buckets a goal at minute 39 into P2 and a goal at minute 40 into P3", () => {
+    const teamGoals = [
+      { type: "EVEN", minute: 39 },
+      { type: "PP", minute: 40 },
+    ] as const;
+
+    const score = deriveScore([...teamGoals], []);
+    expect(score.periods).toEqual([
+      { team: 0, opponent: 0 },
+      { team: 1, opponent: 0 },
+      { team: 1, opponent: 0 },
+    ]);
+  });
+
   it("leaves periods with no goals at 0-0", () => {
     const teamGoals = [{ type: "EVEN", minute: 45 }] as const;
 

@@ -404,3 +404,7 @@ The system SHALL render, on `/games/[id]`, a period-by-period score breakdown de
 - **WHEN** an opponent penalty is recorded for a game, including one naming a Warriors player by coincidence of free text
 - **THEN** no rostered player's derived PIMs and no team derived PIMs for that season change, because opponent penalties are never matched against roster player ids
 
+#### Scenario: A goal at the exact start of a period buckets into that period, not the previous one
+- **WHEN** a game has a team goal at minute 20 and another at minute 39, and a team goal at minute 40
+- **THEN** `/games/[id]` shows the minute-20 and minute-39 goals both in P2, and the minute-40 goal in P3
+
