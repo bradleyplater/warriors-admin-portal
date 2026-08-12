@@ -16,11 +16,7 @@ The portal SHALL render a shared shell layout on every page, containing navigati
 - **THEN** the portal navigates to that area's page without a full-page error
 
 ### Requirement: Placeholder area pages
-The portal SHALL serve a placeholder page at `/seasons`. The placeholder MUST identify its area by name and MUST NOT present fake data or non-functional controls. `/players` is no longer a placeholder — it serves the player roster list (see the `roster-list` capability), `/players/new` serves the create-player form and `/players/[id]` serves the player profile (see the `player-management` and `player-profile` capabilities). `/games` is no longer a placeholder — it serves the season-grouped games list, `/games/new` serves the create-game form, and `/games/[id]` serves the game detail page (see the `game-management` capability).
-
-#### Scenario: Visiting an area directly by URL
-- **WHEN** a user opens `/seasons` directly in the browser
-- **THEN** a placeholder page for that area renders inside the shared shell
+`/players` is no longer a placeholder — it serves the player roster list (see the `roster-list` capability), `/players/new` serves the create-player form and `/players/[id]` serves the player profile (see the `player-management` and `player-profile` capabilities). `/games` is no longer a placeholder — it serves the season-grouped games list, `/games/new` serves the create-game form, and `/games/[id]` serves the game detail page (see the `game-management` capability). `/seasons` is no longer a placeholder — it serves the season list, and `/seasons/new` serves the create-season form.
 
 #### Scenario: Players is no longer a placeholder
 - **WHEN** a user opens `/players` directly in the browser
@@ -29,6 +25,10 @@ The portal SHALL serve a placeholder page at `/seasons`. The placeholder MUST id
 #### Scenario: Games is no longer a placeholder
 - **WHEN** a user opens `/games` directly in the browser
 - **THEN** the season-grouped games list renders inside the shared shell, not a placeholder message
+
+#### Scenario: Seasons is no longer a placeholder
+- **WHEN** a user opens `/seasons` directly in the browser
+- **THEN** the season list renders inside the shared shell, not a placeholder message
 
 ### Requirement: Home page
 The portal SHALL render a landing page at `/` inside the shared shell, identifying the application as the Warriors Admin Portal.
