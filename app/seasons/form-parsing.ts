@@ -5,7 +5,7 @@ import { SeasonCreateInputSchema, type SeasonCreateInput } from "@/lib/schemas";
 // only export async functions, and these need to be unit-testable directly.
 const SeasonYearInputSchema = z.object({
   startYear: z.coerce
-    .number({ invalid_type_error: "Start year must be a 4-digit year" })
+    .number({ error: "Start year must be a 4-digit year" })
     .int("Start year must be a 4-digit year")
     .min(2000, "Start year must be between 2000 and 2099")
     .max(2099, "Start year must be between 2000 and 2099"),
