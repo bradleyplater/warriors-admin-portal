@@ -1,0 +1,92 @@
+[
+  {
+    "id": "awards-2425",
+    "title": "Third Annual Awards Evening",
+    "season": "24/25",
+    "images": [],
+    "awards": [
+      { "tier": 1, "category": "MVP", "winner": "Bradley Plater", "playerId": "PLR502819" },
+      { "tier": 2, "category": "Captain", "winner": "Josh Turner", "playerId": "PLR030348" },
+      { "tier": 2, "category": "Alternate Captain", "winner": "Bradley Plater", "playerId": "PLR502819" },
+      { "tier": 2, "category": "Alternate Captain", "winner": "Matthew Mowbray", "playerId": "PLR053305" },
+      { "tier": 2, "category": "Managers Player of the Year", "winner": "Jacques Dickinson", "playerId": "PLR902411" },
+      { "tier": 2, "category": "Players Player", "winner": "Nick Mcfarlane", "playerId": "PLR646257" },
+      { "tier": 2, "category": "Coaches Player of the Year", "winner": "Aaron Knight", "playerId": "PLR238395" },
+      { "tier": 3, "category": "Most Goals of the Year", "winner": "Bradley Plater", "playerId": "PLR502819" },
+      { "tier": 3, "category": "Most Assists of the Year", "winner": "Bradley Plater", "playerId": "PLR502819" },
+      { "tier": 3, "category": "Most Points of the Year", "winner": "Bradley Plater", "playerId": "PLR502819" },
+      { "tier": 3, "category": "Most Consistent Forward", "winner": "Bradley Plater", "playerId": "PLR502819" },
+      { "tier": 3, "category": "Most Consistent Defenceman", "winner": "Matthew Mowbray", "playerId": "PLR053305" },
+      { "tier": 3, "category": "Best Goalie", "winner": "Konstantins Grigorjevs", "playerId": "PLR729592" },
+      { "tier": 4, "category": "Most Improved Player", "winner": "Matt Silsby", "playerId": "PLR941511" },
+      { "tier": 4, "category": "Most Improved Skating", "winner": "Dean Ruane", "playerId": "PLR763992" },
+      { "tier": 4, "category": "Most Improved Stickhandling", "winner": "Chris Jeffs", "playerId": "PLR382468" },
+      { "tier": 4, "category": "Most Improved Shooting", "winner": "Nick Foley", "playerId": "PLR992077" },
+      { "tier": 5, "category": "Best Changing Room Injury", "winner": "Jyotinder Kumar", "playerId": "PLR491823" },
+      { "tier": 5, "category": "Far Blue Line Officer", "winner": "Rhys Evans", "playerId": "PLR006500" },
+      { "tier": 5, "category": "Best No Goal Celebration", "winner": "Chris Jeffs", "playerId": "PLR382468" }
+    ]
+  },
+  {
+    "id": "awards-2324",
+    "title": "Second Annual Awards Evening",
+    "season": "23/24",
+    "images": [
+      "/images/events/awards-24/1.jpg",
+      "/images/events/awards-24/2.jpg",
+      "/images/events/awards-24/3.jpg",
+      "/images/events/awards-24/4..jpg",
+      "/images/events/awards-24/5.jpg",
+      "/images/events/awards-24/6.jpg",
+      "/images/events/awards-24/7.jpg"
+    ],
+    "awards": [
+      { "tier": 1, "category": "MVP", "winner": "Bradley Plater", "playerId": "PLR502819" },
+      { "tier": 2, "category": "Coaches Player of the Year", "winner": "Nick Mcfarlane", "playerId": "PLR646257" },
+      { "tier": 2, "category": "Managers Player of the Year", "winner": "Deane Ruane", "playerId": "PLR763992" },
+      { "tier": 2, "category": "Players Player", "winner": "Oliver McGill", "playerId": "PLR123881" },
+      { "tier": 3, "category": "Most Goals of the Year", "winner": "Charles Loew", "playerId": "PLR760594" },
+      { "tier": 3, "category": "Most Assists of the Year", "winner": "Bradley Plater", "playerId": "PLR502819" },
+      { "tier": 3, "category": "Most Points of the Year", "winner": "Rhys Evans & Charles Loew", "playerId": null },
+      { "tier": 3, "category": "Most Consistent Defender", "winner": "Joshua Turner", "playerId": "PLR030348" },
+      { "tier": 3, "category": "Most Consistent Forward", "winner": "Charles Loew", "playerId": "PLR760594" },
+      { "tier": 3, "category": "Best Goalie", "winner": "Conor Watkins", "playerId": "PLR798807" },
+      { "tier": 4, "category": "Most Improved Player", "winner": "Carlos Garret", "playerId": "PLR277435" },
+      { "tier": 4, "category": "Most Improved Skater", "winner": "Sandis Zutis", "playerId": "PLR708075" },
+      { "tier": 4, "category": "Most Improved Stickhandling", "winner": "Callum Jarvis", "playerId": "PLR883828" },
+      { "tier": 4, "category": "Most Improved Shooting", "winner": "James Donovan", "playerId": "PLR357060" },
+      { "tier": 5, "category": "Most Likely To Score An Own Goal", "winner": "Matt Heaton", "playerId": "PLR297690" },
+      { "tier": 5, "category": "Best Right Hook To Teammate", "winner": "Paul Bush", "playerId": "PLR026982" },
+      { "tier": 5, "category": "Biggest No Show", "winner": "Chris Jeffs", "playerId": "PLR382468" }
+    ]
+  },
+  {
+    "id": "awards-2223",
+    "title": "First Annual Awards Evening",
+    "season": "22/23",
+    "images": [],
+    "awards": [
+      { "tier": 1, "category": "MVP", "winner": "Konstantins Grigorjevs", "playerId": "PLR729592" },
+      { "tier": 2, "category": "Captain for 2023/24 Season", "winner": "Joshua Turner", "playerId": "PLR030348" },
+      { "tier": 2, "category": "Captain Assistant for 2023/24 Season", "winner": "Aaron Knight", "playerId": "PLR238395" },
+      { "tier": 2, "category": "Captain Assistant for 2023/24 Season", "winner": "Rhys Evans", "playerId": "PLR006500" },
+      { "tier": 2, "category": "Coaches Player of the Year", "winner": "Katie Bmx Plumb", "playerId": "PLR829708" },
+      { "tier": 2, "category": "Managers Player of the Year", "winner": "Darren Wolf", "playerId": null },
+      { "tier": 2, "category": "Players Player", "winner": "Aaron Knight", "playerId": "PLR238395" },
+      { "tier": 2, "category": "Players Player", "winner": "Josh Jt Turner", "playerId": "PLR030348" },
+      { "tier": 3, "category": "Most Goals of the Year", "winner": "Marcis Klemenss", "playerId": "PLR397024" },
+      { "tier": 3, "category": "Most Assists of the Year", "winner": "Aaron Knight", "playerId": "PLR238395" },
+      { "tier": 3, "category": "Most Consistent Defender", "winner": "Joshua Turner", "playerId": "PLR030348" },
+      { "tier": 3, "category": "Most Consistent Forward", "winner": "Marcis Klemenss", "playerId": "PLR397024" },
+      { "tier": 4, "category": "Most Improved Player", "winner": "Bradley Plater", "playerId": "PLR502819" },
+      { "tier": 4, "category": "Most Improved Skater", "winner": "Carlos Gabriel", "playerId": "PLR277435" },
+      { "tier": 4, "category": "Most Improved Stickhandling", "winner": "Joshua Turner", "playerId": "PLR030348" },
+      { "tier": 4, "category": "Most Improved Stickhandling", "winner": "Rhys Evans", "playerId": "PLR006500" },
+      { "tier": 4, "category": "Most Improved Shooting", "winner": "Rhys Evans", "playerId": "PLR006500" },
+      { "tier": 5, "category": "Biggest MK Lightning Fan", "winner": "Darren Bush", "playerId": "PLR780396" },
+      { "tier": 5, "category": "Best Attempt at Backflip", "winner": "Dean Ruane", "playerId": "PLR763992" },
+      { "tier": 5, "category": "Muffin Shot", "winner": "James Donovan", "playerId": "PLR357060" },
+      { "tier": 5, "category": "Team Enforcer", "winner": "Bradley Plater", "playerId": "PLR502819" }
+    ]
+  }
+]

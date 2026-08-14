@@ -1,0 +1,18 @@
+[
+  {
+    "opponentTeam": "Grimsby Trawlers",
+    "logoImage": "grimsby-trawlers.jpg",
+    "gameType": "BOTB",
+    "date": "2026-08-01",
+    "time": "7:00 PM",
+    "location": "Planet Ice Peterborough"
+  },
+  {
+    "opponentTeam": "Sheffield Mavericks",
+    "logoImage": "sheffield-mavericks.jpg",
+    "gameType": "LLIHC",
+    "date": "2026-08-08",
+    "time": "4:00 PM",
+    "location": "Planet Ice Peterborough"
+  }
+]

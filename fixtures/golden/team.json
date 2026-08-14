@@ -1,0 +1,44 @@
+{
+  "stats": [
+    {
+      "season": "24/25",
+      "games": 25,
+      "goalsFor": 134,
+      "pims": 243,
+      "goalsAgainst": 131,
+      "wins": 13,
+      "draws": 2,
+      "losses": 10
+    },
+    {
+      "season": "22/23",
+      "games": 17,
+      "goalsFor": 41,
+      "pims": 168,
+      "goalsAgainst": 108,
+      "wins": 3,
+      "draws": 2,
+      "losses": 12
+    },
+    {
+      "season": "23/24",
+      "games": 24,
+      "goalsFor": 102,
+      "pims": 227,
+      "goalsAgainst": 145,
+      "wins": 8,
+      "draws": 4,
+      "losses": 12
+    },
+    {
+      "season": "25/26",
+      "games": 22,
+      "goalsFor": 103,
+      "pims": 144,
+      "goalsAgainst": 71,
+      "wins": 16,
+      "draws": 2,
+      "losses": 4
+    }
+  ]
+}
