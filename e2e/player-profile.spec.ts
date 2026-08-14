@@ -42,12 +42,19 @@ test.describe("player profile", () => {
 
     // Seasons render ascending, one section per season, every seeded game
     // included (seed/data/games.ts rosters every active player in every game).
+    // The page renders a section for every season that exists, not just ones
+    // with games for this player (see create-season.spec.ts), and other spec
+    // files running in parallel may create extra seasons (e.g. "71/72") in
+    // this shared database — so only assert the seed seasons stay in order
+    // among whatever else is present, rather than requiring an exact match.
     const headings = page.getByRole("heading", { level: 3 });
-    await expect(headings).toHaveText([
-      "22/23 (2)",
-      "23/24 (2)",
-      "24/25 (3)",
-      "25/26 (3)",
-    ]);
+    const seedHeadings = ["22/23 (2)", "23/24 (2)", "24/25 (3)", "25/26 (3)"];
+    await expect(async () => {
+      const allHeadings = await headings.allTextContents();
+      const filtered = allHeadings.filter((text) =>
+        seedHeadings.includes(text),
+      );
+      expect(filtered).toEqual(seedHeadings);
+    }).toPass();
   });
 });
