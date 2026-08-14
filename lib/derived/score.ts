@@ -32,7 +32,9 @@ function shootoutGoals(goals: { type: GoalType }[]): number {
 // running-clock buckets (minute 0-19 -> P1, 20-39 -> P2, 40-59 -> P3). SO
 // goals sit outside periods entirely — they're shootout attempts, not tied
 // to game clock time.
-function periodIndexOf(minute: number): number {
+// Exported for reuse by lib/derived/game-periods.ts, which needs the same
+// boundary rule to bucket full goal/penalty objects (not just counts).
+export function periodIndexOf(minute: number): number {
   return Math.floor(minute / PERIOD_LENGTH_MINUTES);
 }
 
