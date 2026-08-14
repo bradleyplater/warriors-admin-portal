@@ -16,6 +16,7 @@
     "typecheck": "tsc --noEmit",
     "db:seed": "tsx seed/seed-cli.ts",
     "db:reset": "tsx seed/reset-cli.ts",
+    "publish:preview": "tsx lib/publish/cli.ts",
     "test:unit": "vitest run --config vitest.config.ts",
     "test:integration": "vitest run --config vitest.integration.config.ts",
     "test:e2e": "playwright test"
