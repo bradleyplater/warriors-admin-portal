@@ -38,3 +38,11 @@ export async function listPublishes(): Promise<Publishes[]> {
   const docs = await col.find().sort({ completedAt: -1 }).toArray();
   return docs.map((doc) => PublishesSchema.parse(doc));
 }
+
+// The change-detection baseline for the next publish, and the timestamp the
+// unpublished-changes indicator compares against (see docs/02-architecture.md).
+export async function getLatestSuccessfulPublish(): Promise<Publishes | null> {
+  const col = await collection();
+  const doc = await col.findOne({ status: "success" }, { sort: { completedAt: -1 } });
+  return doc ? PublishesSchema.parse(doc) : null;
+}
