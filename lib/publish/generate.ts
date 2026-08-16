@@ -30,6 +30,12 @@ export function generateAllArtifacts(
   };
 }
 
+// Shared by disk preview (writeArtifacts) and S3 upload/checksumming
+// (lib/publish/run.ts), so both operate on byte-identical content.
+export function serializeArtifact(content: unknown): string {
+  return `${JSON.stringify(content, null, 2)}\n`;
+}
+
 export async function writeArtifacts(
   artifacts: GeneratedArtifacts,
   outputDir: string,
@@ -39,7 +45,7 @@ export async function writeArtifacts(
   const paths: string[] = [];
   for (const [file, content] of Object.entries(artifacts)) {
     const path = join(outputDir, file);
-    await writeFile(path, `${JSON.stringify(content, null, 2)}\n`, "utf-8");
+    await writeFile(path, serializeArtifact(content), "utf-8");
     paths.push(path);
   }
   return paths;
