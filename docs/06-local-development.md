@@ -59,3 +59,4 @@ Swap `MONGODB_URI` (and the S3 values) for the production ones and the same buil
 | `npm run test:e2e` / `test:e2e:ui` | Playwright headless / UI mode |
 | `npm run migrate -- --dry-run` | Migration scripts in dry-run |
 | `npm run publish:preview` | Generate JSON artifacts locally without uploading |
+| `npm run publish:run` | Run the full publish pipeline against the configured S3 bucket (MinIO locally) |
