@@ -30,8 +30,9 @@ blob-report/
 dumps/
 backups/
 
-# Generated publish artifacts (local previews)
-artifacts/
+# Generated publish artifacts (local previews) — root-anchored so it
+# doesn't also swallow lib/publish/artifacts/, the generator source.
+/artifacts/
 
 # Logs
 *.log

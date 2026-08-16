@@ -64,6 +64,8 @@ One Next.js (App Router) full-stack application. The server talks directly to Mo
 5. A `Publishes` document records when, what changed, and the checksums.
 6. CDN invalidation for changed paths (if a CDN is in front of the bucket).
 
+**Steps 2–3, KAN-30:** `lib/publish/artifacts/` generates four of the six golden-fixture artifacts from current data — `players.json`, `roster-config.json`, `team.json`, `results.json`. `npm run publish:preview` (`lib/publish/cli.ts`) runs generation alone, writing to the git-ignored `artifacts/` directory with no upload — useful for reviewing output before steps 4–6 (KAN-31) exist. `awards.json` (awards-evening ceremonies) and `upcoming-games.json` (scheduled future games), plus `results.json`'s `opponentTeam.logoImage`, are **not generated** — no collection backs any of the three yet; each needs its own data model before it can be published. Since the shared dev seed data is fictional, generated output is verified for *shape* conformance against Zod schemas in `lib/publish/schemas.ts` (also validated against the golden fixture files themselves), not byte-for-byte fixture values — true byte parity is checked later, against real data, at the [migration plan](04-migration-plan.md)'s publish-parity step.
+
 **Unpublished-changes indicator:** every write stamps `updatedAt` on the affected document. The indicator shows when `max(updatedAt across collections) > lastPublish.completedAt`. This is cheap (one indexed query per collection) and cannot false-negative.
 
 ## Configuration

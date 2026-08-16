@@ -188,7 +188,7 @@ Used by the old export system. Untouched during migration; deleted when the old 
 All computed from `Game` documents — never stored as editable data:
 
 - **Player season stats:** games played = rostered games in season; goals = goals with `scoredBy` = player; assists = goals where player is `assist1`/`assist2`; points = goals + assists; PIMs = Σ `duration` of their penalties; `manOfTheMatch` / `warriorOfTheGame` = count of games where awarded.
-- **Team season stats:** games played = games in season; goals/assists/PIMs = team totals across games (bench PIMs included).
+- **Team season stats:** games played = games in season; goals/assists/PIMs = team totals across games (bench PIMs included); goalsFor/goalsAgainst/wins/draws/losses = per-game `Score` totals (see below) summed and classified across the season — a shootout win counts as a win, not a draw.
 - **Score:** team total = non-SO goals (+1 to the shootout winner if SO goals exist); same for opponent. Periods: goals bucketed by 20-minute running-clock periods (minute 0–19:59 → P1, 20–39:59 → P2, 40–59:59 → P3). Verified against sampled historical games; the migration reconciliation ([04](04-migration-plan.md)) validates it against **all** 85 stored scores before the stored field is dropped.
 
 ## Indexes
