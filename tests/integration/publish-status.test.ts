@@ -5,7 +5,6 @@ import { getPublishStatus } from "../../lib/publish/status";
 import {
   createPlayer,
   createSeason,
-  createPublish,
   getTheTeam,
   updatePlayer,
   updateTeam,
@@ -17,6 +16,14 @@ import type { Player, PlayerCreateInput } from "../../lib/schemas";
 // Verifies the indicator across every entity type named in KAN-32's
 // acceptance criteria: players, games (via the shared seed data already in
 // the dev database), seasons, and team.
+//
+// Every test establishes its own baseline via a real runPublish() rather
+// than fabricating a Publishes document with an arbitrary timestamp: other
+// integration test files run concurrently against this same database (see
+// publish-run.test.ts), and a fabricated "latest successful publish" would
+// win getLatestSuccessfulPublish's sort for whichever test reads it next,
+// corrupting an unrelated file's baseline. A real runPublish() always
+// reflects genuinely-current data, so it can't do that.
 describe("getPublishStatus", () => {
   const createdPlayerIds: string[] = [];
   const createdSeasonIds: string[] = [];
@@ -65,22 +72,6 @@ describe("getPublishStatus", () => {
     }
   });
 
-  // Seeds a deliberately-wrong "last successful publish" far enough in the
-  // future to always win getLatestSuccessfulPublish's sort, giving every
-  // test in this file a known, changes-are-published starting point
-  // regardless of whatever real publish history already exists in the
-  // shared dev database — same technique as publish-run.test.ts.
-  async function seedFutureBaseline(): Promise<void> {
-    const at = Date.now() + 1000 * 60 * 60 * 24 * 365 * 55;
-    const bogus = await createPublish({
-      startedAt: new Date(at),
-      completedAt: new Date(at + 1_000),
-      artifacts: [],
-      status: "success",
-    });
-    createdPublishIds.push(bogus._id);
-  }
-
   it("has no unpublished changes right after a successful publish", async () => {
     const publish = await runPublish();
     createdPublishIds.push(publish._id);
@@ -90,7 +81,8 @@ describe("getPublishStatus", () => {
   });
 
   it("flags unpublished changes when a player is created after the last publish", async () => {
-    await seedFutureBaseline();
+    const publish = await runPublish();
+    createdPublishIds.push(publish._id);
 
     await createTestPlayer();
 
@@ -112,7 +104,8 @@ describe("getPublishStatus", () => {
   });
 
   it("flags unpublished changes when a season is created after the last publish", async () => {
-    await seedFutureBaseline();
+    const publish = await runPublish();
+    createdPublishIds.push(publish._id);
 
     const season = await createSeason({ name: "41/42" });
     createdSeasonIds.push(season._id);
@@ -137,7 +130,9 @@ describe("getPublishStatus", () => {
   });
 
   it("clears after publishing the changes", async () => {
-    await seedFutureBaseline();
+    const firstPublish = await runPublish();
+    createdPublishIds.push(firstPublish._id);
+
     await createTestPlayer();
     expect((await getPublishStatus()).hasUnpublishedChanges).toBe(true);
 
