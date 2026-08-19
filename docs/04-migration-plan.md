@@ -2,7 +2,7 @@
 
 How the existing `HockeyTracker` data moves to the target shape in [03 — Data Model](03-data-model.md) **without corrupting anything**. The guiding rules:
 
-1. **Backup before every mutating step** (`mongodump`, timestamped, kept until decommission).
+1. **Backup before every mutating step** (`npm run backup:run`, timestamped, kept until decommission — see Step 0 below).
 2. **Additive first, destructive last.** New fields are added alongside old ones; old fields are only dropped after the new system has proven parity.
 3. **Every script is idempotent and has a dry-run mode** that prints what it *would* change.
 4. **Nothing is overwritten without sign-off.** Discrepancies are reported, and you approve each resolution.
@@ -25,13 +25,14 @@ Also known going in: 8 position spellings to normalise; 14 players with numbers 
 
 ### Step 0 — Freeze & capture
 
-- Full `mongodump` of `HockeyTracker`.
+- Full backup of `HockeyTracker` via `npm run backup:run` (KAN-33): every collection — including legacy ones no repository model knows about, e.g. `ApiKeys` — is dumped to S3 under a timestamped `backups/<timestamp>/` prefix, one EJSON object per collection plus a manifest. Restore with `npm run backup:restore -- --prefix=<timestamp>` (refuses a non-local target unless `--allow-remote` is passed). `tests/integration/backup-restore.test.ts` proves the round trip on every CI run.
 - Capture the current website JSON files from the website repo as **golden fixtures** (checked into this repo under `fixtures/golden/`). These define the publish contract.
+- **Known gap:** confirming the old admin services tolerate Step 1's additive fields on a staging copy can't happen until [KAN-34](https://bradleyplater.atlassian.net/browse/KAN-34) (the additive migration script) exists — the old services also aren't part of this repo, so that verification is a manual step taken once KAN-34 ships, not something proven here.
 - From this point, data entry continues in the old system as normal — migration scripts are re-runnable, so we re-execute them at cutover against fresh data.
 
 ### Step 1 — Additive schema migration (no data loss possible)
 
-Script `migrate-01-additive`:
+Starts with `npm run backup:run` (principle 1). Script `migrate-01-additive`:
 
 - `Player`: add `positions` (parsed from `position`), `number` + `teamId` (lifted from `teams[0]`), `createdAt`/`updatedAt`. Old `position`, `teams`, `stats` remain untouched.
 - `Game`: add normalised `type` casing (`challenge` → `CHALLENGE`) — written to the same field only after dry-run review, since it's a value normalisation, not a structural change. Add audit timestamps.
@@ -72,6 +73,7 @@ The gate: **reconciliation must run clean (all mismatches resolved) before cutov
 
 ### Step 4 — Cutover
 
+- `npm run backup:run` first (principle 1).
 - Re-run Steps 1–3 against the final data snapshot (scripts are idempotent).
 - Data entry in the old system stops.
 - The portal becomes the write path. It reads/writes only the new fields.
@@ -87,7 +89,7 @@ The gate: **reconciliation must run clean (all mismatches resolved) before cutov
 
 After an agreed bedding-in period with the new system live:
 
-- Script `migrate-06-cleanup` drops the frozen legacy fields (fresh backup first).
+- `npm run backup:run` first (principle 1), then script `migrate-06-cleanup` drops the frozen legacy fields.
 - `ApiKeys` collection deleted.
 - Old admin services decommissioned.
 
@@ -95,9 +97,9 @@ After an agreed bedding-in period with the new system live:
 
 | Failure point | Rollback |
 |---|---|
-| Steps 1–3 | Nothing destructive has happened; old system still primary. Restore from dump only if additive fields somehow cause trouble (they shouldn't — old system ignores unknown fields; verify this assumption on a staging copy first). |
+| Steps 1–3 | Nothing destructive has happened; old system still primary. `npm run backup:restore` from the Step 1 backup only if additive fields somehow cause trouble (they shouldn't — old system ignores unknown fields; verify this assumption on a staging copy first — see Step 0's known gap). |
 | Step 4–5 | Old fields are frozen but intact and the old services still exist — point the website back at the repo JSON and resume the old workflow. |
-| Step 6 | Timestamped dumps retained; restore restores everything. |
+| Step 6 | Timestamped backups retained; `npm run backup:restore` restores everything. |
 
 ## Testing the migration itself
 

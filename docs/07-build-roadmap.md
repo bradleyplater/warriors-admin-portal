@@ -4,11 +4,11 @@ Phased so that every phase ends with something verifiable, and the risky/destruc
 
 ## Phase 0 — Contract capture & safety net
 
-- Full `mongodump` backup of production.
+- Full backup of production via `npm run backup:run` (KAN-33) — every collection dumped to S3 under a timestamped prefix, restore proven with `npm run backup:restore` against a local copy.
 - Copy the current website JSON files out of the website repo into `fixtures/golden/` — this defines the publish contract.
-- Confirm on a staging copy that the old system tolerates the additive fields from migration Step 1.
+- Confirm on a staging copy that the old system tolerates the additive fields from migration Step 1 — **deferred**: this needs the additive migration script (Phase 6 / KAN-34) to exist first, so it happens once that ships, not in Phase 0.
 
-**Exit:** golden fixtures committed; backup stored; additive-safety confirmed.
+**Exit:** golden fixtures committed; backup tooling proven; additive-safety confirmation tracked as a Phase 6 follow-up.
 
 ## Phase 1 — Scaffold
 

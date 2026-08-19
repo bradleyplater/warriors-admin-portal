@@ -60,3 +60,5 @@ Swap `MONGODB_URI` (and the S3 values) for the production ones and the same buil
 | `npm run migrate -- --dry-run` | Migration scripts in dry-run |
 | `npm run publish:preview` | Generate JSON artifacts locally without uploading |
 | `npm run publish:run` | Run the full publish pipeline against the configured S3 bucket (MinIO locally) |
+| `npm run backup:run` | Back up every collection in the configured DB to S3 (MinIO locally) under a timestamped prefix |
+| `npm run backup:restore -- --prefix=<ts>` | Restore a backup prefix into the configured DB; refuses a non-local target unless `--allow-remote` is passed |
