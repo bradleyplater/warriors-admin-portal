@@ -48,3 +48,16 @@ export async function listSeasons(): Promise<Season[]> {
   const docs = await col.find().toArray();
   return docs.map((doc) => SeasonSchema.parse(doc));
 }
+
+// The unpublished-changes indicator's per-collection freshness check (see
+// docs/02-architecture.md#the-publish-pipeline) — served by the
+// { updatedAt: -1 } index in internal/indexes.ts.
+export async function getSeasonsLatestUpdatedAt(): Promise<Date | null> {
+  const col = await collection();
+  const [doc] = await col
+    .find()
+    .sort({ updatedAt: -1 })
+    .limit(1)
+    .toArray();
+  return doc?.updatedAt ?? null;
+}

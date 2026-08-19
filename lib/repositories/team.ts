@@ -27,6 +27,19 @@ export async function getTheTeam(): Promise<Team | null> {
   return doc ? TeamSchema.parse(doc) : null;
 }
 
+// The unpublished-changes indicator's per-collection freshness check (see
+// docs/02-architecture.md#the-publish-pipeline) — served by the
+// { updatedAt: -1 } index in internal/indexes.ts.
+export async function getTeamLatestUpdatedAt(): Promise<Date | null> {
+  const col = await collection();
+  const [doc] = await col
+    .find()
+    .sort({ updatedAt: -1 })
+    .limit(1)
+    .toArray();
+  return doc?.updatedAt ?? null;
+}
+
 export async function updateTeam(
   id: string,
   input: TeamUpdateInput,

@@ -1,7 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Geist, Geist_Mono } from "next/font/google";
+import { PublishBar } from "./publish/PublishBar";
 import "./globals.css";
+
+// PublishStatus (rendered via PublishBar below) reads the database on
+// every request, same reasoning as the force-dynamic pages under
+// app/{games,players,seasons} — without it Next would statically
+// prerender the shell and freeze the indicator to build time.
+export const dynamic = "force-dynamic";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -51,7 +58,7 @@ export default function RootLayout({
                 </Link>
               ))}
             </nav>
-            {/* Publish status / unpublished-changes indicator lands here (KAN-32). */}
+            <PublishBar />
           </div>
         </header>
         <main className="mx-auto w-full max-w-5xl flex-1 px-6 py-10">
