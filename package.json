@@ -18,6 +18,8 @@
     "db:reset": "tsx seed/reset-cli.ts",
     "publish:preview": "tsx lib/publish/cli.ts",
     "publish:run": "tsx lib/publish/run-cli.ts",
+    "backup:run": "tsx lib/backup/run-cli.ts",
+    "backup:restore": "tsx lib/backup/restore-cli.ts",
     "test:unit": "vitest run --config vitest.config.ts",
     "test:integration": "vitest run --config vitest.integration.config.ts",
     "test:e2e": "playwright test"
