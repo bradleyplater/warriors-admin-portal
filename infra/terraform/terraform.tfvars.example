@@ -1,0 +1,7 @@
+aws_region         = "eu-west-2"
+bucket_name        = "warriors-admin-portal-prod"   # must be globally unique — change if taken
+budget_alert_email = "you@example.com"
+
+# Optional overrides (defaults shown):
+# backup_retention_days = 90
+# budget_limit_usd      = "1"

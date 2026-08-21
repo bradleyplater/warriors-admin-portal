@@ -49,3 +49,12 @@ Thumbs.db
 .vercel
 *.tsbuildinfo
 *.pem
+
+# Terraform (infra/terraform/terraform.tfstate holds the IAM secret access
+# key in plaintext — never commit state or real tfvars). .terraform.lock.hcl
+# IS committed on purpose — it pins provider versions.
+.terraform/
+*.tfstate
+*.tfstate.*
+terraform.tfvars
+*.auto.tfvars
