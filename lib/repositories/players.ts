@@ -9,10 +9,11 @@ import {
 import { stampCreate, stampUpdate } from "./internal/audit";
 import { generateTopLevelId, isDuplicateKeyErrorForField } from "./internal/ids";
 import { DuplicateShirtNumberError, NotFoundError } from "./internal/errors";
+import { COLLECTION_NAMES } from "./internal/collections";
 
 async function collection() {
   const db = await getDb();
-  return db.collection<Player>("players");
+  return db.collection<Player>(COLLECTION_NAMES.player);
 }
 
 export async function createPlayer(input: PlayerCreateInput): Promise<Player> {

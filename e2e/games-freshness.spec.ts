@@ -48,7 +48,7 @@ test.describe("games and games/new reflect data created after server start", () 
       ).toHaveCount(1);
     } finally {
       const db = await getDb();
-      await db.collection<{ _id: string }>("seasons").deleteOne({ _id: season._id });
+      await db.collection<{ _id: string }>("Seasons").deleteOne({ _id: season._id });
     }
   });
 

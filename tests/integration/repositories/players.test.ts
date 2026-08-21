@@ -125,7 +125,7 @@ describe("players repository", () => {
   it("retries id generation against a real MongoDB duplicate _id error", async () => {
     const db = await getDb();
     const collidingId = "PLR000123";
-    await db.collection<RawDoc>("players").insertOne({
+    await db.collection<RawDoc>("Player").insertOne({
       _id: collidingId,
       ...testPlayerInput({ number: 92 }),
       createdAt: new Date(),

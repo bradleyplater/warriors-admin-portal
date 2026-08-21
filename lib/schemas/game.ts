@@ -57,10 +57,18 @@ function checkGoalRules(goal: GoalLike, ctx: z.RefinementCtx) {
   }
 }
 
+// Real legacy game data stores "no assist" as an empty string rather than
+// omitting the field — without this, checkGoalRules and checkGameRefs both
+// misread "" as a real (invalid) assist value ("must be on the roster",
+// "must be two different players") for the common case of a goal with no
+// second (or no) assist recorded.
+const emptyStringToUndefined = (value: unknown) =>
+  value === "" ? undefined : value;
+
 const GoalBaseShape = {
   scoredBy: z.string(), // playerId — checked against roster at the Game level
-  assist1: z.string().optional(),
-  assist2: z.string().optional(),
+  assist1: z.preprocess(emptyStringToUndefined, z.string().optional()),
+  assist2: z.preprocess(emptyStringToUndefined, z.string().optional()),
   minute: z.number().int().min(0),
   second: SecondSchema,
   type: GoalTypeSchema,

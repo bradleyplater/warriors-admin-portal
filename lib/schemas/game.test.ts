@@ -142,6 +142,13 @@ describe("GameSchema", () => {
     expect(GameSchema.safeParse(game).success).toBe(false);
   });
 
+  it("treats empty-string assist1/assist2 as no assist (real legacy data convention)", () => {
+    const game = baseGame();
+    game.team.goals[0].assist1 = "";
+    game.team.goals[0].assist2 = "";
+    expect(GameSchema.safeParse(game).success).toBe(true);
+  });
+
   it("rejects assist2 without assist1", () => {
     const game = baseGame();
     game.team.goals[0].assist1 = undefined;

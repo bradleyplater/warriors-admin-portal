@@ -2,14 +2,16 @@ import type { Db, Document } from "mongodb";
 import { getDb } from "../../mongodb";
 import { mapLegacyPosition } from "./position-mapping";
 import { GameTypeSchema } from "../../schemas/enums";
+import { COLLECTION_NAMES } from "../../repositories/internal/collections";
 
-export type MigrationCollectionName = "players" | "games" | "team" | "seasons";
+export type MigrationCollectionName =
+  (typeof COLLECTION_NAMES)[keyof typeof COLLECTION_NAMES];
 
 const COLLECTIONS: MigrationCollectionName[] = [
-  "players",
-  "games",
-  "team",
-  "seasons",
+  COLLECTION_NAMES.player,
+  COLLECTION_NAMES.game,
+  COLLECTION_NAMES.team,
+  COLLECTION_NAMES.seasons,
 ];
 
 export interface AdditivePatch {
@@ -40,7 +42,7 @@ export function computeAdditivePatch(
     patch.updatedAt = now;
   }
 
-  if (collection === "players") {
+  if (collection === COLLECTION_NAMES.player) {
     if (doc.positions === undefined) {
       if (typeof doc.position !== "string") {
         return {
@@ -75,7 +77,7 @@ export function computeAdditivePatch(
     }
   }
 
-  if (collection === "games" && typeof doc.type === "string") {
+  if (collection === COLLECTION_NAMES.game && typeof doc.type === "string") {
     const normalised = doc.type.toUpperCase();
     if (normalised !== doc.type) {
       if (!GameTypeSchema.safeParse(normalised).success) {
@@ -141,7 +143,7 @@ async function migrateCollection(
 
 // Migration Plan Step 1 (docs/04-migration-plan.md): additively backfills
 // Player.positions/teamId/number, normalises Game.type casing, and backfills
-// createdAt/updatedAt across players/games/team/seasons. Never touches or
+// createdAt/updatedAt across Player/Game/Team/Seasons. Never touches or
 // removes any legacy field. dryRun: true computes and reports every intended
 // change without writing anything.
 export async function runAdditiveMigration({

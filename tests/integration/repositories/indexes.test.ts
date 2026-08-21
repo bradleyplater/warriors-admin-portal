@@ -7,7 +7,7 @@ describe("ensureIndexes", () => {
     const db = await getDb();
     await ensureIndexes(db);
 
-    const indexes = await db.collection("players").indexes();
+    const indexes = await db.collection("Player").indexes();
     const numberIndex = indexes.find((index) => index.key?.number === 1);
     expect(numberIndex?.unique).toBe(true);
     expect(numberIndex?.partialFilterExpression).toEqual({ active: true });
@@ -16,11 +16,11 @@ describe("ensureIndexes", () => {
   it("is idempotent — calling it twice does not error or duplicate indexes", async () => {
     const db = await getDb();
     await ensureIndexes(db);
-    const before = await db.collection("players").indexes();
+    const before = await db.collection("Player").indexes();
 
     await expect(ensureIndexes(db)).resolves.toBeUndefined();
 
-    const after = await db.collection("players").indexes();
+    const after = await db.collection("Player").indexes();
     expect(after.length).toBe(before.length);
   });
 
@@ -30,7 +30,7 @@ describe("ensureIndexes", () => {
     await runSeed();
 
     const db = await getDb();
-    const indexes = await db.collection("players").indexes();
+    const indexes = await db.collection("Player").indexes();
     const numberIndex = indexes.find((index) => index.key?.number === 1);
     expect(numberIndex?.unique).toBe(true);
   });

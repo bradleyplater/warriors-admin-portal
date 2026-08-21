@@ -2,6 +2,7 @@ import { getDb } from "../mongodb";
 import { TeamSchema, type Team, type TeamCreateInput } from "../schemas";
 import { stampUpdate } from "./internal/audit";
 import { NotFoundError } from "./internal/errors";
+import { COLLECTION_NAMES } from "./internal/collections";
 
 // No `create` here — there is exactly one Team document, created once via
 // seed/migration; the PRD excludes multi-team support (see design.md).
@@ -9,7 +10,7 @@ type TeamUpdateInput = Partial<TeamCreateInput>;
 
 async function collection() {
   const db = await getDb();
-  return db.collection<Team>("team");
+  return db.collection<Team>(COLLECTION_NAMES.team);
 }
 
 export async function getTeam(id: string): Promise<Team | null> {

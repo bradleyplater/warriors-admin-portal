@@ -16,6 +16,7 @@ import {
   RosterPlayerReferencedError,
   type BlockedRosterPlayer,
 } from "./internal/errors";
+import { COLLECTION_NAMES } from "./internal/collections";
 
 export interface GameUpdateInput {
   date?: Date;
@@ -55,7 +56,7 @@ function applyAwardPatch(
 
 async function collection() {
   const db = await getDb();
-  return db.collection<Game>("games");
+  return db.collection<Game>(COLLECTION_NAMES.game);
 }
 
 // Assigns a fresh, game-scoped id to each item in `items` (embedded goal/
