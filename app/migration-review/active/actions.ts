@@ -1,9 +1,9 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { z } from "zod";
-import { updatePlayer, DuplicateShirtNumberError } from "@/lib/repositories";
+import { updatePlayer } from "@/lib/repositories";
 import type { ActiveReviewRowState } from "./form-state";
+import { describeActiveReviewSaveError } from "./error-messages";
 
 export async function setPlayerActiveAction(
   playerId: string,
@@ -18,20 +18,11 @@ export async function setPlayerActiveAction(
   try {
     await updatePlayer(playerId, { active: raw === "true" });
   } catch (error) {
-    if (error instanceof DuplicateShirtNumberError) {
-      return { error: error.message };
+    const message = describeActiveReviewSaveError(error);
+    if (message === undefined) {
+      throw error;
     }
-    // Step 2 assumes Step 1 (the additive migration, KAN-34) already ran for
-    // every player — if positions/number/teamId are still missing, the
-    // resulting document fails PlayerSchema.parse inside updatePlayer().
-    // Surface that as a row-level message instead of a 500.
-    if (error instanceof z.ZodError) {
-      return {
-        error:
-          "This player's record is missing required migration data — run the additive migration first.",
-      };
-    }
-    throw error;
+    return { error: message };
   }
 
   revalidatePath("/migration-review/active");
