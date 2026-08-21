@@ -11,9 +11,25 @@ if (!envFile || command.length === 0) {
   process.exit(1);
 }
 
+// A real MONGODB_URI embeds a password in its userinfo (mongodb[+srv]://
+// user:pass@host/...) — never print that verbatim, this line's whole job
+// is to be safe to paste into a chat transcript or CI log.
+function maskMongoUri(uri) {
+  if (!uri) {
+    return "(unset)";
+  }
+  try {
+    const url = new URL(uri);
+    const userinfo = url.username ? `${url.username}:***@` : "";
+    return `${url.protocol}//${userinfo}${url.host}${url.pathname}${url.search}`;
+  } catch {
+    return "(set — unparseable as a URL, value withheld)";
+  }
+}
+
 process.loadEnvFile(envFile);
 console.log(
-  `[with-env] loaded ${envFile} — S3_BUCKET=${process.env.S3_BUCKET} S3_ENDPOINT=${process.env.S3_ENDPOINT || "(unset)"} MONGODB_URI=${process.env.MONGODB_URI}`,
+  `[with-env] loaded ${envFile} — S3_BUCKET=${process.env.S3_BUCKET} S3_ENDPOINT=${process.env.S3_ENDPOINT || "(unset)"} MONGODB_URI=${maskMongoUri(process.env.MONGODB_URI)}`,
 );
 
 // A single joined string (not a file+args array) is required with
