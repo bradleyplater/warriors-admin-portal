@@ -50,7 +50,7 @@ describe("active-flags migration review", () => {
 
   async function insertFixtures(seasonId: string): Promise<void> {
     const db = await getDb();
-    await col(db, "players").insertMany([
+    await col(db, "Player").insertMany([
       {
         _id: reviewedPlayerId,
         firstName: "Already",
@@ -84,7 +84,7 @@ describe("active-flags migration review", () => {
         // no `number`, no `active` — Step 1 somehow incomplete for this doc
       },
     ]);
-    await col(db, "games").insertOne({
+    await col(db, "Game").insertOne({
       _id: gameId,
       seasonId,
       date: new Date(),
@@ -105,10 +105,10 @@ describe("active-flags migration review", () => {
   afterEach(async () => {
     const db = await getDb();
     await Promise.all([
-      col(db, "players").deleteMany({ _id: { $in: playerIds } }),
-      col(db, "games").deleteOne({ _id: gameId }),
+      col(db, "Player").deleteMany({ _id: { $in: playerIds } }),
+      col(db, "Game").deleteOne({ _id: gameId }),
       createdSeasonId
-        ? col(db, "seasons").deleteOne({ _id: createdSeasonId })
+        ? col(db, "Seasons").deleteOne({ _id: createdSeasonId })
         : Promise.resolve(),
     ]);
     createdSeasonId = undefined;
@@ -173,7 +173,7 @@ describe("active-flags migration review", () => {
     // unreviewedPlayerId has number 91; give it the same number as the
     // already-active reviewedPlayerId (90) to force a collision on save.
     const db = await getDb();
-    await col(db, "players").updateOne(
+    await col(db, "Player").updateOne(
       { _id: unreviewedPlayerId },
       { $set: { number: 90 } },
     );

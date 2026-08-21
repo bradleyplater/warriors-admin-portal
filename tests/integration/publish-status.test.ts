@@ -57,12 +57,12 @@ describe("getPublishStatus", () => {
     const db = await getDb();
     if (createdPlayerIds.length > 0) {
       await db
-        .collection<{ _id: string }>("players")
+        .collection<{ _id: string }>("Player")
         .deleteMany({ _id: { $in: createdPlayerIds.splice(0) } });
     }
     if (createdSeasonIds.length > 0) {
       await db
-        .collection<{ _id: string }>("seasons")
+        .collection<{ _id: string }>("Seasons")
         .deleteMany({ _id: { $in: createdSeasonIds.splice(0) } });
     }
     if (createdPublishIds.length > 0) {

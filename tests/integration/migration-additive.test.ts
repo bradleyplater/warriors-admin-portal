@@ -48,7 +48,7 @@ describe("runAdditiveMigration", () => {
 
   async function insertFixtures(): Promise<void> {
     const db = await getDb();
-    await col(db, "players").insertMany(
+    await col(db, "Player").insertMany(
       legacyPlayers.map((player) => ({
         _id: player._id,
         firstName: player.firstName,
@@ -57,24 +57,24 @@ describe("runAdditiveMigration", () => {
         teams: player.teams,
       })),
     );
-    await col(db, "games").insertMany([
+    await col(db, "Game").insertMany([
       { _id: gameIds[0], seasonId, type: "challenge" },
       { _id: gameIds[1], seasonId, type: "BOTBC" },
     ]);
-    await col(db, "team").insertOne({
+    await col(db, "Team").insertOne({
       _id: teamDocId,
       name: "Legacy Fixture Team",
     });
-    await col(db, "seasons").insertOne({ _id: seasonId, name: "KA/N3" });
+    await col(db, "Seasons").insertOne({ _id: seasonId, name: "KA/N3" });
   }
 
   afterEach(async () => {
     const db = await getDb();
     await Promise.all([
-      col(db, "players").deleteMany({ _id: { $in: playerIds } }),
-      col(db, "games").deleteMany({ _id: { $in: gameIds } }),
-      col(db, "team").deleteOne({ _id: teamDocId }),
-      col(db, "seasons").deleteOne({ _id: seasonId }),
+      col(db, "Player").deleteMany({ _id: { $in: playerIds } }),
+      col(db, "Game").deleteMany({ _id: { $in: gameIds } }),
+      col(db, "Team").deleteOne({ _id: teamDocId }),
+      col(db, "Seasons").deleteOne({ _id: seasonId }),
     ]);
   });
 
@@ -83,7 +83,7 @@ describe("runAdditiveMigration", () => {
 
     const summary = await runAdditiveMigration({ dryRun: true });
 
-    const players = summary.collections.find((c) => c.name === "players")!;
+    const players = summary.collections.find((c) => c.name === "Player")!;
     for (const player of legacyPlayers) {
       const change = players.changes.find((c) => c.id === player._id);
       expect(change).toBeDefined();
@@ -94,12 +94,12 @@ describe("runAdditiveMigration", () => {
       });
     }
 
-    const games = summary.collections.find((c) => c.name === "games")!;
+    const games = summary.collections.find((c) => c.name === "Game")!;
     const challengeChange = games.changes.find((c) => c.id === gameIds[0]);
     expect(challengeChange?.patch).toMatchObject({ type: "CHALLENGE" });
 
     const db = await getDb();
-    const untouched = await col(db, "players").findOne({
+    const untouched = await col(db, "Player").findOne({
       _id: playerIds[0],
     });
     expect(untouched?.positions).toBeUndefined();
@@ -113,7 +113,7 @@ describe("runAdditiveMigration", () => {
 
     const db = await getDb();
     for (const player of legacyPlayers) {
-      const doc = await col(db, "players").findOne({ _id: player._id });
+      const doc = await col(db, "Player").findOne({ _id: player._id });
       expect(doc?.positions).toEqual(player.expectedPositions);
       expect(doc?.teamId).toBe(TEAM_ID);
       expect(typeof doc?.number).toBe("number");
@@ -124,20 +124,20 @@ describe("runAdditiveMigration", () => {
       expect(doc?.teams).toEqual(player.teams);
     }
 
-    const challengeGame = await col(db, "games").findOne({ _id: gameIds[0] });
+    const challengeGame = await col(db, "Game").findOne({ _id: gameIds[0] });
     expect(challengeGame?.type).toBe("CHALLENGE");
     expect(challengeGame?.createdAt).toBeInstanceOf(Date);
 
-    const alreadyCasedGame = await col(db, "games").findOne({
+    const alreadyCasedGame = await col(db, "Game").findOne({
       _id: gameIds[1],
     });
     expect(alreadyCasedGame?.type).toBe("BOTBC");
 
-    const team = await col(db, "team").findOne({ _id: teamDocId });
+    const team = await col(db, "Team").findOne({ _id: teamDocId });
     expect(team?.createdAt).toBeInstanceOf(Date);
     expect(team?.updatedAt).toBeInstanceOf(Date);
 
-    const season = await col(db, "seasons").findOne({ _id: seasonId });
+    const season = await col(db, "Seasons").findOne({ _id: seasonId });
     expect(season?.createdAt).toBeInstanceOf(Date);
     expect(season?.updatedAt).toBeInstanceOf(Date);
   });
@@ -153,7 +153,7 @@ describe("runAdditiveMigration", () => {
     expect(firstChangedTotal).toBeGreaterThan(0);
 
     const db = await getDb();
-    const afterFirstRun = await col(db, "players").findOne({
+    const afterFirstRun = await col(db, "Player").findOne({
       _id: playerIds[0],
     });
 
@@ -167,7 +167,7 @@ describe("runAdditiveMigration", () => {
       expect(collection.errors).toHaveLength(0);
     }
 
-    const afterSecondRun = await col(db, "players").findOne({
+    const afterSecondRun = await col(db, "Player").findOne({
       _id: playerIds[0],
     });
     // createdAt must not have been re-stamped on the second run.

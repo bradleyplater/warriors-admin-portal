@@ -1,5 +1,6 @@
 import { getDb } from "../../mongodb";
 import { listGames, listSeasons } from "../../repositories";
+import { COLLECTION_NAMES } from "../../repositories/internal/collections";
 import type { Game, Season } from "../../schemas";
 
 export interface ActiveReviewPlayer {
@@ -85,7 +86,7 @@ export async function listPlayersForActiveReview(): Promise<
     listGames(),
   ]);
   const docs = await db
-    .collection<RawPlayerDoc>("players")
+    .collection<RawPlayerDoc>(COLLECTION_NAMES.player)
     .find({})
     .toArray();
 

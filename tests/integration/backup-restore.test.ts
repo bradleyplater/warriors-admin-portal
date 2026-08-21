@@ -44,7 +44,7 @@ describe("runBackup / runRestore", () => {
     createdPrefixes.push(backup.prefix);
 
     expect(backup.collections.length).toBeGreaterThan(0);
-    const playersBackup = backup.collections.find((c) => c.name === "players");
+    const playersBackup = backup.collections.find((c) => c.name === "Player");
     expect(playersBackup).toBeDefined();
     expect(playersBackup!.documentCount).toBeGreaterThan(0);
 
@@ -54,7 +54,7 @@ describe("runBackup / runRestore", () => {
     );
     const uploadedKeys = (listed.Contents ?? []).map((object) => object.Key);
     expect(uploadedKeys).toContain(`${backup.prefix}/manifest.json`);
-    expect(uploadedKeys).toContain(`${backup.prefix}/players.json`);
+    expect(uploadedKeys).toContain(`${backup.prefix}/Player.json`);
 
     const restoreClient = new MongoClient(restoreTargetUri, { serverSelectionTimeoutMS: 3000 });
     await restoreClient.connect();
@@ -74,13 +74,13 @@ describe("runBackup / runRestore", () => {
       try {
         const sourcePlayers = await sourceClient
           .db()
-          .collection("players")
+          .collection("Player")
           .find({})
           .sort({ _id: 1 })
           .toArray();
         const restoredPlayers = await restoreClient
           .db()
-          .collection("players")
+          .collection("Player")
           .find({})
           .sort({ _id: 1 })
           .toArray();
@@ -103,11 +103,11 @@ describe("runBackup / runRestore", () => {
       await runRestore(backup.prefix, restoreClient.db());
       const second = await runRestore(backup.prefix, restoreClient.db());
 
-      const playersExpected = backup.collections.find((c) => c.name === "players")!.documentCount;
-      const playersSecond = second.collections.find((c) => c.name === "players")!;
+      const playersExpected = backup.collections.find((c) => c.name === "Player")!.documentCount;
+      const playersSecond = second.collections.find((c) => c.name === "Player")!;
       expect(playersSecond.documentCount).toBe(playersExpected);
 
-      const actualCount = await restoreClient.db().collection("players").countDocuments();
+      const actualCount = await restoreClient.db().collection("Player").countDocuments();
       expect(actualCount).toBe(playersExpected);
     } finally {
       await restoreClient.close();

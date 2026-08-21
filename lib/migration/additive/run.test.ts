@@ -10,7 +10,7 @@ describe("computeAdditivePatch", () => {
           position: "Goalie / Defence",
           teams: [{ teamId: "TM551420", number: 22 }],
         },
-        "players",
+        "Player",
       );
 
       expect(error).toBeUndefined();
@@ -33,7 +33,7 @@ describe("computeAdditivePatch", () => {
           createdAt: new Date(),
           updatedAt: new Date(),
         },
-        "players",
+        "Player",
       );
 
       expect(error).toBeUndefined();
@@ -49,7 +49,7 @@ describe("computeAdditivePatch", () => {
           positions: ["Forward"],
           createdAt: new Date(),
         },
-        "players",
+        "Player",
       );
 
       expect(patch).toEqual({
@@ -62,7 +62,7 @@ describe("computeAdditivePatch", () => {
     it("errors when positions is missing and there is no legacy position string", () => {
       const { patch, error } = computeAdditivePatch(
         { _id: "PLR000004", teams: [{ teamId: "TM551420", number: 9 }] },
-        "players",
+        "Player",
       );
 
       expect(patch).toBeNull();
@@ -72,7 +72,7 @@ describe("computeAdditivePatch", () => {
     it("errors when teamId/number is missing and there is no legacy teams entry", () => {
       const { patch, error } = computeAdditivePatch(
         { _id: "PLR000005", position: "Forward" },
-        "players",
+        "Player",
       );
 
       expect(patch).toBeNull();
@@ -86,7 +86,7 @@ describe("computeAdditivePatch", () => {
           position: "Wing",
           teams: [{ teamId: "TM551420", number: 9 }],
         },
-        "players",
+        "Player",
       );
 
       expect(patch).toBeNull();
@@ -98,7 +98,7 @@ describe("computeAdditivePatch", () => {
     it("normalises lowercase type casing and backfills audit timestamps", () => {
       const { patch, error } = computeAdditivePatch(
         { _id: "GME000001", type: "challenge" },
-        "games",
+        "Game",
       );
 
       expect(error).toBeUndefined();
@@ -115,7 +115,7 @@ describe("computeAdditivePatch", () => {
           createdAt: new Date(),
           updatedAt: new Date(),
         },
-        "games",
+        "Game",
       );
 
       expect(patch).toBeNull();
@@ -124,7 +124,7 @@ describe("computeAdditivePatch", () => {
     it("errors on a type that doesn't normalise to a valid enum value", () => {
       const { patch, error } = computeAdditivePatch(
         { _id: "GME000003", type: "friendly" },
-        "games",
+        "Game",
       );
 
       expect(patch).toBeNull();
@@ -136,7 +136,7 @@ describe("computeAdditivePatch", () => {
     it("backfills audit timestamps for a team document", () => {
       const { patch } = computeAdditivePatch(
         { _id: "TM551420", name: "Peterborough Warriors" },
-        "team",
+        "Team",
       );
 
       expect(patch?.createdAt).toBeInstanceOf(Date);
@@ -146,7 +146,7 @@ describe("computeAdditivePatch", () => {
     it("backfills audit timestamps for a season document", () => {
       const { patch } = computeAdditivePatch(
         { _id: "SSN2425", name: "24/25" },
-        "seasons",
+        "Seasons",
       );
 
       expect(patch?.createdAt).toBeInstanceOf(Date);
@@ -161,7 +161,7 @@ describe("computeAdditivePatch", () => {
           createdAt: new Date(),
           updatedAt: new Date(),
         },
-        "seasons",
+        "Seasons",
       );
 
       expect(patch).toBeNull();

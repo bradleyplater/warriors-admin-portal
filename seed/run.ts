@@ -1,5 +1,6 @@
 import { getDb } from "../lib/mongodb";
 import { ensureIndexes } from "../lib/repositories";
+import { COLLECTION_NAMES } from "../lib/repositories/internal/collections";
 import type { Season, Team, Player, Game } from "./types";
 import { seasons } from "./data/seasons";
 import { team } from "./data/team";
@@ -14,10 +15,10 @@ export async function runSeed(): Promise<void> {
   // establishes the same indexes (see data-access-layer design.md).
   await ensureIndexes(db);
 
-  const seasonsCollection = db.collection<Season>("seasons");
-  const teamCollection = db.collection<Team>("team");
-  const playersCollection = db.collection<Player>("players");
-  const gamesCollection = db.collection<Game>("games");
+  const seasonsCollection = db.collection<Season>(COLLECTION_NAMES.seasons);
+  const teamCollection = db.collection<Team>(COLLECTION_NAMES.team);
+  const playersCollection = db.collection<Player>(COLLECTION_NAMES.player);
+  const gamesCollection = db.collection<Game>(COLLECTION_NAMES.game);
 
   const [seasonCount, teamCount, playerCount, gameCount] = await Promise.all([
     seasonsCollection.countDocuments(),

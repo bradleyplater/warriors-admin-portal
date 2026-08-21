@@ -8,10 +8,11 @@ import {
 import { stampCreate } from "./internal/audit";
 import { isDuplicateKeyErrorForField } from "./internal/ids";
 import { DuplicateSeasonError } from "./internal/errors";
+import { COLLECTION_NAMES } from "./internal/collections";
 
 async function collection() {
   const db = await getDb();
-  return db.collection<Season>("seasons");
+  return db.collection<Season>(COLLECTION_NAMES.seasons);
 }
 
 // Seasons ids are derived from their name ("25/26" -> "SSN2526"), not

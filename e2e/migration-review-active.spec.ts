@@ -26,7 +26,7 @@ test.describe("migration review — active flags", () => {
 
     const playerId = "PLRE2EMR01";
     const db = await getDb();
-    await db.collection<Document & { _id: string }>("players").insertOne({
+    await db.collection<Document & { _id: string }>("Player").insertOne({
       _id: playerId,
       firstName: "Unreviewed",
       surname: "Fixture",
@@ -58,7 +58,7 @@ test.describe("migration review — active flags", () => {
       ).toHaveAttribute("aria-pressed", "true");
     } finally {
       await db
-        .collection<Document & { _id: string }>("players")
+        .collection<Document & { _id: string }>("Player")
         .deleteOne({ _id: playerId });
     }
   });

@@ -16,7 +16,7 @@ describe("seasons repository", () => {
     }
     const db = await getDb();
     await db
-      .collection<{ _id: string }>("seasons")
+      .collection<{ _id: string }>("Seasons")
       .deleteMany({ _id: { $in: createdIds.splice(0) } });
   });
 
