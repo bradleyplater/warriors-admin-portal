@@ -21,7 +21,8 @@ async function checkS3(): Promise<ServiceStatus> {
       new HeadBucketCommand({ Bucket: process.env.S3_BUCKET }),
     );
     return "ok";
-  } catch {
+  } catch (error) {
+    console.error(`S3 health check failed (bucket "${process.env.S3_BUCKET}")`, error);
     return "error";
   }
 }
