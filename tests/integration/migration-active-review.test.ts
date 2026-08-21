@@ -199,4 +199,37 @@ describe("active-flags migration review", () => {
       false,
     );
   });
+
+  it("still lists players when an unrelated Game document fails schema validation", async () => {
+    const season = await createSeason({ name: "82/83" });
+    createdSeasonId = season._id;
+    await insertFixtures(season._id);
+
+    // A Game document that fails GameSchema.parse for reasons unrelated to
+    // this review — e.g. a missing `location` — must not take down the
+    // active-flags list, since the played-this-season sort is only ever a
+    // hint (see fetchSeasonHintData in lib/migration/active-review/list.ts).
+    const db = await getDb();
+    const brokenGameId = "GMEKAN35BROKEN";
+    await col(db, "Game").insertOne({
+      _id: brokenGameId,
+      seasonId: season._id,
+      date: new Date(),
+      type: "CHALLENGE",
+      // location intentionally omitted
+      team: { id: teamId, roster: [{ playerId: unreviewedPlayerId }], goals: [], penalties: [] },
+      opponentTeam: { name: "Opponent", goals: [], penalties: [] },
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+
+    try {
+      const players = await listPlayersForActiveReview();
+      expect(players.length).toBeGreaterThan(0);
+      // Degraded gracefully: nobody gets the "played this season" hint.
+      expect(players.every((p) => p.playedCurrentSeason === false)).toBe(true);
+    } finally {
+      await col(db, "Game").deleteOne({ _id: brokenGameId });
+    }
+  });
 });

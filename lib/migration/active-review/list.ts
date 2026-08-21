@@ -71,6 +71,24 @@ interface RawPlayerDoc {
   active?: unknown;
 }
 
+// The "played this season" sort is only ever a hint (Migration Plan Step 2)
+// — it is never authoritative, so a Season/Game document elsewhere in the
+// app that fails its own (unrelated) schema validation must never block the
+// D8 active-flags review itself. Falls back to no hint for anyone rather
+// than throwing.
+async function fetchSeasonHintData(): Promise<{ seasons: Season[]; games: Game[] }> {
+  try {
+    const [seasons, games] = await Promise.all([listSeasons(), listGames()]);
+    return { seasons, games };
+  } catch (error) {
+    console.warn(
+      "listPlayersForActiveReview: failed to compute the played-this-season hint, continuing without it",
+      error,
+    );
+    return { seasons: [], games: [] };
+  }
+}
+
 // Reads players via the raw driver rather than the players repository's
 // listPlayers(), which validates every document against PlayerSchema —
 // `active` is a required field there, but real production player docs have
@@ -80,10 +98,9 @@ interface RawPlayerDoc {
 export async function listPlayersForActiveReview(): Promise<
   ActiveReviewPlayer[]
 > {
-  const [db, seasons, games] = await Promise.all([
+  const [db, { seasons, games }] = await Promise.all([
     getDb(),
-    listSeasons(),
-    listGames(),
+    fetchSeasonHintData(),
   ]);
   const docs = await db
     .collection<RawPlayerDoc>(COLLECTION_NAMES.player)
