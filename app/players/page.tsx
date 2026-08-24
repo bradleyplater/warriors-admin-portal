@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { listPlayers } from "@/lib/repositories";
+import { compareByShirtNumber } from "@/lib/derived/player-order";
 import type { Player } from "@/lib/schemas";
 
 function RosterTable({ players }: { players: Player[] }) {
@@ -30,7 +31,7 @@ function RosterTable({ players }: { players: Player[] }) {
                 className="absolute inset-0"
                 aria-label={`View ${player.firstName} ${player.surname}`}
               />
-              {player.number}
+              {player.number ?? "—"}
             </td>
             <td className="py-2 pr-4">
               {player.firstName} {player.surname}
@@ -58,10 +59,10 @@ export default async function PlayersPage() {
   const players = await listPlayers();
   const active = players
     .filter((player) => player.active)
-    .sort((a, b) => a.number - b.number);
+    .sort(compareByShirtNumber);
   const inactive = players
     .filter((player) => !player.active)
-    .sort((a, b) => a.number - b.number);
+    .sort(compareByShirtNumber);
 
   return (
     <div className="flex flex-col gap-8">

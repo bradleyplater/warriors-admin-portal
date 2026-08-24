@@ -65,6 +65,11 @@ function checkGoalRules(goal: GoalLike, ctx: z.RefinementCtx) {
 const emptyStringToUndefined = (value: unknown) =>
   value === "" ? undefined : value;
 
+// Real legacy game data stores "no Warrior of the Game awarded" as an
+// explicit `null` rather than omitting the field — same absent-sentinel
+// pattern as assist1/assist2 above, different field/sentinel.
+const nullToUndefined = (value: unknown) => (value === null ? undefined : value);
+
 const GoalBaseShape = {
   scoredBy: z.string(), // playerId — checked against roster at the Game level
   assist1: z.preprocess(emptyStringToUndefined, z.string().optional()),
@@ -229,7 +234,10 @@ const GameBaseShape = {
   location: z.enum(["HOME", "AWAY"]),
   netminderPlayerId: z.string().optional(),
   manOfTheMatchPlayerId: z.string().optional(),
-  warriorOfTheGamePlayerId: z.string().optional(),
+  warriorOfTheGamePlayerId: z.preprocess(
+    nullToUndefined,
+    z.string().optional(),
+  ),
 };
 
 const GameShape = z.object({

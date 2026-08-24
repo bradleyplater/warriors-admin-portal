@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getGame, listPlayers, listSeasons } from "@/lib/repositories";
 import { sortSeasonsAscending } from "@/lib/derived/season-order";
+import { compareByShirtNumber } from "@/lib/derived/player-order";
 import { GameForm } from "../../GameForm";
 
 export default async function EditGamePage({
@@ -19,7 +20,7 @@ export default async function EditGamePage({
   const rosterPlayers = game.team.roster
     .map((entry) => players.find((player) => player._id === entry.playerId))
     .filter((player): player is NonNullable<typeof player> => player !== undefined)
-    .sort((a, b) => a.number - b.number);
+    .sort(compareByShirtNumber);
 
   return (
     <div className="flex flex-col gap-3">

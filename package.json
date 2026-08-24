@@ -11,6 +11,8 @@
     "dev:prod": "node scripts/with-env.mjs .env.production.local next dev",
     "build": "next build",
     "start": "next start",
+    "build:local": "node scripts/with-env.mjs .env.local next build",
+    "start:local": "node scripts/with-env.mjs .env.local next start",
     "lint": "eslint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

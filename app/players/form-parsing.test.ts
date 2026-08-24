@@ -65,4 +65,28 @@ describe("parsePlayerFormData", () => {
       expect(result.data.imagePath).toBe("plr100010.jpg");
     }
   });
+
+  it("omits number entirely when left blank for an inactive player, and accepts it (D9)", () => {
+    const formData = baseFormData();
+    formData.delete("number");
+    formData.delete("active");
+    const result = parsePlayerFormData(formData, "TM551420");
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(Object.hasOwn(result.data, "number")).toBe(false);
+      expect(result.data.active).toBe(false);
+    }
+  });
+
+  it("rejects a blank number for an active player", () => {
+    const formData = baseFormData();
+    formData.delete("number");
+    const result = parsePlayerFormData(formData, "TM551420");
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.flatten().fieldErrors.number).toEqual([
+        "Number must be between 1 and 99",
+      ]);
+    }
+  });
 });

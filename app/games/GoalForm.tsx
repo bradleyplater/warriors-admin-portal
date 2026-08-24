@@ -50,7 +50,7 @@ export function GoalForm({ gameId, rosterPlayers, initialValues }: GoalFormProps
         >
           {rosterPlayers.map((player) => (
             <option key={player._id} value={player._id}>
-              #{player.number} {player.firstName} {player.surname}
+              #{player.number ?? "—"} {player.firstName} {player.surname}
             </option>
           ))}
         </select>
@@ -68,7 +68,7 @@ export function GoalForm({ gameId, rosterPlayers, initialValues }: GoalFormProps
           <option value="">None</option>
           {rosterPlayers.map((player) => (
             <option key={player._id} value={player._id}>
-              #{player.number} {player.firstName} {player.surname}
+              #{player.number ?? "—"} {player.firstName} {player.surname}
             </option>
           ))}
         </select>
@@ -86,7 +86,7 @@ export function GoalForm({ gameId, rosterPlayers, initialValues }: GoalFormProps
           <option value="">None</option>
           {rosterPlayers.map((player) => (
             <option key={player._id} value={player._id}>
-              #{player.number} {player.firstName} {player.surname}
+              #{player.number ?? "—"} {player.firstName} {player.surname}
             </option>
           ))}
         </select>

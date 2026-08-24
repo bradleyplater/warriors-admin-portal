@@ -156,7 +156,7 @@ export function GameForm({
           {activePlayers.map((player) => (
             <label key={player._id} className="flex items-center gap-2">
               <input type="checkbox" name="roster" value={player._id} />
-              #{player.number} {player.firstName} {player.surname}
+              #{player.number ?? "—"} {player.firstName} {player.surname}
             </label>
           ))}
           <FieldErrors messages={state.errors.roster} />

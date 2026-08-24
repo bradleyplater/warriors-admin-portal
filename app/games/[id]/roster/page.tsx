@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { getGame, listPlayers } from "@/lib/repositories";
+import { compareByShirtNumber } from "@/lib/derived/player-order";
 import { RosterForm } from "../../RosterForm";
 
 export default async function GameRosterPage({
@@ -18,7 +19,7 @@ export default async function GameRosterPage({
   const rosteredIds = new Set(game.team.roster.map((entry) => entry.playerId));
   const pickerPlayers = players
     .filter((player) => player.active || rosteredIds.has(player._id))
-    .sort((a, b) => a.number - b.number);
+    .sort(compareByShirtNumber);
 
   return (
     <div className="flex flex-col gap-3">

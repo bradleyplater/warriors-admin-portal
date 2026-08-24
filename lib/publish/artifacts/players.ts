@@ -1,6 +1,7 @@
 import type { Player, Game, Season } from "../../schemas";
 import { derivePlayerSeasonStats } from "../../derived/player-stats";
 import { sortSeasonsAscending } from "../../derived/season-order";
+import { compareByShirtNumber } from "../../derived/player-order";
 
 export interface PlayerSeasonStatsArtifact {
   season: string;
@@ -17,7 +18,10 @@ export interface PlayerArtifact {
   id: string;
   name: string;
   nickname?: string;
-  number: number;
+  // Absent for an inactive player without a number (D9, KAN-36) — they
+  // don't need one. Omitted rather than published as null/undefined, same
+  // convention as nickname below.
+  number?: number;
   position: string;
   stats: PlayerSeasonStatsArtifact[];
 }
@@ -36,7 +40,7 @@ export function generatePlayersArtifact(
   const seasonsAscending = sortSeasonsAscending(seasons);
 
   return [...players]
-    .sort((a, b) => a.number - b.number)
+    .sort(compareByShirtNumber)
     .map((player) => {
       const stats: PlayerSeasonStatsArtifact[] = [];
       for (const season of seasonsAscending) {
@@ -59,11 +63,11 @@ export function generatePlayersArtifact(
       const artifact: PlayerArtifact = {
         id: player._id,
         name: `${player.firstName} ${player.surname}`,
-        number: player.number,
         position: player.positions.join(" / "),
         stats,
       };
       if (player.nickname !== undefined) artifact.nickname = player.nickname;
+      if (player.number !== undefined) artifact.number = player.number;
       return artifact;
     });
 }

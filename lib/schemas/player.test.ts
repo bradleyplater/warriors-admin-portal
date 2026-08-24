@@ -73,6 +73,41 @@ describe("PlayerSchema", () => {
     expect(PlayerSchema.safeParse(validPlayer).success).toBe(true);
     expect(PlayerSchema.safeParse(other).success).toBe(true);
   });
+
+  it("accepts an inactive player with no number at all (D9)", () => {
+    const { number: _number, ...rest } = validPlayer;
+    const result = PlayerSchema.safeParse({ ...rest, active: false });
+    expect(result.success).toBe(true);
+  });
+
+  it.each([134, 900])(
+    "accepts an inactive player with an out-of-range legacy number %d (D9)",
+    (number) => {
+      const result = PlayerSchema.safeParse({
+        ...validPlayer,
+        active: false,
+        number,
+      });
+      expect(result.success).toBe(true);
+    },
+  );
+
+  it("rejects an active player with no number, with the same message as an out-of-range one", () => {
+    const { number: _number, ...rest } = validPlayer;
+    const result = PlayerSchema.safeParse({ ...rest, active: true });
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues[0].message).toBe(
+        "Number must be between 1 and 99",
+      );
+      expect(result.error.issues[0].path).toEqual(["number"]);
+    }
+  });
+
+  it("still rejects an active player with an out-of-range number (D9 unaffected for active players)", () => {
+    const result = PlayerSchema.safeParse({ ...validPlayer, number: 134 });
+    expect(result.success).toBe(false);
+  });
 });
 
 describe("PlayerCreateInputSchema", () => {

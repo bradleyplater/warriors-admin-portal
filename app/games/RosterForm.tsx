@@ -54,7 +54,7 @@ export function RosterForm({ game, pickerPlayers }: RosterFormProps) {
               value={player._id}
               defaultChecked={rosteredIds.has(player._id)}
             />
-            #{player.number} {player.firstName} {player.surname}
+            #{player.number ?? "—"} {player.firstName} {player.surname}
             {!player.active && " (inactive)"}
           </label>
         ))}

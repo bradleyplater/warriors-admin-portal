@@ -10,6 +10,7 @@ import {
   deletePlayer,
   ensureIndexes,
   getPlayer,
+  listPlayers,
   updatePlayer,
   DuplicateShirtNumberError,
 } from "../../../lib/repositories";
@@ -120,6 +121,43 @@ describe("players repository", () => {
     createdIds.push(inactive._id);
 
     expect(inactive._id).not.toBe(active._id);
+  });
+
+  it("does not throw on listPlayers() for an inactive player with an out-of-range legacy number (D9, KAN-36)", async () => {
+    // Real production shape: an inactive player whose number was never
+    // resolved by the D9 migration review — that review only requires it
+    // for active players, so this is expected to persist indefinitely.
+    // /players (and anything else calling listPlayers()) must not crash on
+    // it — this is the regression covered by the KAN-36 follow-up fix.
+    const inactive = await createPlayer(
+      testPlayerInput({ active: false, surname: "LegacyNumber" }),
+    );
+    createdIds.push(inactive._id);
+    const db = await getDb();
+    await db
+      .collection<RawDoc>("Player")
+      .updateOne({ _id: inactive._id }, { $set: { number: 134 } });
+
+    const players = await listPlayers();
+    const found = players.find((p) => p._id === inactive._id);
+    expect(found?.number).toBe(134);
+    expect(found?.active).toBe(false);
+  });
+
+  it("rejects creating an active player with no number", async () => {
+    const { number: _number, ...withoutNumber } = testPlayerInput();
+    await expect(createPlayer(withoutNumber)).rejects.toThrow(
+      "Number must be between 1 and 99",
+    );
+  });
+
+  it("allows creating an inactive player with no number at all", async () => {
+    const { number: _number, ...withoutNumber } = testPlayerInput({
+      active: false,
+    });
+    const created = await createPlayer(withoutNumber);
+    createdIds.push(created._id);
+    expect(created.number).toBeUndefined();
   });
 
   it("retries id generation against a real MongoDB duplicate _id error", async () => {

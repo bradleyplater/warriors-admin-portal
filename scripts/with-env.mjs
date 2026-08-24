@@ -3,6 +3,7 @@
 // to .env.local — unlike Next's own multi-file loading) then runs the given
 // command with it. NODE_OPTIONS can't carry --env-file (Node disallows it
 // there), so this does the same job via process.loadEnvFile() instead.
+import { existsSync } from "node:fs";
 import { spawn } from "node:child_process";
 
 const [envFile, ...command] = process.argv.slice(2);
@@ -27,10 +28,22 @@ function maskMongoUri(uri) {
   }
 }
 
-process.loadEnvFile(envFile);
-console.log(
-  `[with-env] loaded ${envFile} — S3_BUCKET=${process.env.S3_BUCKET} S3_ENDPOINT=${process.env.S3_ENDPOINT || "(unset)"} MONGODB_URI=${maskMongoUri(process.env.MONGODB_URI)}`,
-);
+// Missing is not fatal here — CI (and anywhere else that injects real env
+// vars directly into process.env rather than via a dotenv file, e.g. a
+// GitHub Actions workflow's own `env:` block) has no .env.local at all.
+// Whatever's already in process.env is used as-is; a genuinely missing
+// required var still fails loudly downstream (e.g. getDb()'s own
+// "MONGODB_URI is not set").
+if (existsSync(envFile)) {
+  process.loadEnvFile(envFile);
+  console.log(
+    `[with-env] loaded ${envFile} — S3_BUCKET=${process.env.S3_BUCKET} S3_ENDPOINT=${process.env.S3_ENDPOINT || "(unset)"} MONGODB_URI=${maskMongoUri(process.env.MONGODB_URI)}`,
+  );
+} else {
+  console.log(
+    `[with-env] ${envFile} not found, using process.env as-is — S3_BUCKET=${process.env.S3_BUCKET} S3_ENDPOINT=${process.env.S3_ENDPOINT || "(unset)"} MONGODB_URI=${maskMongoUri(process.env.MONGODB_URI)}`,
+  );
+}
 
 // A single joined string (not a file+args array) is required with
 // shell: true — passing an args array here has Node re-concatenate them
