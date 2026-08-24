@@ -18,3 +18,13 @@ output "s3_secret_access_key" {
   value       = aws_iam_access_key.app.secret
   sensitive   = true
 }
+
+output "cdn_domain_name" {
+  description = "Public CloudFront URL serving the published JSON artifacts (the S3/CDN URL the website switches to — docs/04-migration-plan.md Step 5)."
+  value       = "https://${aws_cloudfront_distribution.app.domain_name}"
+}
+
+output "cdn_distribution_id" {
+  description = "Value for the app's CDN_INVALIDATION env var."
+  value       = aws_cloudfront_distribution.app.id
+}
