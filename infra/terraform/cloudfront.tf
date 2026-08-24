@@ -18,17 +18,47 @@ data "aws_cloudfront_cache_policy" "caching_optimized" {
   name = "Managed-CachingOptimized"
 }
 
-# AWS managed policy ("Managed-SimpleCORS") adds Access-Control-Allow-Origin:
-# * to every response at the CloudFront layer, regardless of caller — not
-# configured as S3 bucket CORS, since that would depend on the origin
-# echoing the right headers back through CloudFront. A wildcard is
-# deliberate: these are public read-only artifacts (the actual access
-# control is the OAC/bucket-policy layer below, which CORS doesn't touch),
-# so an origin allowlist would protect nothing while requiring upkeep every
-# time a dev port or preview-URL pattern changes. No preflight handling
-# needed since the website only ever does simple GET requests here.
-data "aws_cloudfront_response_headers_policy" "simple_cors" {
-  name = "Managed-SimpleCORS"
+# AWS managed policy ("Managed-CORS-with-preflight") adds
+# Access-Control-Allow-Origin: * to every response at the CloudFront layer,
+# regardless of caller — not configured as S3 bucket CORS, since that would
+# depend on the origin echoing the right headers back through CloudFront.
+# A wildcard is deliberate: these are public read-only artifacts (the
+# actual access control is the OAC/bucket-policy layer below, which CORS
+# doesn't touch), so an origin allowlist would protect nothing while
+# requiring upkeep every time a dev port or preview-URL pattern changes.
+#
+# The "-with-preflight" variant (not the plainer Managed-SimpleCORS) is
+# required, not optional: the website's fetch client triggers a real CORS
+# preflight (OPTIONS), and only this policy carries the
+# Access-Control-Allow-Methods / -Max-Age headers a preflight response
+# needs. This policy only adds headers to whatever response comes back,
+# though — it does NOT make CloudFront answer OPTIONS itself, so it still
+# has to be paired with the function below.
+data "aws_cloudfront_response_headers_policy" "cors_with_preflight" {
+  name = "Managed-CORS-With-Preflight"
+}
+
+# S3 has no bucket-level CORS config of its own, so a forwarded OPTIONS
+# preflight reaches S3 and gets a flat 403 back — headers from the response
+# headers policy above land on that 403 too, but browsers require the
+# preflight response itself to be 2xx, so it still fails. This function
+# answers OPTIONS directly at the edge, before the request ever reaches S3;
+# the response headers policy still supplies the actual CORS headers on
+# top of this 204. CloudFront Functions are free up to 2M invocations/month.
+resource "aws_cloudfront_function" "handle_preflight" {
+  name    = "warriors-admin-portal-cors-preflight"
+  runtime = "cloudfront-js-2.0"
+  comment = "Answers CORS preflight (OPTIONS) at the edge, since the S3 origin has no CORS config and would otherwise 403 it"
+  publish = true
+  code    = <<-EOT
+    function handler(event) {
+      var request = event.request;
+      if (request.method === "OPTIONS") {
+        return { statusCode: 204, statusDescription: "No Content" };
+      }
+      return request;
+    }
+  EOT
 }
 
 resource "aws_cloudfront_distribution" "app" {
@@ -48,13 +78,18 @@ resource "aws_cloudfront_distribution" "app" {
   }
 
   default_cache_behavior {
-    allowed_methods            = ["GET", "HEAD"]
+    allowed_methods            = ["GET", "HEAD", "OPTIONS"]
     cached_methods             = ["GET", "HEAD"]
     target_origin_id           = "s3-published-artifacts"
     viewer_protocol_policy     = "redirect-to-https"
     compress                   = true
     cache_policy_id            = data.aws_cloudfront_cache_policy.caching_optimized.id
-    response_headers_policy_id = data.aws_cloudfront_response_headers_policy.simple_cors.id
+    response_headers_policy_id = data.aws_cloudfront_response_headers_policy.cors_with_preflight.id
+
+    function_association {
+      event_type   = "viewer-request"
+      function_arn = aws_cloudfront_function.handle_preflight.arn
+    }
   }
 
   restrictions {
