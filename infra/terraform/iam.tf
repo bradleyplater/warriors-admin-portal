@@ -30,6 +30,15 @@ resource "aws_iam_user_policy" "app_bucket_access" {
         Effect   = "Allow"
         Action   = ["s3:GetObject", "s3:PutObject"]
         Resource = ["${aws_s3_bucket.app.arn}/*"]
+      },
+      {
+        # lib/publish/cdn.ts calls CreateInvalidationCommand using these
+        # same credentials (docs/02-architecture.md's CDN_INVALIDATION
+        # config) — scoped to this one distribution, nothing account-wide.
+        Sid      = "CloudFrontInvalidation"
+        Effect   = "Allow"
+        Action   = ["cloudfront:CreateInvalidation"]
+        Resource = [aws_cloudfront_distribution.app.arn]
       }
     ]
   })

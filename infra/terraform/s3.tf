@@ -55,3 +55,42 @@ resource "aws_s3_bucket_lifecycle_configuration" "app" {
     }
   }
 }
+
+# Lets the CloudFront distribution (infra/terraform/cloudfront.tf) read
+# objects via OAC — scoped to that one distribution's ARN, so no other
+# CloudFront distribution in the account could use this grant even if it
+# tried. block_public_policy above only blocks policies that grant access
+# to everyone; a policy scoped to a specific AWS service + SourceArn isn't
+# "public" by AWS's own definition, so this coexists with it.
+#
+# backups/ holds full production DB dumps and must never be reachable by
+# URL-guessing through the CDN, so it gets an explicit Deny — belt and
+# suspenders on top of the Allow only ever granting the other prefixes.
+resource "aws_s3_bucket_policy" "cdn_read" {
+  bucket = aws_s3_bucket.app.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid       = "AllowCloudFrontServicePrincipalReadOnly"
+        Effect    = "Allow"
+        Principal = { Service = "cloudfront.amazonaws.com" }
+        Action    = "s3:GetObject"
+        Resource  = "${aws_s3_bucket.app.arn}/*"
+        Condition = {
+          StringEquals = {
+            "AWS:SourceArn" = aws_cloudfront_distribution.app.arn
+          }
+        }
+      },
+      {
+        Sid       = "DenyCloudFrontOnBackups"
+        Effect    = "Deny"
+        Principal = { Service = "cloudfront.amazonaws.com" }
+        Action    = "s3:GetObject"
+        Resource  = "${aws_s3_bucket.app.arn}/backups/*"
+      }
+    ]
+  })
+}
