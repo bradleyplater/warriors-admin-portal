@@ -28,6 +28,7 @@
     "backup:restore:prod": "node scripts/with-env.mjs .env.production.local tsx lib/backup/restore-cli.ts",
     "migrate:additive:preview": "tsx lib/migration/additive/run-cli.ts --dry-run",
     "migrate:additive:run": "tsx lib/migration/additive/run-cli.ts",
+    "migrate:reconcile:preview": "tsx lib/migration/reconcile/run-cli.ts",
     "test:unit": "vitest run --config vitest.config.ts",
     "test:integration": "vitest run --config vitest.integration.config.ts",
     "test:e2e": "playwright test"
