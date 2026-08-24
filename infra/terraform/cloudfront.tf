@@ -18,6 +18,19 @@ data "aws_cloudfront_cache_policy" "caching_optimized" {
   name = "Managed-CachingOptimized"
 }
 
+# AWS managed policy ("Managed-SimpleCORS") adds Access-Control-Allow-Origin:
+# * to every response at the CloudFront layer, regardless of caller — not
+# configured as S3 bucket CORS, since that would depend on the origin
+# echoing the right headers back through CloudFront. A wildcard is
+# deliberate: these are public read-only artifacts (the actual access
+# control is the OAC/bucket-policy layer below, which CORS doesn't touch),
+# so an origin allowlist would protect nothing while requiring upkeep every
+# time a dev port or preview-URL pattern changes. No preflight handling
+# needed since the website only ever does simple GET requests here.
+data "aws_cloudfront_response_headers_policy" "simple_cors" {
+  name = "Managed-SimpleCORS"
+}
+
 resource "aws_cloudfront_distribution" "app" {
   enabled         = true
   is_ipv6_enabled = true
@@ -35,12 +48,13 @@ resource "aws_cloudfront_distribution" "app" {
   }
 
   default_cache_behavior {
-    allowed_methods        = ["GET", "HEAD"]
-    cached_methods         = ["GET", "HEAD"]
-    target_origin_id       = "s3-published-artifacts"
-    viewer_protocol_policy = "redirect-to-https"
-    compress               = true
-    cache_policy_id        = data.aws_cloudfront_cache_policy.caching_optimized.id
+    allowed_methods            = ["GET", "HEAD"]
+    cached_methods             = ["GET", "HEAD"]
+    target_origin_id           = "s3-published-artifacts"
+    viewer_protocol_policy     = "redirect-to-https"
+    compress                   = true
+    cache_policy_id            = data.aws_cloudfront_cache_policy.caching_optimized.id
+    response_headers_policy_id = data.aws_cloudfront_response_headers_policy.simple_cors.id
   }
 
   restrictions {
