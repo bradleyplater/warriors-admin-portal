@@ -1,9 +1,60 @@
+import { existsSync } from "node:fs";
+import type { Document } from "mongodb";
 import { expect, test } from "@playwright/test";
+import { createPlayer, deletePlayer, getTheTeam } from "@/lib/repositories";
+import { getDb } from "@/lib/mongodb";
+
+if (existsSync(".env.local")) {
+  process.loadEnvFile(".env.local");
+} else if (existsSync(".env.example")) {
+  process.loadEnvFile(".env.example");
+}
 
 // Read-only assertions against the seeded roster (seed/data/players.ts) —
 // no group counts are asserted since create-player.spec.ts mutates the same
-// shared database and may run concurrently.
+// shared database and may run concurrently. The fixture-based regression
+// test below runs first, serially, so its own create/cleanup can't race
+// with the read-only assertions.
+test.describe.configure({ mode: "serial" });
+
 test.describe("player roster list", () => {
+  test("renders without crashing when an inactive player has an out-of-range legacy number (D9, KAN-36)", async ({
+    page,
+  }) => {
+    // Regression test: an inactive player's number is never required to be
+    // fixed by the D9 migration review (only active players are), so a
+    // stale out-of-range value like this persists indefinitely in real
+    // production — listPlayers() must tolerate it rather than crash /players.
+    const team = await getTheTeam();
+    if (!team) throw new Error("No team configured for the e2e seed");
+
+    const player = await createPlayer({
+      firstName: "Legacy",
+      surname: "OutOfRangeFixture",
+      number: 40,
+      positions: ["Forward"],
+      active: false,
+      teamId: team._id,
+    });
+    const db = await getDb();
+    await db
+      .collection<Document & { _id: string }>("Player")
+      .updateOne({ _id: player._id }, { $set: { number: 134 } });
+
+    try {
+      await page.goto("/players");
+
+      await expect(
+        page.getByRole("heading", { name: /^Active/ }),
+      ).toBeVisible();
+      const row = page.getByRole("row", { name: /Legacy OutOfRangeFixture/ });
+      await expect(row).toBeVisible();
+      await expect(row).toContainText("134");
+    } finally {
+      await deletePlayer(player._id);
+    }
+  });
+
   test("seeded players render, grouped by active status", async ({ page }) => {
     await page.goto("/players");
 

@@ -53,7 +53,7 @@ export function PenaltyForm({ gameId, rosterPlayers, initialValues }: PenaltyFor
           <option value="BENCH">Bench</option>
           {rosterPlayers.map((player) => (
             <option key={player._id} value={player._id}>
-              #{player.number} {player.firstName} {player.surname}
+              #{player.number ?? "—"} {player.firstName} {player.surname}
             </option>
           ))}
         </select>

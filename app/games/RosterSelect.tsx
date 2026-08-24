@@ -14,7 +14,7 @@ function FieldErrors({ messages }: { messages?: string[] }) {
 }
 
 function playerLabel(player: Player): string {
-  return `#${player.number} ${player.firstName} ${player.surname}`;
+  return `#${player.number ?? "—"} ${player.firstName} ${player.surname}`;
 }
 
 type RosterSelectProps = {

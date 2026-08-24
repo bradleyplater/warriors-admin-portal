@@ -1,5 +1,6 @@
 import { listPlayers, listSeasons } from "@/lib/repositories";
 import { sortSeasonsAscending } from "@/lib/derived/season-order";
+import { compareByShirtNumber } from "@/lib/derived/player-order";
 import { GameForm } from "../GameForm";
 
 // No dynamic route segment, so Next would otherwise statically prerender
@@ -11,7 +12,7 @@ export default async function NewGamePage() {
   const [players, seasons] = await Promise.all([listPlayers(), listSeasons()]);
   const activePlayers = players
     .filter((player) => player.active)
-    .sort((a, b) => a.number - b.number);
+    .sort(compareByShirtNumber);
 
   return (
     <div className="flex flex-col gap-3">

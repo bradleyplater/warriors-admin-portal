@@ -10,18 +10,21 @@ export function optionalString(value: FormDataEntryValue | null): string | undef
 export function parsePlayerFormData(formData: FormData, teamId: string) {
   const nickname = optionalString(formData.get("nickname"));
   const imagePath = optionalString(formData.get("imagePath"));
+  const numberRaw = optionalString(formData.get("number"));
 
   return PlayerCreateInputSchema.safeParse({
     firstName: optionalString(formData.get("firstName")) ?? "",
     surname: optionalString(formData.get("surname")) ?? "",
-    number: Number(formData.get("number")),
     positions: formData.getAll("positions"),
     active: formData.get("active") !== null,
     // Omit rather than set to `undefined`: the MongoDB driver serializes an
     // explicit `undefined` value as BSON null, which then fails the
-    // optional (not nullable) schema field on read-back.
+    // optional (not nullable) schema field on read-back. A blank number is
+    // valid for an inactive player (D9, KAN-36) — the schema's
+    // requireNumberWhenActive refine is what rejects it for an active one.
     ...(nickname !== undefined ? { nickname } : {}),
     ...(imagePath !== undefined ? { imagePath } : {}),
+    ...(numberRaw !== undefined ? { number: Number(numberRaw) } : {}),
     teamId,
   });
 }

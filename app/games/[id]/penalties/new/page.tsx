@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { getGame, listPlayers } from "@/lib/repositories";
+import { compareByShirtNumber } from "@/lib/derived/player-order";
 import { PenaltyForm } from "../../../PenaltyForm";
 
 export default async function NewPenaltyPage({
@@ -18,7 +19,7 @@ export default async function NewPenaltyPage({
   const rosterPlayers = game.team.roster
     .map((entry) => players.find((player) => player._id === entry.playerId))
     .filter((player): player is NonNullable<typeof player> => player !== undefined)
-    .sort((a, b) => a.number - b.number);
+    .sort(compareByShirtNumber);
 
   return (
     <div className="flex flex-col gap-3">

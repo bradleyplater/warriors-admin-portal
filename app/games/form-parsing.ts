@@ -202,7 +202,7 @@ export function describeBlockedPlayer(
 ): string {
   const player = players.find((candidate) => candidate._id === entry.playerId);
   const label = player
-    ? `#${player.number} ${player.firstName} ${player.surname}`
+    ? `#${player.number ?? "—"} ${player.firstName} ${player.surname}`
     : entry.playerId;
 
   const parts: string[] = [];

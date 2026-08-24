@@ -63,7 +63,7 @@ export default async function PlayerProfilePage({
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="text-2xl font-semibold">
-          #{player.number} {player.firstName} {player.surname}
+          #{player.number ?? "—"} {player.firstName} {player.surname}
         </h1>
         <p className="text-sm text-black/60 dark:text-white/60">
           {player.positions.join(", ")}

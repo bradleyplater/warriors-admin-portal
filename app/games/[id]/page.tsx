@@ -14,7 +14,7 @@ import {
 function playerLabel(players: Player[], playerId: string): string {
   const player = players.find((entry) => entry._id === playerId);
   return player
-    ? `#${player.number} ${player.firstName} ${player.surname}`
+    ? `#${player.number ?? "—"} ${player.firstName} ${player.surname}`
     : playerId;
 }
 
@@ -188,7 +188,7 @@ export default async function GameDetailPage({
           <ul className="flex flex-col gap-1 text-sm">
             {rosterPlayers.map((player) => (
               <li key={player._id}>
-                #{player.number} {player.firstName} {player.surname}
+                #{player.number ?? "—"} {player.firstName} {player.surname}
               </li>
             ))}
           </ul>

@@ -25,7 +25,10 @@ export async function createPlayer(input: PlayerCreateInput): Promise<Player> {
     try {
       await col.insertOne(candidate);
     } catch (error) {
-      if (isDuplicateKeyErrorForField(error, "number")) {
+      if (
+        isDuplicateKeyErrorForField(error, "number") &&
+        candidate.number !== undefined
+      ) {
         throw new DuplicateShirtNumberError(candidate.number);
       }
       throw error;
