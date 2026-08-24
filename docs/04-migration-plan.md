@@ -56,20 +56,20 @@ The portal ships a one-time **Migration Review** area with two checklists:
 1. **Active flags (D8):** all 84 players listed (pre-sorted by whether they played in 25/26 as a hint); you set Active/Inactive for each. Nothing proceeds until every player is marked.
 2. **Shirt numbers (D9):** the 14 players with numbers > 99 (134, 170, 250, 333, 900, 101, 102, 105, 106, 107, 110, 112, 113, 114) listed for you to assign new 1–99 numbers, with clash detection against active players.
 
-### Step 3 — Reconciliation report (D6 sign-off gate)
+### Step 3 — Reconciliation report (D6 sign-off gate) ✅ KAN-37
 
-Script `migrate-03-reconcile` recomputes, from `Game` documents alone:
+`generateReconciliationReport()` (`lib/migration/reconcile/`) recomputes, from `Game` documents alone:
 
-- every player's per-season stats vs the stored `Player.stats` **and** the `Team.players[].stats` copy;
-- team per-season stats vs stored `Team.stats`;
-- every game's score and period line vs the stored `score` field (validates the 20-minute derivation rule across all 85 games, including the 5 shootout goals).
+- every player's per-season stats vs the stored `Player.stats` **and** the `Team.players[].stats` copy (`player-stats.ts`);
+- team per-season stats vs stored `Team.stats`, for the fields it actually stores — `gamesPlayed`/`goals`/`assists`/`pims` (`team-stats.ts`);
+- every game's score and period line vs the stored `score` field, using the raw goal arrays directly so it never depends on `GameSchema` validation (`game-score.ts`).
 
-Output: a report of every mismatch with both values. For each you choose:
+CLI: `npm run migrate:reconcile:preview` — read-only, prints the report, safe against any environment including production. Portal: `/migration-review/reconciliation` lists every mismatch with both values, grouped by dimension:
 
-- **Accept computed** — the game records are right; stored aggregate was drifted (expected for the known cases above), or
-- **Fix the games** — a game record is wrong/missing (e.g. a roster entry was never recorded); you correct the game in the portal and re-run reconciliation.
+- **Accept computed** — writes a `ReconciliationResolutions` record (the game records are right; stored aggregate was drifted, expected for the known cases above). Matched on re-run by mismatch key **and** the exact stored/computed values, so a later data change makes the mismatch reappear rather than staying silently accepted.
+- **Fix the games** — no action needed here; the row links to the relevant player/game, and correcting it there makes the mismatch stop appearing on the next run.
 
-The gate: **reconciliation must run clean (all mismatches resolved) before cutover.** If a stored stat turns out to have no possible backing game record, that is a scope escalation — we would revisit the "adjustments ledger" option rather than invent game data.
+`isReconciliationComplete()` reports whether every mismatch is resolved — same "nothing gates cutover on it yet" caveat as D8/D9. If a stored stat turns out to have no possible backing game record, that is a scope escalation — revisit the "adjustments ledger" option rather than invent game data.
 
 ### Step 4 — Cutover
 
