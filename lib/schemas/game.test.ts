@@ -149,6 +149,17 @@ describe("GameSchema", () => {
     expect(GameSchema.safeParse(game).success).toBe(true);
   });
 
+  it("treats an explicit null warriorOfTheGamePlayerId as not awarded (real legacy data convention)", () => {
+    const game = baseGame();
+    // @ts-expect-error real legacy documents store this as an explicit null
+    game.warriorOfTheGamePlayerId = null;
+    const result = GameSchema.safeParse(game);
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.warriorOfTheGamePlayerId).toBeUndefined();
+    }
+  });
+
   it("rejects assist2 without assist1", () => {
     const game = baseGame();
     game.team.goals[0].assist1 = undefined;
