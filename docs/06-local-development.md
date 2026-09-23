@@ -7,7 +7,7 @@ Per the PRD: local development spins up Docker services with seeded data, and mo
 | Service | Image | Port | Purpose |
 |---|---|---|---|
 | `mongo` | `mongo:7` | 27017 | Local `HockeyTracker` database |
-| `minio` | `minio/minio` | 9000 / 9001 | S3-compatible storage so the publish pipeline runs for real locally |
+| `minio` | `quay.io/minio/minio` | 9000 / 9001 | S3-compatible storage so the publish pipeline runs for real locally |
 | `mongo-seed` | one-shot node script | — | Seeds the database on first run |
 
 ## First run
