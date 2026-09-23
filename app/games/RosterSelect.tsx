@@ -1,17 +1,5 @@
 import type { Player } from "@/lib/schemas";
-
-function FieldErrors({ messages }: { messages?: string[] }) {
-  if (!messages || messages.length === 0) return null;
-  return (
-    <div className="flex flex-col gap-1">
-      {messages.map((message) => (
-        <p key={message} className="text-sm text-red-600">
-          {message}
-        </p>
-      ))}
-    </div>
-  );
-}
+import { SelectField } from "@/app/_ui";
 
 function playerLabel(player: Player): string {
   return `#${player.number ?? "—"} ${player.firstName} ${player.surname}`;
@@ -38,22 +26,19 @@ export function RosterSelect({
   errors,
 }: RosterSelectProps) {
   return (
-    <div className="flex flex-col gap-1">
-      <label htmlFor={id}>{label}</label>
-      <select
-        id={id}
-        name={name}
-        defaultValue={defaultValue ?? ""}
-        className="border border-black/20 rounded px-2 py-1 dark:border-white/20"
-      >
-        <option value="">None</option>
-        {rosterPlayers.map((player) => (
-          <option key={player._id} value={player._id}>
-            {playerLabel(player)}
-          </option>
-        ))}
-      </select>
-      <FieldErrors messages={errors} />
-    </div>
+    <SelectField
+      id={id}
+      name={name}
+      label={label}
+      defaultValue={defaultValue ?? ""}
+      errors={errors}
+    >
+      <option value="">None</option>
+      {rosterPlayers.map((player) => (
+        <option key={player._id} value={player._id}>
+          {playerLabel(player)}
+        </option>
+      ))}
+    </SelectField>
   );
 }

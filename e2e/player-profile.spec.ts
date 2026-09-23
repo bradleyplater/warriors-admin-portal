@@ -47,8 +47,8 @@ test.describe("player profile", () => {
     // files running in parallel may create extra seasons (e.g. "71/72") in
     // this shared database — so only assert the seed seasons stay in order
     // among whatever else is present, rather than requiring an exact match.
-    const headings = page.getByRole("heading", { level: 3 });
-    const seedHeadings = ["22/23 (2)", "23/24 (2)", "24/25 (3)", "25/26 (3)"];
+    const headings = page.getByRole("heading", { level: 2 });
+    const seedHeadings = ["22/23", "23/24", "24/25", "25/26"];
     await expect(async () => {
       const allHeadings = await headings.allTextContents();
       const filtered = allHeadings.filter((text) =>
@@ -56,5 +56,18 @@ test.describe("player profile", () => {
       );
       expect(filtered).toEqual(seedHeadings);
     }).toPass();
+
+    // Each season's games-played count sits beside its heading.
+    const seedCounts = {
+      SSN2223: "2 games played",
+      SSN2324: "2 games played",
+      SSN2425: "3 games played",
+      SSN2526: "3 games played",
+    };
+    for (const [seasonId, count] of Object.entries(seedCounts)) {
+      await expect(
+        page.getByTestId(`season-${seasonId}`).getByTestId("season-count"),
+      ).toHaveText(count);
+    }
   });
 });

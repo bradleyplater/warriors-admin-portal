@@ -3,21 +3,17 @@
 import { useActionState } from "react";
 import { PositionSchema } from "@/lib/schemas/enums";
 import type { Player } from "@/lib/schemas";
+import {
+  Button,
+  ButtonLink,
+  Choice,
+  Fieldset,
+  FormActions,
+  FormErrorSummary,
+  TextField,
+} from "@/app/_ui";
 import { createPlayerAction, updatePlayerAction } from "./actions";
 import { initialPlayerFormState, type PlayerFormState } from "./form-state";
-
-function FieldErrors({ messages }: { messages?: string[] }) {
-  if (!messages || messages.length === 0) return null;
-  return (
-    <div>
-      {messages.map((message) => (
-        <p key={message} className="text-sm text-red-600">
-          {message}
-        </p>
-      ))}
-    </div>
-  );
-}
 
 type PlayerFormProps = {
   initialValues?: Player;
@@ -29,111 +25,99 @@ export function PlayerForm({ initialValues }: PlayerFormProps) {
     ? updatePlayerAction.bind(null, initialValues._id)
     : createPlayerAction;
 
-  const [state, formAction, pending] = useActionState<PlayerFormState, FormData>(
-    action,
-    initialPlayerFormState,
-  );
+  const [state, formAction, pending] = useActionState<
+    PlayerFormState,
+    FormData
+  >(action, initialPlayerFormState);
 
   return (
-    <form action={formAction} className="flex max-w-sm flex-col gap-4">
-      <div className="flex flex-col gap-1">
-        <label htmlFor="firstName">First name</label>
-        <input
-          id="firstName"
-          name="firstName"
-          defaultValue={initialValues?.firstName}
-          className="border border-black/20 rounded px-2 py-1 dark:border-white/20"
-        />
-        <FieldErrors messages={state.errors.firstName} />
-      </div>
+    <form action={formAction} className="flex max-w-md flex-col gap-5">
+      <FormErrorSummary errors={state.errors} />
 
-      <div className="flex flex-col gap-1">
-        <label htmlFor="surname">Surname</label>
-        <input
-          id="surname"
-          name="surname"
-          defaultValue={initialValues?.surname}
-          className="border border-black/20 rounded px-2 py-1 dark:border-white/20"
-        />
-        <FieldErrors messages={state.errors.surname} />
-      </div>
+      <TextField
+        id="firstName"
+        name="firstName"
+        label="First name"
+        defaultValue={initialValues?.firstName}
+        errors={state.errors.firstName}
+      />
 
-      <div className="flex flex-col gap-1">
-        <label htmlFor="number">Shirt number</label>
-        <input
-          id="number"
-          name="number"
-          type="text"
-          inputMode="numeric"
-          defaultValue={initialValues?.number}
-          className="border border-black/20 rounded px-2 py-1 dark:border-white/20"
-        />
-        <FieldErrors messages={state.errors.number} />
-      </div>
+      <TextField
+        id="surname"
+        name="surname"
+        label="Surname"
+        defaultValue={initialValues?.surname}
+        errors={state.errors.surname}
+      />
 
-      <fieldset className="flex flex-col gap-1">
-        <legend>Positions</legend>
+      <TextField
+        id="number"
+        name="number"
+        label="Shirt number"
+        type="text"
+        inputMode="numeric"
+        defaultValue={initialValues?.number}
+        errors={state.errors.number}
+        className="max-w-40"
+      />
+
+      <Fieldset legend="Positions" errors={state.errors.positions}>
         {PositionSchema.options.map((position) => (
-          <label key={position} className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              name="positions"
-              value={position}
-              defaultChecked={initialValues?.positions.includes(position)}
-            />
+          <Choice
+            key={position}
+            type="checkbox"
+            name="positions"
+            value={position}
+            defaultChecked={initialValues?.positions.includes(position)}
+          >
             {position}
-          </label>
+          </Choice>
         ))}
-        <FieldErrors messages={state.errors.positions} />
-      </fieldset>
+      </Fieldset>
 
-      <label className="flex items-center gap-2">
-        <input
-          type="checkbox"
-          name="active"
-          defaultChecked={initialValues ? initialValues.active : true}
-        />
-        Active
-      </label>
-
-      <div className="flex flex-col gap-1">
-        <label htmlFor="nickname">Nickname (optional)</label>
-        <input
-          id="nickname"
-          name="nickname"
-          defaultValue={initialValues?.nickname}
-          className="border border-black/20 rounded px-2 py-1 dark:border-white/20"
-        />
-        <FieldErrors messages={state.errors.nickname} />
-      </div>
-
-      <div className="flex flex-col gap-1">
-        <label htmlFor="imagePath">Image identifier (optional)</label>
-        <input
-          id="imagePath"
-          name="imagePath"
-          placeholder="e.g. plr100010.jpg"
-          defaultValue={initialValues?.imagePath}
-          className="border border-black/20 rounded px-2 py-1 dark:border-white/20"
-        />
-        <FieldErrors messages={state.errors.imagePath} />
-      </div>
-
-      <FieldErrors messages={state.errors.form} />
-
-      <button
-        type="submit"
-        disabled={pending}
-        className="rounded border border-black/20 px-3 py-1.5 font-medium disabled:opacity-50 dark:border-white/20"
+      <Choice
+        type="checkbox"
+        name="active"
+        defaultChecked={initialValues ? initialValues.active : true}
       >
-        {pending
-          ? isEdit
-            ? "Saving…"
-            : "Creating…"
-          : isEdit
-            ? "Save changes"
-            : "Create player"}
-      </button>
+        Active
+      </Choice>
+
+      <TextField
+        id="nickname"
+        name="nickname"
+        label="Nickname (optional)"
+        defaultValue={initialValues?.nickname}
+        errors={state.errors.nickname}
+      />
+
+      <TextField
+        id="imagePath"
+        name="imagePath"
+        label="Image identifier (optional)"
+        placeholder="e.g. plr100010.jpg"
+        defaultValue={initialValues?.imagePath}
+        errors={state.errors.imagePath}
+      />
+
+      <FormActions>
+        <Button type="submit" size="lg" disabled={pending}>
+          {pending
+            ? isEdit
+              ? "Saving…"
+              : "Creating…"
+            : isEdit
+              ? "Save changes"
+              : "Create player"}
+        </Button>
+        <ButtonLink
+          href={isEdit ? `/players/${initialValues._id}` : "/players"}
+          variant="ghost"
+          size="lg"
+        >
+          Cancel
+        </ButtonLink>
+      </FormActions>
     </form>
   );
 }

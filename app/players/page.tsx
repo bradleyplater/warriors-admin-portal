@@ -2,56 +2,72 @@ import Link from "next/link";
 import { listPlayers } from "@/lib/repositories";
 import { compareByShirtNumber } from "@/lib/derived/player-order";
 import type { Player } from "@/lib/schemas";
+import {
+  ButtonLink,
+  Card,
+  EmptyState,
+  PageHeader,
+  SectionHeading,
+} from "@/app/_ui";
 
 function RosterTable({ players }: { players: Player[] }) {
   if (players.length === 0) {
-    return <p className="text-sm text-black/60 dark:text-white/60">None.</p>;
+    return <EmptyState>None.</EmptyState>;
   }
 
   return (
-    <table className="w-full text-left text-sm">
-      <thead>
-        <tr className="border-b border-black/10 dark:border-white/15">
-          <th className="py-2 pr-4 font-medium">#</th>
-          <th className="py-2 pr-4 font-medium">Name</th>
-          <th className="py-2 pr-4 font-medium">Position(s)</th>
-          <th className="py-2 pr-4 font-medium">Nickname</th>
-          <th className="py-2 pr-4 font-medium" />
-        </tr>
-      </thead>
-      <tbody>
-        {players.map((player) => (
-          <tr
-            key={player._id}
-            className="relative border-b border-black/5 hover:bg-black/[0.03] dark:border-white/10 dark:hover:bg-white/[0.05]"
-          >
-            <td className="py-2 pr-4">
-              <Link
-                href={`/players/${player._id}`}
-                className="absolute inset-0"
-                aria-label={`View ${player.firstName} ${player.surname}`}
-              />
-              {player.number ?? "—"}
-            </td>
-            <td className="py-2 pr-4">
-              {player.firstName} {player.surname}
-            </td>
-            <td className="py-2 pr-4">{player.positions.join(", ")}</td>
-            <td className="py-2 pr-4">{player.nickname ?? ""}</td>
-            <td className="py-2 pr-4 text-right">
-              <Link
-                href={`/players/${player._id}/edit`}
-                aria-label={`Edit ${player.firstName} ${player.surname}`}
-                title="Edit"
-                className="relative z-10 text-black/60 hover:text-black dark:text-white/60 dark:hover:text-white"
-              >
-                ✎
-              </Link>
-            </td>
+    <Card flush>
+      <table className="wr-table">
+        <thead>
+          <tr>
+            <th className="w-16">#</th>
+            <th>Name</th>
+            <th>Position(s)</th>
+            <th>Nickname</th>
+            <th className="wr-right w-24">Edit</th>
           </tr>
-        ))}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {players.map((player) => (
+            <tr key={player._id} className="relative">
+              <td className="wr-num">
+                {/* Whole-row hit target; the name below is styled as the
+                    visible link. */}
+                <Link
+                  href={`/players/${player._id}`}
+                  className="absolute inset-0"
+                  aria-label={`View ${player.firstName} ${player.surname}`}
+                />
+                {player.number ?? "—"}
+              </td>
+              <td>
+                <span className="text-[color:var(--link)] underline underline-offset-[.15em]">
+                  {player.firstName} {player.surname}
+                </span>
+              </td>
+              <td className="t-label text-fg-secondary">
+                {player.positions.join(", ")}
+              </td>
+              <td>{player.nickname ?? "—"}</td>
+              <td className="wr-right">
+                <ButtonLink
+                  href={`/players/${player._id}/edit`}
+                  variant="secondary"
+                  size="sm"
+                  className="relative z-10"
+                >
+                  Edit
+                  <span className="sr-only">
+                    {" "}
+                    {player.firstName} {player.surname}
+                  </span>
+                </ButtonLink>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </Card>
   );
 }
 
@@ -65,24 +81,20 @@ export default async function PlayersPage() {
     .sort(compareByShirtNumber);
 
   return (
-    <div className="flex flex-col gap-8">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Players</h1>
-        <Link
-          href="/players/new"
-          className="rounded border border-black/20 px-3 py-1.5 text-sm font-medium hover:bg-black/[0.03] dark:border-white/20 dark:hover:bg-white/[0.05]"
-        >
-          Add new player
-        </Link>
-      </div>
+    <div className="flex flex-col gap-10">
+      <PageHeader
+        eyebrow="Database"
+        title="Players"
+        actions={<ButtonLink href="/players/new">Add new player</ButtonLink>}
+      />
 
-      <div className="flex flex-col gap-3" data-testid="active-section">
-        <h2 className="text-xl font-semibold">Active ({active.length})</h2>
+      <div className="flex flex-col gap-4" data-testid="active-section">
+        <SectionHeading count={active.length}>Active</SectionHeading>
         <RosterTable players={active} />
       </div>
 
-      <div className="flex flex-col gap-3" data-testid="inactive-section">
-        <h2 className="text-xl font-semibold">Inactive ({inactive.length})</h2>
+      <div className="flex flex-col gap-4" data-testid="inactive-section">
+        <SectionHeading count={inactive.length}>Inactive</SectionHeading>
         <RosterTable players={inactive} />
       </div>
     </div>

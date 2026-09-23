@@ -1,0 +1,361 @@
+/* Component classes for the Peterborough Warriors design system.
+   Each block mirrors a component in the design-system bundle
+   (components/{core,forms,feedback,navigation,data}/*.jsx) with the same
+   tokens and values, expressed as classes so hover, focus and disabled
+   states work from CSS instead of per-component React state. The React
+   wrappers live in app/_ui/. */
+@layer components {
+  /* Weight jumps go 400 → 700. font-variation-settings replaces the whole
+     axis list, so bold needs its own declaration rather than font-weight. */
+  .wr-strong {
+    font-variation-settings:
+      "wdth" var(--wr-w-normal),
+      "wght" 700;
+  }
+
+  /* ---- Button (core/Button) ---- */
+  .wr-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--wr-space-2);
+    white-space: nowrap;
+    font-family: var(--wr-font-body);
+    font-variation-settings:
+      "wdth" var(--wr-w-condensed),
+      "wght" 600;
+    letter-spacing: var(--wr-ls-caps);
+    text-transform: uppercase;
+    text-decoration: none;
+    line-height: var(--wr-lh-body);
+    border-radius: var(--wr-radius-sm);
+    border: var(--wr-bw-hair) solid transparent;
+    cursor: pointer;
+    transition: all var(--wr-dur-fast) var(--wr-ease);
+    padding: var(--wr-space-2) var(--wr-space-4);
+    font-size: var(--wr-text-sm);
+  }
+  .wr-btn--sm {
+    padding: var(--wr-space-1) var(--wr-space-3);
+    font-size: var(--wr-text-micro);
+  }
+  .wr-btn--lg {
+    padding: var(--wr-space-3) var(--wr-space-6);
+    font-size: var(--wr-text-body-sm);
+  }
+  .wr-btn--primary {
+    background: var(--action-bg);
+    color: var(--action-fg);
+  }
+  .wr-btn--primary:hover {
+    background: var(--action-hover);
+    color: var(--action-fg);
+  }
+  .wr-btn--secondary {
+    background: transparent;
+    color: var(--fg-primary);
+    border-color: var(--border-functional);
+  }
+  .wr-btn--secondary:hover {
+    background: var(--bg-hover);
+    color: var(--fg-primary);
+  }
+  .wr-btn--ghost {
+    background: transparent;
+    color: var(--fg-secondary);
+  }
+  .wr-btn--ghost:hover {
+    background: var(--bg-hover);
+    color: var(--fg-primary);
+  }
+  .wr-btn--danger {
+    background: var(--st-danger-icon);
+    color: #ffffff;
+  }
+  .wr-btn--danger:hover {
+    color: #ffffff;
+    filter: brightness(1.1);
+  }
+  .wr-btn:disabled,
+  .wr-btn:disabled:hover {
+    background: var(--bg-disabled);
+    color: var(--fg-disabled);
+    border-color: transparent;
+    filter: none;
+    cursor: not-allowed;
+  }
+
+  /* ---- Badge (core/Badge) ---- */
+  .wr-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--wr-space-1);
+    font-family: var(--wr-font-body);
+    font-variation-settings:
+      "wdth" var(--wr-w-condensed),
+      "wght" 600;
+    font-size: var(--wr-text-micro);
+    letter-spacing: var(--wr-ls-label);
+    text-transform: uppercase;
+    line-height: var(--wr-lh-tight);
+    white-space: nowrap;
+    padding: var(--wr-space-1) var(--wr-space-2);
+    border-radius: var(--wr-radius-xs);
+    border: var(--wr-bw-hair) solid var(--border-hairline);
+    background: var(--bg-sunken);
+    color: var(--fg-secondary);
+  }
+  .wr-badge--success {
+    background: var(--st-success-surface);
+    color: var(--st-success-fg);
+    border-color: var(--st-success-border);
+  }
+  .wr-badge--warning {
+    background: var(--st-warning-surface);
+    color: var(--st-warning-fg);
+    border-color: var(--st-warning-border);
+  }
+  .wr-badge--danger {
+    background: var(--st-danger-surface);
+    color: var(--st-danger-fg);
+    border-color: var(--st-danger-border);
+  }
+  .wr-badge--info {
+    background: var(--st-info-surface);
+    color: var(--st-info-fg);
+    border-color: var(--st-info-border);
+  }
+
+  /* ---- Card (core/Card, elevation 1) ---- */
+  .wr-card {
+    background: var(--e1-bg);
+    border: var(--wr-bw-hair) solid var(--border-hairline);
+    border-radius: var(--wr-radius-md);
+    box-shadow: var(--e1);
+    padding: var(--wr-space-6);
+  }
+  .wr-card--flush {
+    padding: 0;
+    overflow: hidden;
+  }
+
+  /* ---- Stripe (core/Stripe): the jersey stripe, always full-bleed ---- */
+  /* content-box so the 2px core survives base.css's global border-box:
+     4px rule, 2px gap, 2px core, 2px gap, 4px rule. */
+  .wr-stripe {
+    box-sizing: content-box;
+    border-top: var(--wr-bw-heavy) solid var(--stripe);
+    border-bottom: var(--wr-bw-heavy) solid var(--stripe);
+    height: var(--wr-bw-thick);
+    padding-block: var(--wr-bw-thick);
+    background: var(--stripe-mid);
+    background-clip: content-box;
+    margin: 0;
+  }
+
+  /* ---- Message (feedback/Message) ---- */
+  .wr-message {
+    display: flex;
+    gap: var(--wr-space-3);
+    padding: var(--wr-space-4);
+    border-radius: var(--wr-radius-sm);
+    border: var(--wr-bw-hair) solid var(--st-info-border);
+    background: var(--st-info-surface);
+    color: var(--st-info-fg);
+    --wr-message-icon: var(--st-info-icon);
+  }
+  .wr-message--success {
+    border-color: var(--st-success-border);
+    background: var(--st-success-surface);
+    color: var(--st-success-fg);
+    --wr-message-icon: var(--st-success-icon);
+  }
+  .wr-message--warning {
+    border-color: var(--st-warning-border);
+    background: var(--st-warning-surface);
+    color: var(--st-warning-fg);
+    --wr-message-icon: var(--st-warning-icon);
+  }
+  .wr-message--danger {
+    border-color: var(--st-danger-border);
+    background: var(--st-danger-surface);
+    color: var(--st-danger-fg);
+    --wr-message-icon: var(--st-danger-icon);
+  }
+  .wr-message__glyph {
+    flex: 0 0 auto;
+    font-family: var(--wr-font-mono);
+    font-variation-settings: "wght" 700;
+    font-size: var(--wr-text-body);
+    line-height: 1.5;
+    color: var(--wr-message-icon);
+  }
+  .wr-message__title {
+    display: block;
+    font-family: var(--wr-font-display);
+    font-variation-settings:
+      "wdth" var(--wr-w-expanded),
+      "wght" 700;
+    font-size: var(--wr-text-body-sm);
+  }
+  .wr-message__body {
+    margin: 2px 0 0;
+    font-size: var(--wr-text-sm);
+    opacity: 0.9;
+  }
+
+  /* ---- TextField / SelectField (forms/*) ---- */
+  .wr-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--wr-space-2);
+  }
+  .wr-field__label {
+    font-family: var(--wr-font-body);
+    font-variation-settings:
+      "wdth" var(--wr-w-condensed),
+      "wght" 600;
+    font-size: var(--wr-text-label);
+    letter-spacing: var(--wr-ls-label);
+    text-transform: uppercase;
+    line-height: var(--wr-lh-tight);
+    color: var(--fg-secondary);
+    padding: 0;
+  }
+  .wr-input {
+    background: var(--bg-surface);
+    color: var(--fg-primary);
+    border: var(--wr-bw-hair) solid var(--border-functional);
+    border-radius: var(--wr-radius-sm);
+    padding: var(--wr-space-2) var(--wr-space-3);
+    font-family: var(--wr-font-body);
+    font-size: var(--wr-text-body-sm);
+    line-height: var(--wr-lh-body);
+    width: 100%;
+    transition: border-color var(--wr-dur-fast) var(--wr-ease);
+  }
+  .wr-input::placeholder {
+    color: var(--fg-placeholder);
+  }
+  .wr-input[aria-invalid="true"] {
+    border-color: var(--st-danger-icon);
+  }
+  .wr-input:disabled {
+    background: var(--bg-disabled);
+    color: var(--fg-disabled);
+  }
+  .wr-field__error {
+    font-size: var(--wr-text-xs);
+    color: var(--st-danger-fg);
+    margin: 0;
+  }
+  .wr-field__hint {
+    font-size: var(--wr-text-xs);
+    color: var(--fg-secondary);
+    margin: 0;
+  }
+  /* Checkbox and radio groups. The system defines no custom control, so the
+     native one is kept and tinted with the action colour. */
+  .wr-fieldset {
+    display: flex;
+    flex-direction: column;
+    gap: var(--wr-space-2);
+    border: 0;
+    padding: 0;
+    margin: 0;
+    min-width: 0;
+  }
+  .wr-choice {
+    display: flex;
+    align-items: center;
+    gap: var(--wr-space-2);
+    font-size: var(--wr-text-body-sm);
+    cursor: pointer;
+  }
+  .wr-choice input {
+    width: 1rem;
+    height: 1rem;
+    margin: 0;
+    accent-color: var(--action-bg);
+    cursor: pointer;
+  }
+
+  /* ---- DataTable (data/DataTable) ---- */
+  .wr-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--wr-text-body-sm);
+    text-align: left;
+  }
+  .wr-table th {
+    background: var(--bg-sunken);
+    color: var(--fg-secondary);
+    text-align: left;
+    font-family: var(--wr-font-body);
+    font-variation-settings:
+      "wdth" var(--wr-w-condensed),
+      "wght" 600;
+    font-size: var(--wr-text-micro);
+    letter-spacing: var(--wr-ls-label);
+    text-transform: uppercase;
+    line-height: var(--wr-lh-tight);
+    padding: var(--wr-space-3);
+    border-bottom: var(--wr-bw-hair) solid var(--border-hairline);
+  }
+  .wr-table td {
+    padding: var(--wr-space-3);
+    border-bottom: var(--wr-bw-hair) solid var(--border-hairline);
+    vertical-align: middle;
+  }
+  .wr-table tbody tr:last-child td {
+    border-bottom: 0;
+  }
+  .wr-table tbody tr {
+    transition: background var(--wr-dur-fast) var(--wr-ease);
+  }
+  .wr-table tbody tr:hover {
+    background: var(--bg-hover);
+  }
+  .wr-table .wr-num {
+    font-family: var(--wr-font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+  .wr-table .wr-right {
+    text-align: right;
+  }
+
+  /* ---- SiteNav (navigation/SiteNav) ---- */
+  .wr-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--wr-space-1);
+  }
+  .wr-nav__link {
+    font-family: var(--wr-font-body);
+    font-variation-settings:
+      "wdth" var(--wr-w-condensed),
+      "wght" 600;
+    font-size: var(--wr-text-label);
+    letter-spacing: var(--wr-ls-label);
+    text-transform: uppercase;
+    text-decoration: none;
+    line-height: var(--wr-lh-tight);
+    color: var(--fg-secondary);
+    padding: var(--wr-space-3) var(--wr-space-4);
+    border-bottom: var(--wr-bw-thick) solid transparent;
+    margin-bottom: -1px;
+    transition:
+      color var(--wr-dur-fast) var(--wr-ease),
+      background var(--wr-dur-fast) var(--wr-ease);
+  }
+  .wr-nav__link:hover {
+    color: var(--fg-primary);
+    background: var(--bg-hover);
+    text-decoration: none;
+  }
+  .wr-nav__link[aria-current="page"] {
+    color: var(--fg-primary);
+    background: transparent;
+    border-bottom-color: var(--identity-mark);
+  }
+}

@@ -1,0 +1,59 @@
+/* TIER 1 — kit, neutral ramp, optional accent, status hues. */
+:root {
+  --wr-kit-black: #000000;
+  --wr-kit-white: #ffffff;
+
+  --wr-ink-50: #f4f7fa;
+  --wr-ink-100: #e8eef2;
+  --wr-ink-200: #d6dde3;
+  --wr-ink-300: #c1cad1;
+  --wr-ink-400: #a9b3bc;
+  --wr-ink-500: #909ba4;
+  --wr-ink-600: #77828b;
+  --wr-ink-700: #606a72;
+  --wr-ink-800: #4b545b;
+  --wr-ink-900: #373f45;
+  --wr-ink-950: #262c31;
+  --wr-ink-975: #181c20;
+  --wr-ink-1000: #0c1013;
+
+  --wr-navy-50: #f0f8ff;
+  --wr-navy-100: #ddf0ff;
+  --wr-navy-200: #bce1fe;
+  --wr-navy-300: #a0cff3;
+  --wr-navy-400: #82b9e2;
+  --wr-navy-500: #65a0cc;
+  --wr-navy-600: #4c87b2;
+  --wr-navy-700: #356f97;
+  --wr-navy-800: #22587c;
+  --wr-navy-900: #114261;
+  --wr-navy-950: #052e47;
+  --wr-navy-975: #011e32;
+  --wr-navy-1000: #00111f;
+
+  --wr-success-50: #eefaf6;
+  --wr-success-200: #b6e8da;
+  --wr-success-400: #4dcaad;
+  --wr-success-700: #007b66;
+  --wr-success-800: #006150;
+  --wr-success-900: #00493c;
+  --wr-success-950: #003329;
+  --wr-success-bright: #3cf0cb;
+
+  --wr-warning-50: #fff4ef;
+  --wr-warning-200: #fcd2ba;
+  --wr-warning-400: #f09a68;
+  --wr-warning-600: #c75e0c;
+  --wr-warning-800: #833b00;
+  --wr-warning-900: #642b00;
+  --wr-warning-950: #471d00;
+  --wr-warning-bright: #ffa571;
+
+  --wr-danger-50: #fff4f3;
+  --wr-danger-200: #ffcecc;
+  --wr-danger-400: #ff8a8c;
+  --wr-danger-800: #9d0026;
+  --wr-danger-900: #78001b;
+  --wr-danger-950: #570010;
+  --wr-danger-bright: #e93a4e;
+}

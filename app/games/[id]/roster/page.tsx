@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { getGame, listPlayers } from "@/lib/repositories";
 import { compareByShirtNumber } from "@/lib/derived/player-order";
 import { RosterForm } from "../../RosterForm";
+import { PageHeader } from "@/app/_ui";
 
 export default async function GameRosterPage({
   params,
@@ -22,10 +23,14 @@ export default async function GameRosterPage({
     .sort(compareByShirtNumber);
 
   return (
-    <div className="flex flex-col gap-3">
-      <h1 className="text-2xl font-semibold">
-        Manage roster — vs {game.opponentTeam.name}
-      </h1>
+    <div className="flex flex-col gap-8">
+      <PageHeader
+        back={{
+          href: `/games/${game._id}`,
+          label: `vs ${game.opponentTeam.name}`,
+        }}
+        title="Manage roster"
+      />
       <RosterForm game={game} pickerPlayers={pickerPlayers} />
     </div>
   );

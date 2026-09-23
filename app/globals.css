@@ -1,26 +1,41 @@
 @import "tailwindcss";
 
+/* Peterborough Warriors design system. tokens/ and base.css are vendored
+   verbatim from the claude.ai/design project; components.css translates
+   its component bundle into classes. */
+@import "./styles/warriors/tokens/colors.css";
+@import "./styles/warriors/tokens/typography.css";
+@import "./styles/warriors/tokens/spacing.css";
+@import "./styles/warriors/tokens/shape.css";
+@import "./styles/warriors/tokens/elevation.css";
+@import "./styles/warriors/tokens/motion.css";
+@import "./styles/warriors/tokens/themes.css";
+/* Layered so Tailwind utilities can still override element defaults —
+   unlayered styles would beat every utility. */
+@import "./styles/warriors/base.css" layer(base);
+@import "./styles/warriors/components.css";
+
+/* The design system names its faces 'Archivo' and 'Chivo Mono'; next/font
+   self-hosts them under generated family names, exposed as these vars. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --wr-font-display: var(--font-archivo), system-ui, sans-serif;
+  --wr-font-body: var(--font-archivo), system-ui, sans-serif;
+  --wr-font-mono: var(--font-chivo-mono), ui-monospace, monospace;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --font-sans: var(--wr-font-body);
+  --font-mono: var(--wr-font-mono);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+  --color-page: var(--bg-page);
+  --color-surface: var(--bg-surface);
+  --color-sunken: var(--bg-sunken);
+  --color-hover: var(--bg-hover);
+  --color-fg: var(--fg-primary);
+  --color-fg-secondary: var(--fg-secondary);
+  --color-hairline: var(--border-hairline);
+  --color-danger: var(--st-danger-fg);
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  --container-page: var(--wr-container);
+  --container-measure: var(--wr-measure);
 }

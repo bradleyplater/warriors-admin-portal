@@ -70,7 +70,7 @@ test.describe("game detail page shows the derived score and period breakdown", (
     await expect(page.getByTestId("period-1-opponent")).toHaveText("0");
     await expect(page.getByTestId("period-2-opponent")).toHaveText("0");
     await expect(page.getByTestId("period-3-opponent")).toHaveText("1");
-    await expect(page.getByRole("heading", { name: /— 2-1$/ })).toBeVisible();
+    await expect(page.getByTestId("final-score")).toHaveText("2 — 1");
     await expect(page.getByTestId("shootout-note")).toHaveCount(0);
 
     // Shootout goals are excluded from every period and shown as a
@@ -81,9 +81,9 @@ test.describe("game detail page shows the derived score and period breakdown", (
 
     await expect(page.getByTestId("period-1-team")).toHaveText("1");
     await expect(page.getByTestId("period-1-opponent")).toHaveText("0");
-    await expect(page.getByRole("heading", { name: /— 3-1$/ })).toBeVisible();
+    await expect(page.getByTestId("final-score")).toHaveText("3 — 1");
     await expect(page.getByTestId("shootout-note")).toHaveText(
-      "Decided by shootout — Team won 2-1",
+      "Decided by shootout — Warriors won 2-1",
     );
   });
 
@@ -111,6 +111,6 @@ test.describe("game detail page shows the derived score and period breakdown", (
     await page.getByRole("button", { name: "Delete goal" }).click();
     await expect(page).toHaveURL(new RegExp(`/games/${gameId}$`));
     await expect(page.getByTestId("period-3-team")).toHaveText("0");
-    await expect(page.getByRole("heading", { name: /— 0-0$/ })).toBeVisible();
+    await expect(page.getByTestId("final-score")).toHaveText("0 — 0");
   });
 });

@@ -2,21 +2,17 @@
 
 import { useActionState } from "react";
 import type { Game, Player } from "@/lib/schemas";
+import {
+  Button,
+  ButtonLink,
+  Card,
+  Choice,
+  FieldErrors,
+  FormActions,
+  Message,
+} from "@/app/_ui";
 import { updateGameRosterAction } from "./actions";
 import { initialGameFormState, type GameFormState } from "./form-state";
-
-function FieldErrors({ messages }: { messages?: string[] }) {
-  if (!messages || messages.length === 0) return null;
-  return (
-    <div className="flex flex-col gap-1">
-      {messages.map((message) => (
-        <p key={message} className="text-sm text-red-600">
-          {message}
-        </p>
-      ))}
-    </div>
-  );
-}
 
 type RosterFormProps = {
   game: Game;
@@ -43,33 +39,48 @@ export function RosterForm({ game, pickerPlayers }: RosterFormProps) {
   const rosterKey = [...rosteredIds].sort().join(",");
 
   return (
-    <form action={formAction} className="flex max-w-sm flex-col gap-4">
-      <fieldset key={rosterKey} className="flex flex-col gap-1">
-        <legend>Roster</legend>
-        {pickerPlayers.map((player) => (
-          <label key={player._id} className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              name="roster"
-              value={player._id}
-              defaultChecked={rosteredIds.has(player._id)}
-            />
-            #{player.number ?? "—"} {player.firstName} {player.surname}
-            {!player.active && " (inactive)"}
-          </label>
-        ))}
+    <form action={formAction} className="flex max-w-3xl flex-col gap-5">
+      {state.errors.form?.map((message) => (
+        <Message key={message} tone="danger" title="Not saved">
+          {message}
+        </Message>
+      ))}
+
+      <fieldset key={rosterKey} className="wr-fieldset">
+        <legend className="wr-field__label mb-3">Roster</legend>
+        <Card>
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-x-4 gap-y-2">
+            {pickerPlayers.map((player) => (
+              <Choice
+                key={player._id}
+                type="checkbox"
+                name="roster"
+                value={player._id}
+                defaultChecked={rosteredIds.has(player._id)}
+              >
+                <span className="t-data text-fg-secondary">
+                  #{player.number ?? "—"}
+                </span>
+                {player.firstName} {player.surname}
+                {!player.active && (
+                  <span className="t-label text-fg-secondary"> (inactive)</span>
+                )}
+              </Choice>
+            ))}
+          </div>
+        </Card>
       </fieldset>
 
       <FieldErrors messages={state.errors.roster} />
-      <FieldErrors messages={state.errors.form} />
 
-      <button
-        type="submit"
-        disabled={pending}
-        className="rounded border border-black/20 px-3 py-1.5 font-medium disabled:opacity-50 dark:border-white/20"
-      >
-        {pending ? "Saving…" : "Save roster"}
-      </button>
+      <FormActions>
+        <Button type="submit" size="lg" disabled={pending}>
+          {pending ? "Saving…" : "Save roster"}
+        </Button>
+        <ButtonLink href={`/games/${game._id}`} variant="ghost" size="lg">
+          Cancel
+        </ButtonLink>
+      </FormActions>
     </form>
   );
 }

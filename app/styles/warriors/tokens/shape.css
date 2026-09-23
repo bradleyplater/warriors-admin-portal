@@ -1,0 +1,12 @@
+/* The kit has no soft corners. */
+:root {
+  --wr-radius-none: 0;
+  --wr-radius-xs: 2px;
+  --wr-radius-sm: 4px;
+  --wr-radius-md: 6px;
+  --wr-radius-lg: 8px;
+
+  --wr-bw-hair: 1px;
+  --wr-bw-thick: 2px;
+  --wr-bw-heavy: 4px;
+}

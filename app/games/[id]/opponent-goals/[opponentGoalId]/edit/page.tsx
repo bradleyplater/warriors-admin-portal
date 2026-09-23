@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getGame } from "@/lib/repositories";
 import { OpponentGoalForm } from "../../../../OpponentGoalForm";
+import { PageHeader } from "@/app/_ui";
 
 export default async function EditOpponentGoalPage({
   params,
@@ -23,10 +24,14 @@ export default async function EditOpponentGoalPage({
   }
 
   return (
-    <div className="flex flex-col gap-3">
-      <h1 className="text-2xl font-semibold">
-        Edit opponent goal — vs {game.opponentTeam.name}
-      </h1>
+    <div className="flex flex-col gap-8">
+      <PageHeader
+        back={{
+          href: `/games/${game._id}`,
+          label: `vs ${game.opponentTeam.name}`,
+        }}
+        title="Edit opponent goal"
+      />
       <OpponentGoalForm gameId={game._id} initialValues={goal} />
     </div>
   );

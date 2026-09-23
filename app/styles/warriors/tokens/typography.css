@@ -1,0 +1,35 @@
+/* Archivo is a variable superfamily; the width axis carries the hierarchy. */
+:root {
+  --wr-font-display: "Archivo", system-ui, sans-serif;
+  --wr-font-body: "Archivo", system-ui, sans-serif;
+  --wr-font-mono: "Chivo Mono", ui-monospace, monospace;
+
+  --wr-w-condensed: 75; /* @kind other */
+  --wr-w-normal: 100; /* @kind other */
+  --wr-w-expanded: 125; /* @kind other */
+
+  --wr-text-display: 3.75rem;
+  --wr-text-h1: 1.875rem;
+  --wr-text-h2: 1.5rem;
+  --wr-text-h3: 1.125rem;
+  --wr-text-body: 1rem;
+  --wr-text-body-sm: 0.9375rem;
+  --wr-text-sm: 0.875rem;
+  --wr-text-xs: 0.8125rem;
+  --wr-text-label: 0.75rem;
+  --wr-text-micro: 0.6875rem;
+
+  --wr-lh-display: 1; /* @kind other */
+  --wr-lh-heading: 1.15; /* @kind other */
+  --wr-lh-body: 1.65; /* @kind other */
+  --wr-lh-tight: 1.3; /* @kind other */
+  --wr-ls-display: -0.02em;
+  --wr-ls-heading: -0.01em;
+  --wr-ls-label: 0.1em;
+  --wr-ls-caps: 0.04em;
+
+  /* semantic */
+  --font-display: var(--wr-font-display);
+  --font-body: var(--wr-font-body);
+  --font-data: var(--wr-font-mono);
+}
