@@ -7,7 +7,7 @@ Per the PRD: local development spins up Docker services with seeded data, and mo
 | Service | Image | Port | Purpose |
 |---|---|---|---|
 | `mongo` | `mongo:7` | 27017 | Local `HockeyTracker` database |
-| `minio` | `quay.io/minio/minio` | 9000 / 9001 | S3-compatible storage so the publish pipeline runs for real locally |
+| `localstack` | `localstack/localstack` | 4566 | S3-compatible storage so the publish pipeline runs for real locally |
 | `mongo-seed` | one-shot node script | — | Seeds the database on first run |
 
 ## First run
@@ -40,10 +40,10 @@ Everything environment-specific is in env vars (see [02 — Architecture](02-arc
 
 ```
 MONGODB_URI=mongodb://localhost:27017/HockeyTracker
-S3_ENDPOINT=http://localhost:9000
+S3_ENDPOINT=http://localhost:4566
 S3_BUCKET=warriors-local
-S3_ACCESS_KEY_ID=minioadmin
-S3_SECRET_ACCESS_KEY=minioadmin
+S3_ACCESS_KEY_ID=test
+S3_SECRET_ACCESS_KEY=test
 ```
 
 Swap `MONGODB_URI` (and the S3 values) for the production ones and the same build talks to the real database and bucket — no code changes. **Guard rail:** the migration/seed/reset commands refuse to run when the URI does not look local unless `--allow-remote` is passed explicitly, so a copied command can never wipe production.
@@ -59,6 +59,6 @@ Swap `MONGODB_URI` (and the S3 values) for the production ones and the same buil
 | `npm run test:e2e` / `test:e2e:ui` | Playwright headless / UI mode |
 | `npm run migrate -- --dry-run` | Migration scripts in dry-run |
 | `npm run publish:preview` | Generate JSON artifacts locally without uploading |
-| `npm run publish:run` | Run the full publish pipeline against the configured S3 bucket (MinIO locally) |
-| `npm run backup:run` | Back up every collection in the configured DB to S3 (MinIO locally) under a timestamped prefix |
+| `npm run publish:run` | Run the full publish pipeline against the configured S3 bucket (LocalStack locally) |
+| `npm run backup:run` | Back up every collection in the configured DB to S3 (LocalStack locally) under a timestamped prefix |
 | `npm run backup:restore -- --prefix=<ts>` | Restore a backup prefix into the configured DB; refuses a non-local target unless `--allow-remote` is passed |

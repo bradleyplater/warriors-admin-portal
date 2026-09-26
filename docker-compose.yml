@@ -22,33 +22,22 @@ services:
       MONGODB_URI: mongodb://mongo:27017/HockeyTracker
     restart: "no"
 
-  minio:
-    image: bitnami/minio
+  localstack:
+    image: localstack/localstack
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - "4566:4566"
     environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
+      SERVICES: s3
     volumes:
-      - minio-data:/bitnami/minio/data
+      - ./scripts/localstack-init.sh:/etc/localstack/init/ready.d/init-s3.sh
+      - localstack-data:/var/lib/localstack
     healthcheck:
-      test: ["CMD-SHELL", "curl -sf http://localhost:9000/minio/health/live"]
+      test: ["CMD", "awslocal", "s3", "ls", "s3://warriors-local"]
       interval: 5s
-      timeout: 5s
-      retries: 5
-
-  minio-init:
-    image: bitnami/minio-client
-    depends_on:
-      minio:
-        condition: service_healthy
-    entrypoint: >
-      /bin/sh -c "
-      mc alias set local http://minio:9000 minioadmin minioadmin &&
-      mc mb --ignore-existing local/warriors-local
-      "
+      timeout: 10s
+      retries: 12
+      start_period: 5s
 
 volumes:
   mongo-data:
-  minio-data:
+  localstack-data:

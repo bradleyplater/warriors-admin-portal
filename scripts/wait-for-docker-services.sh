@@ -10,7 +10,7 @@ docker compose up -d --wait || true
 
 fail=0
 
-for svc in mongo minio; do
+for svc in mongo localstack; do
   cid="$(docker compose ps -a -q "$svc")"
   status="$(docker inspect -f '{{.State.Health.Status}}' "$cid")"
   if [ "$status" != "healthy" ]; then
@@ -19,7 +19,7 @@ for svc in mongo minio; do
   fi
 done
 
-for svc in mongo-seed minio-init; do
+for svc in mongo-seed; do
   cid="$(docker compose ps -a -q "$svc")"
   code="$(docker inspect -f '{{.State.ExitCode}}' "$cid")"
   if [ "$code" != "0" ]; then

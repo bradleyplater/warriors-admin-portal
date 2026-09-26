@@ -75,9 +75,9 @@ All environment-specific values are env vars — switching from local Docker to 
 | Variable | Local (Docker) | Production |
 |---|---|---|
 | `MONGODB_URI` | `mongodb://localhost:27017/HockeyTracker` | Atlas/production connection string |
-| `S3_ENDPOINT` | MinIO `http://localhost:9000` | real AWS endpoint (unset = default) |
+| `S3_ENDPOINT` | LocalStack `http://localhost:4566` | real AWS endpoint (unset = default) |
 | `S3_BUCKET` | `warriors-local` | production bucket |
-| `S3_ACCESS_KEY_ID` / `S3_SECRET_ACCESS_KEY` | MinIO defaults | IAM credentials |
+| `S3_ACCESS_KEY_ID` / `S3_SECRET_ACCESS_KEY` | `test` / `test` (LocalStack) | IAM credentials |
 | `CDN_INVALIDATION` | disabled | CloudFront distribution ID (optional) |
 
 ## Auth seam (future)
