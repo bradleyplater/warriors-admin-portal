@@ -12,4 +12,7 @@ export const COLLECTION_NAMES = {
   game: "Game",
   team: "Team",
   seasons: "Seasons",
+  // New with add-opponents — no legacy counterpart, but named to match the
+  // capitalised-singular convention above.
+  opponent: "Opponent",
 } as const;
