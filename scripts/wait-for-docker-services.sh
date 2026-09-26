@@ -33,4 +33,10 @@ if [ "$fail" -ne 0 ]; then
   exit 1
 fi
 
+# Create the S3 bucket inside LocalStack now that it's healthy.
+# awslocal is in PATH inside the container; this is more reliable than an
+# init-hooks script (which requires the file to be executable on the host).
+cid="$(docker compose ps -q localstack)"
+docker exec "$cid" awslocal s3 mb s3://warriors-local 2>/dev/null || true
+
 echo "All services healthy and seeded."
