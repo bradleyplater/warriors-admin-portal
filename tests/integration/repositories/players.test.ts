@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import { getDb } from "../../../lib/mongodb";
 
 interface RawDoc {
@@ -34,6 +34,13 @@ function testPlayerInput(
 
 describe("players repository", () => {
   const createdIds: string[] = [];
+
+  beforeAll(async () => {
+    const db = await getDb();
+    await db
+      .collection("Player")
+      .deleteMany({ $or: [{ firstName: "Zztest" }, { number: { $in: [88, 89, 90, 92, 93, 94, 95, 96] } }] });
+  });
 
   afterEach(async () => {
     while (createdIds.length > 0) {

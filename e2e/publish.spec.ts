@@ -2,6 +2,7 @@ import { existsSync } from "node:fs";
 import { GetObjectCommand } from "@aws-sdk/client-s3";
 import { expect, test } from "@playwright/test";
 import { getS3Client } from "@/lib/s3";
+import { deletePlayer, listPlayers } from "@/lib/repositories";
 
 // Core Journey #6 (docs/05-testing-strategy.md) / KAN-32's acceptance
 // criteria: change data -> indicator appears -> publish -> indicator
@@ -17,6 +18,16 @@ if (existsSync(".env.local")) {
 test.describe.configure({ mode: "serial" });
 
 test.describe("publish flow", () => {
+  test.afterAll(async () => {
+    const players = await listPlayers();
+    const testPlayer = players.find(
+      (p) => p.firstName === "Publish" && p.surname === "Journey",
+    );
+    if (testPlayer) {
+      await deletePlayer(testPlayer._id);
+    }
+  });
+
   test("editing a player surfaces the indicator, publishing clears it, and the artifact reflects the change", async ({
     page,
   }) => {
