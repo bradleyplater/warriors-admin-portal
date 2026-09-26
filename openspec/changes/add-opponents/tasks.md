@@ -49,8 +49,8 @@
 ## 8. Backfill migration (one step)
 
 - [ ] 8.1 Pull `distinct("opponentTeam.name")` with game counts from prod (read-only) and agree each raw name → canonical name with the user one at a time; commit `lib/migration/opponents/mapping.json`
-- [ ] 8.2 Implement `lib/migration/opponents/run.ts` + `run-cli.ts`: dry-run by default (fail on any unmapped raw name, warn on unused mapping entries, report opponents to create and games per opponent); `--apply` upserts opponents, swaps `name` → `opponentId` per raw name, then verifies no game still has `name`/lacks `opponentId` and every game passes `GameSchema`; idempotent on re-run; add an npm script run through `scripts/with-env.mjs`
-- [ ] 8.3 Integration tests for the migration: dry-run writes nothing, unmapped name blocks apply, apply maps variants to one opponent, re-run is a no-op, reuses an existing same-named opponent
+- [x] 8.2 Implement `lib/migration/opponents/run.ts` + `run-cli.ts`: dry-run by default (fail on any unmapped raw name, warn on unused mapping entries, report opponents to create and games per opponent); `--apply` upserts opponents, swaps `name` → `opponentId` per raw name, then verifies no game still has `name`/lacks `opponentId` and every game passes `GameSchema`; idempotent on re-run; add an npm script run through `scripts/with-env.mjs`
+- [x] 8.3 Integration tests for the migration: dry-run writes nothing, unmapped name blocks apply, apply maps variants to one opponent, re-run is a no-op, reuses an existing same-named opponent
 
 ## 9. Production rollout
 

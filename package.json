@@ -19,6 +19,8 @@
     "typecheck": "tsc --noEmit",
     "db:seed": "tsx seed/seed-cli.ts",
     "db:reset": "tsx seed/reset-cli.ts",
+    "migrate:opponents:preview": "tsx lib/migration/opponents/run-cli.ts",
+    "migrate:opponents:run": "tsx lib/migration/opponents/run-cli.ts --apply",
     "publish:preview": "tsx lib/publish/cli.ts",
     "publish:run": "tsx lib/publish/run-cli.ts",
     "publish:run:prod": "node scripts/with-env.mjs .env.production.local tsx lib/publish/run-cli.ts",
