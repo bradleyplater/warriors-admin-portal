@@ -58,5 +58,7 @@
 
 - [x] 7.1 Open a PR; the description states that the prod cleanup (section 1) has already run and must precede the merge
   - PR #35
-- [ ] 7.2 After merge: check how the website repo renders a player without `number` before the next real publish, then publish
-- [ ] 7.3 Sync delta specs and archive the change
+- [x] 7.2 After merge: check how the website repo renders a player without `number` before the next real publish, then publish
+  - Confirmed by Bradley 2026-09-26: the website handles a player without `number`
+- [x] 7.3 Sync delta specs and archive the change
+  - Synced to openspec/specs/{entity-schemas,seed-data} and archived 2026-09-26

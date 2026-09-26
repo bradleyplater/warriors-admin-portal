@@ -26,16 +26,20 @@ The seed dataset SHALL include 4 seasons, 1 team, and enough players and games t
 - **WHEN** the seeded `games` collection is inspected
 - **THEN** every game type, both locations, bench penalties, goals with each assist count, every goal type including shootout, and games both with and without a netminder/award are present
 
-### Requirement: Legacy-shaped and drifted fixtures for migration testing
-The seed dataset SHALL include at least one player document carrying legacy fields (`position` string, `teams` array) alongside its target-shape fields, and the team document SHALL carry legacy `players[]`/`stats[]` arrays whose values deliberately do not match what the stats engine would compute from the seeded games.
+### Requirement: Seed dataset uses the target shape only
+The seed dataset SHALL contain only target-shape documents as defined in `docs/03-data-model.md`: no player SHALL carry the legacy `position`, `teams`, or `stats` fields, and the team document SHALL NOT carry `players[]` or `stats[]`. The dataset SHALL include at least one inactive player with no `number`, so the numberless-inactive case is exercised everywhere seed data is used.
 
-#### Scenario: Legacy player fixture present
+#### Scenario: No legacy player fields
 - **WHEN** the seeded `players` collection is inspected
-- **THEN** at least one player document has both target-shape fields (`positions`, `active`, `teamId`) and legacy fields (`position`, `teams`)
+- **THEN** no document has a `position`, `teams`, or `stats` field
 
-#### Scenario: Drifted team aggregate present
-- **WHEN** the seeded team document's legacy `stats[]` array is compared against totals derived from the seeded games
-- **THEN** at least one value differs, simulating real-world aggregate drift
+#### Scenario: No legacy team aggregates
+- **WHEN** the seeded team document is inspected
+- **THEN** it has no `players` or `stats` field
+
+#### Scenario: Numberless inactive player present
+- **WHEN** the seeded `players` collection is inspected
+- **THEN** at least one document has `active: false` and no `number` field
 
 ### Requirement: Database reset command
 The system SHALL provide an `npm run db:reset` command that drops the configured local database entirely and then runs the same seed function used elsewhere, leaving the database in the same state as a fresh seed of an empty database.
