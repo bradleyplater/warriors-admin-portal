@@ -1,50 +1,50 @@
 ## 1. Schemas
 
-- [ ] 1.1 Add `lib/schemas/opponent.ts`: `OpponentSchema` (`OPN` + 6 digits, trimmed non-empty name, optional `logo { key, contentType }` with allowlisted MIME types and a key-extension/content-type cross-check), a create-input variant, and a MIME → extension helper; export from `lib/schemas/index.ts`
-- [ ] 1.2 Unit tests for the opponent schema: with and without a logo, bad content type, extension mismatch, bad id, blank name
-- [ ] 1.3 Change `Game.opponentTeam` in `lib/schemas/game.ts` from `name` to `opponentId` (`OPN` format) in both stored and create-input schemas; update `game.test.ts` fixtures and add the id scenarios
+- [x] 1.1 Add `lib/schemas/opponent.ts`: `OpponentSchema` (`OPN` + 6 digits, trimmed non-empty name, optional `logo { key, contentType }` with allowlisted MIME types and a key-extension/content-type cross-check), a create-input variant, and a MIME → extension helper; export from `lib/schemas/index.ts`
+- [x] 1.2 Unit tests for the opponent schema: with and without a logo, bad content type, extension mismatch, bad id, blank name
+- [x] 1.3 Change `Game.opponentTeam` in `lib/schemas/game.ts` from `name` to `opponentId` (`OPN` format) in both stored and create-input schemas; update `game.test.ts` fixtures and add the id scenarios
 
 ## 2. Data access
 
-- [ ] 2.1 Add the `opponent: "Opponent"` collection name, a unique case-insensitive `name` index on opponents, and an `opponentTeam.opponentId` index on games in `lib/repositories/internal/`
-- [ ] 2.2 Add `lib/repositories/opponents.ts` (id generation exposed for upload-before-insert, create with collision retry, getById, listSortedByName, update name/logo, delete, typed duplicate-name error); register it in `lib/repositories/index.ts`
-- [ ] 2.3 Add `countByOpponentId` to the games repository and update any game read/write code that referenced `opponentTeam.name`
-- [ ] 2.4 Integration tests: OPN id format and retry, case-insensitive duplicate name → typed error, list ordering, count by opponent
+- [x] 2.1 Add the `opponent: "Opponent"` collection name, a unique case-insensitive `name` index on opponents, and an `opponentTeam.opponentId` index on games in `lib/repositories/internal/`
+- [x] 2.2 Add `lib/repositories/opponents.ts` (id generation exposed for upload-before-insert, create with collision retry, getById, listSortedByName, update name/logo, delete, typed duplicate-name error); register it in `lib/repositories/index.ts`
+- [x] 2.3 Add `countByOpponentId` to the games repository and update any game read/write code that referenced `opponentTeam.name`
+- [x] 2.4 Integration tests: OPN id format and retry, case-insensitive duplicate name → typed error, list ordering, count by opponent
 
 ## 3. Logo storage
 
-- [ ] 3.1 Add an opponent-logo storage module (build key `opponents/<id>/logo-<ms>.<ext>`, `PutObject` with Content-Type, `DeleteObject`) using `getS3Client()`/`S3_BUCKET`
-- [ ] 3.2 Add upload validation (allowlisted MIME, ≤ 5 MB, extension derived from MIME) with unit tests
-- [ ] 3.3 Set `experimental.serverActions.bodySizeLimit: "6mb"` (or the Next 16 equivalent) in `next.config.ts`
+- [x] 3.1 Add an opponent-logo storage module (build key `opponents/<id>/logo-<ms>.<ext>`, `PutObject` with Content-Type, `DeleteObject`) using `getS3Client()`/`S3_BUCKET`
+- [x] 3.2 Add upload validation (allowlisted MIME, ≤ 5 MB, extension derived from MIME) with unit tests
+- [x] 3.3 Set `experimental.serverActions.bodySizeLimit: "6mb"` (or the Next 16 equivalent) in `next.config.ts`
 - [ ] 3.4 Add `s3:DeleteObject` scoped to `opponents/*` to `infra/terraform/iam.tf` and run `terraform plan` (apply in task 9.1)
 
 ## 4. Opponent service and pages
 
-- [ ] 4.1 Opponent service: create (validate → uniqueness pre-check → upload → insert, deleting the upload on insert failure), update (rename and/or replace logo: new key, update doc, then delete old object), delete (block if referenced, with the count; otherwise delete doc then logo)
-- [ ] 4.2 Integration tests for the service against Mongo and Moto: create with/without logo, replace deletes the old object, blocked delete leaves doc and logo, unreferenced delete removes both, upload cleaned up on duplicate-name failure
-- [ ] 4.3 `/opponents` list page (per-request, sorted, logo or "No logo" placeholder, rows link to edit, "Add opponent" link)
-- [ ] 4.4 `/opponents/new` form (name + optional file) with server action and field-level errors
-- [ ] 4.5 `/opponents/[id]/edit` form (rename, current logo preview, replace logo, delete with blocked-reason message; 404 on unknown id)
-- [ ] 4.6 Serve logo previews in the portal from S3 (CDN URL in prod, emulator URL locally, or a small read-through route), consistent with how player images are displayed
-- [ ] 4.7 Add Opponents to the shell navigation in `app/layout.tsx`
+- [x] 4.1 Opponent service: create (validate → uniqueness pre-check → upload → insert, deleting the upload on insert failure), update (rename and/or replace logo: new key, update doc, then delete old object), delete (block if referenced, with the count; otherwise delete doc then logo)
+- [x] 4.2 Integration tests for the service against Mongo and Moto: create with/without logo, replace deletes the old object, blocked delete leaves doc and logo, unreferenced delete removes both, upload cleaned up on duplicate-name failure
+- [x] 4.3 `/opponents` list page (per-request, sorted, logo or "No logo" placeholder, rows link to edit, "Add opponent" link)
+- [x] 4.4 `/opponents/new` form (name + optional file) with server action and field-level errors
+- [x] 4.5 `/opponents/[id]/edit` form (rename, current logo preview, replace logo, delete with blocked-reason message; 404 on unknown id)
+- [x] 4.6 Serve logo previews in the portal from S3 (CDN URL in prod, emulator URL locally, or a small read-through route), consistent with how player images are displayed
+- [x] 4.7 Add Opponents to the shell navigation in `app/layout.tsx`
 
 ## 5. Games use the opponent reference
 
-- [ ] 5.1 Replace the free-text opponent field in `GameForm.tsx` with a picker of opponents sorted by name; update `form-parsing.ts` (+ tests) to produce `opponentId`
-- [ ] 5.2 Load opponents in `/games/new` and `/games/[id]/edit`; check the opponent exists in the create/edit server actions (field error if not)
-- [ ] 5.3 Resolve opponent names via an id → opponent map on `/games` (`GamesTable`), `/games/[id]`, and anywhere else that showed `opponentTeam.name` (e.g. player profile); update the affected page tests
+- [x] 5.1 Replace the free-text opponent field in `GameForm.tsx` with a picker of opponents sorted by name; update `form-parsing.ts` (+ tests) to produce `opponentId`
+- [x] 5.2 Load opponents in `/games/new` and `/games/[id]/edit`; check the opponent exists in the create/edit server actions (field error if not)
+- [x] 5.3 Resolve opponent names via an id → opponent map on `/games` (`GamesTable`), `/games/[id]`, and anywhere else that showed `opponentTeam.name` (e.g. player profile); update the affected page tests
 
 ## 6. Publish enrichment
 
-- [ ] 6.1 Load opponents in `lib/publish/generate.ts` and pass a map to the results generator; emit `opponentTeam` from the opponent name and `logoImage` from `logo.key` when present; throw on a dangling reference naming the game
-- [ ] 6.2 Update `lib/publish/schemas.ts`'s `logoImage` comment and the results/team artifact tests (with logo, without logo, rename changes the checksum, dangling reference throws)
+- [x] 6.1 Load opponents in `lib/publish/generate.ts` and pass a map to the results generator; emit `opponentTeam` from the opponent name and `logoImage` from `logo.key` when present; throw on a dangling reference naming the game
+- [x] 6.2 Update `lib/publish/schemas.ts`'s `logoImage` comment and the results/team artifact tests (with logo, without logo, rename changes the checksum, dangling reference throws)
 
 ## 7. Seed data and E2E
 
-- [ ] 7.1 Add seeded opponents (with logo, without logo, one unreferenced), point every seeded game at one, add `opponents` to the seed/reset collection set and the empty-check; update `seed/fixtures.test.ts`
-- [ ] 7.2 Update the existing e2e specs that type an opponent name (create-game, edit-game, etc.) to use the picker
-- [ ] 7.3 New `e2e/opponents.spec.ts`: create with logo, rename shows on a game, replace logo, blocked delete, delete unreferenced, nav link
-- [ ] 7.4 Run lint, typecheck, unit, integration, and full e2e locally; confirm CI is green
+- [x] 7.1 Add seeded opponents (with logo, without logo, one unreferenced), point every seeded game at one, add `opponents` to the seed/reset collection set and the empty-check; update `seed/fixtures.test.ts`
+- [x] 7.2 Update the existing e2e specs that type an opponent name (create-game, edit-game, etc.) to use the picker
+- [x] 7.3 New `e2e/opponents.spec.ts`: create with logo, rename shows on a game, replace logo, blocked delete, delete unreferenced, nav link
+- [x] 7.4 Run lint, typecheck, unit, integration, and full e2e locally; confirm CI is green
 
 ## 8. Backfill migration (one step)
 

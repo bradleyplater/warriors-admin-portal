@@ -39,8 +39,10 @@ Because the portal only runs locally, the only reason for presigned PUTs (hostin
 
 Presigned PUT was rejected: it needs CORS in Terraform, a confirm step, and orphan handling, all for a local-only tool.
 
-### D4. Create order: generate id → upload → insert
-Creating an opponent with a logo needs the id before the key exists. The repository exposes id generation, and the service validates the name (including a uniqueness pre-check) before uploading. That way a doomed request never writes to S3. If the insert still fails after upload (duplicate-name race, id collision retry), the service deletes the uploaded object before returning the error.
+### D4. Create order: validate → insert → upload → record logo
+Everything (name, file type and size) is validated before anything is written. The opponent document is then inserted (which is where the unique index rejects a duplicate name), and only then is the logo uploaded under the new id and recorded on the document. A duplicate name therefore never writes to S3. If the upload or the follow-up update fails, the service deletes the uploaded object (if any) and the new document, then rethrows.
+
+This replaces the original "generate id → upload → insert" plan, which would have needed id generation exposed outside the repository, plus a way to re-key an already-uploaded logo when an `_id` collision forced a retry.
 
 ### D5. Name uniqueness via a case-insensitive unique index
 A unique index on `name` with collation `{ locale: "en", strength: 2 }`, surfaced as a typed error, following the same pattern as the duplicate shirt-number error. This keeps "Cleveland Comets" from coming back as a near-duplicate later. Names are trimmed before storage.
@@ -56,7 +58,9 @@ Existence of the referenced opponent is checked in the game server actions, not 
 The service counts games with `opponentTeam.opponentId = id` (indexed). If the count is greater than zero, deletion is refused with the count. Otherwise it deletes the document and then the logo object. A soft-delete or `active` flag was rejected as unnecessary: an opponent nobody references can simply go.
 
 ### D8. Publish enrichment in `lib/publish/artifacts/results.ts`
-`generate.ts` loads opponents alongside games and passes an id → opponent map into the results generator. The generator emits `opponentTeam: opponent.name` and `logoImage: opponent.logo?.key` (omitted when absent). A missing opponent throws, naming the game, rather than publishing a partial entry. The existing `ResultArtifactSchema` already has `logoImage` optional, so only its "not generated" comment changes. Because checksums are content-based, renames and logo changes are picked up automatically as changed artifacts.
+`generate.ts` loads opponents alongside games and passes an id → opponent map into the results generator. The generator emits `opponentTeam: opponent.name` and `logoImage: opponent.logo?.key` (omitted when absent). A missing opponent throws, naming the game, rather than publishing a partial entry. The existing `ResultArtifactSchema` already has `logoImage` optional, so only its "not generated" comment changes. Because checksums are content-based, renames and logo changes are picked up automatically as changed artifacts. The publish status indicator also counts the Opponent collection's latest `updatedAt` (it has its own `{ updatedAt: -1 }` index), so a rename shows as an unpublished change just like a game edit.
+
+Logo previews inside the portal go through a small read-through route (`/opponents/[id]/logo`) that streams the object with its stored content type, plus a restrictive CSP and `nosniff`. This works the same against the local emulator and the real bucket, with no CDN URL to configure. Player images have no display precedent to follow.
 
 ### D9. IAM gains `s3:DeleteObject` on `opponents/*` only
 This is the minimum needed for D2 and D7 cleanup, scoped so the app still can't delete publish artifacts or backups. The CloudFront distribution already serves every path except `backups/`, so no CDN change is needed.
