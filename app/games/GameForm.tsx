@@ -1,7 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState, useEffect, useRef, useState } from "react";
-import type { Game, Player, Season } from "@/lib/schemas";
+import type { Game, Opponent, Player, Season } from "@/lib/schemas";
 import {
   Button,
   ButtonLink,
@@ -103,6 +104,9 @@ function RosterPicker({
 
 type GameFormProps = {
   seasons: Season[];
+  // Sorted by name. Opponents are only created on the Opponents page — this
+  // form picks from what already exists.
+  opponents: Opponent[];
   // Only needed in create mode — the edit form doesn't touch the roster,
   // that's handled by RosterForm on its own route.
   activePlayers?: Player[];
@@ -114,6 +118,7 @@ type GameFormProps = {
 
 export function GameForm({
   seasons,
+  opponents,
   activePlayers,
   rosterPlayers,
   initialValues,
@@ -169,13 +174,34 @@ export function GameForm({
           ))}
         </SelectField>
 
-        <TextField
-          id="opponentName"
-          name="opponentName"
+        <SelectField
+          id="opponentId"
+          name="opponentId"
           label="Opponent"
-          defaultValue={initialValues?.opponentTeam.name}
-          errors={state.errors.opponentName}
-        />
+          defaultValue={initialValues?.opponentTeam.opponentId ?? ""}
+          errors={state.errors.opponentId}
+          hint={
+            opponents.length === 0 ? (
+              <>
+                No opponents yet —{" "}
+                <Link href="/opponents/new">add one first</Link>.
+              </>
+            ) : (
+              <>
+                Missing one? <Link href="/opponents/new">Add an opponent</Link>.
+              </>
+            )
+          }
+        >
+          <option value="" disabled>
+            Select an opponent
+          </option>
+          {opponents.map((opponent) => (
+            <option key={opponent._id} value={opponent._id}>
+              {opponent.name}
+            </option>
+          ))}
+        </SelectField>
 
         <Fieldset legend="Game type" errors={state.errors.type}>
           {GAME_TYPES.map((type, index) => (

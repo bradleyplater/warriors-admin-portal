@@ -3,6 +3,7 @@ import { getGame, listPlayers } from "@/lib/repositories";
 import { compareByShirtNumber } from "@/lib/derived/player-order";
 import { AwardsForm } from "../../AwardsForm";
 import { PageHeader } from "@/app/_ui";
+import { getOpponentName } from "@/lib/opponents/names";
 
 export default async function GameAwardsPage({
   params,
@@ -15,6 +16,8 @@ export default async function GameAwardsPage({
   if (!game) {
     notFound();
   }
+
+  const opponentName = await getOpponentName(game.opponentTeam.opponentId);
 
   const players = await listPlayers();
   const rosterPlayers = game.team.roster
@@ -29,7 +32,7 @@ export default async function GameAwardsPage({
       <PageHeader
         back={{
           href: `/games/${game._id}`,
-          label: `vs ${game.opponentTeam.name}`,
+          label: `vs ${opponentName}`,
         }}
         title="Manage awards"
       />

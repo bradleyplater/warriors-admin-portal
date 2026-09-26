@@ -17,8 +17,8 @@ describe("fieldKeyFor", () => {
     expect(fieldKeyFor(["team", "roster", 1, "playerId"])).toBe("roster");
   });
 
-  it("maps the opponent name path to 'opponentName'", () => {
-    expect(fieldKeyFor(["opponentTeam", "name"])).toBe("opponentName");
+  it("maps the opponent id path to 'opponentId'", () => {
+    expect(fieldKeyFor(["opponentTeam", "opponentId"])).toBe("opponentId");
   });
 
   it("returns a plain top-level string key as-is", () => {
@@ -36,7 +36,7 @@ describe("mapFieldErrors", () => {
     const error = new z.ZodError([
       { code: "custom", message: "Roster cannot contain duplicate players", path: ["team", "roster", 1, "playerId"] },
       { code: "custom", message: "Roster cannot contain duplicate players", path: ["team", "roster", 2, "playerId"] },
-      { code: "custom", message: "Opponent name is required", path: ["opponentTeam", "name"] },
+      { code: "custom", message: "Opponent is required", path: ["opponentTeam", "opponentId"] },
       { code: "custom", message: "Invalid game type", path: ["type"] },
     ]);
 
@@ -45,7 +45,7 @@ describe("mapFieldErrors", () => {
         "Roster cannot contain duplicate players",
         "Roster cannot contain duplicate players",
       ],
-      opponentName: ["Opponent name is required"],
+      opponentId: ["Opponent is required"],
       type: ["Invalid game type"],
     });
   });
@@ -57,7 +57,7 @@ function baseFormData(): FormData {
   formData.set("seasonId", "SSN2324");
   formData.set("type", "LLIHC");
   formData.set("location", "AWAY");
-  formData.set("opponentName", "Test Opponent");
+  formData.set("opponentId", "OPN000001");
   formData.append("roster", "PLR000001");
   formData.append("roster", "PLR000002");
   return formData;
@@ -133,7 +133,7 @@ function baseGame(overrides: Partial<Game> = {}): Game {
       penalties: [],
     },
     opponentTeam: {
-      name: "Existing Opponent",
+      opponentId: "OPN000001",
       goals: [],
       penalties: [],
     },
@@ -149,7 +149,7 @@ function detailsFormData(overrides: Record<string, string> = {}): FormData {
   formData.set("seasonId", "SSN2223");
   formData.set("type", "LLIHC");
   formData.set("location", "AWAY");
-  formData.set("opponentName", "Renamed Opponent");
+  formData.set("opponentId", "OPN000002");
   for (const [key, value] of Object.entries(overrides)) {
     formData.set(key, value);
   }
@@ -179,14 +179,14 @@ describe("parseGameDetailsFormData", () => {
       expect(result.data.seasonId).toBe("SSN2223");
       expect(result.data.type).toBe("LLIHC");
       expect(result.data.location).toBe("AWAY");
-      expect(result.data.opponentTeam.name).toBe("Renamed Opponent");
+      expect(result.data.opponentTeam.opponentId).toBe("OPN000002");
       expect(result.data.team.roster).toEqual(existing.team.roster);
     }
   });
 
-  it("rejects an empty opponent name, same as creation", () => {
+  it("rejects an unselected opponent, same as creation", () => {
     const result = parseGameDetailsFormData(
-      detailsFormData({ opponentName: "" }),
+      detailsFormData({ opponentId: "" }),
       baseGame(),
     );
 
@@ -194,7 +194,7 @@ describe("parseGameDetailsFormData", () => {
     if (!result.success) {
       const issue = result.error.issues.find(
         (candidate) =>
-          candidate.path[0] === "opponentTeam" && candidate.path[1] === "name",
+          candidate.path[0] === "opponentTeam" && candidate.path[1] === "opponentId",
       );
       expect(issue).toBeDefined();
     }

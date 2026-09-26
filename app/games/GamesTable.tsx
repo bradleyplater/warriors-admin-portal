@@ -2,6 +2,7 @@ import Link from "next/link";
 import { deriveScore, type Score } from "@/lib/derived/score";
 import type { Game } from "@/lib/schemas";
 import { Badge, Card, EmptyState, type Tone } from "@/app/_ui";
+import { opponentNameFrom } from "@/lib/opponents/names";
 
 export function formatDate(date: Date): string {
   return date.toISOString().slice(0, 10);
@@ -23,7 +24,13 @@ function result(score: Score): { tone: Tone; label: string } {
   return { tone: "neutral", label: "Drew" };
 }
 
-export function GamesTable({ games }: { games: Game[] }) {
+export function GamesTable({
+  games,
+  opponentNames,
+}: {
+  games: Game[];
+  opponentNames: Map<string, string>;
+}) {
   if (games.length === 0) {
     return <EmptyState>None.</EmptyState>;
   }
@@ -44,6 +51,10 @@ export function GamesTable({ games }: { games: Game[] }) {
           {games.map((game) => {
             const score = deriveScore(game.team.goals, game.opponentTeam.goals);
             const { tone, label } = result(score);
+            const opponentName = opponentNameFrom(
+              opponentNames,
+              game.opponentTeam.opponentId,
+            );
             return (
               <tr key={game._id} className="relative">
                 <td className="wr-num">
@@ -52,13 +63,13 @@ export function GamesTable({ games }: { games: Game[] }) {
                   <Link
                     href={`/games/${game._id}`}
                     className="absolute inset-0"
-                    aria-label={`View game against ${game.opponentTeam.name} on ${formatDate(game.date)}`}
+                    aria-label={`View game against ${opponentName} on ${formatDate(game.date)}`}
                   />
                   {formatDate(game.date)}
                 </td>
                 <td>
                   <span className="text-[color:var(--link)] underline underline-offset-[.15em]">
-                    {game.opponentTeam.name}
+                    {opponentName}
                   </span>{" "}
                   <span className="t-label text-fg-secondary">
                     · {game.location === "HOME" ? "Home" : "Away"}

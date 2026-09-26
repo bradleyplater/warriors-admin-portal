@@ -7,6 +7,7 @@ import {
   type PlayerSeasonStats,
 } from "@/lib/derived/player-stats";
 import { formatDate } from "@/app/games/GamesTable";
+import { getOpponentNamesById, opponentNameFrom } from "@/lib/opponents/names";
 import { ButtonLink, Card, PageHeader, SectionHeading } from "@/app/_ui";
 import type { Game, Season } from "@/lib/schemas";
 
@@ -36,11 +37,13 @@ function SeasonSection({
   season,
   games,
   stats,
+  opponentNames,
 }: {
   playerId: string;
   season: Season;
   games: Game[];
   stats: PlayerSeasonStats;
+  opponentNames: Map<string, string>;
 }) {
   return (
     <div className="flex flex-col gap-4" data-testid={`season-${season._id}`}>
@@ -95,7 +98,10 @@ function SeasonSection({
                     <td className="wr-num">{formatDate(game.date)}</td>
                     <td>
                       <Link href={`/games/${game._id}`}>
-                        {game.opponentTeam.name}
+                        {opponentNameFrom(
+                          opponentNames,
+                          game.opponentTeam.opponentId,
+                        )}
                       </Link>
                     </td>
                     <td className="wr-num wr-right">{line.goals}</td>
@@ -125,7 +131,11 @@ export default async function PlayerProfilePage({
     notFound();
   }
 
-  const [games, seasons] = await Promise.all([listGames(), listSeasons()]);
+  const [games, seasons, opponentNames] = await Promise.all([
+    listGames(),
+    listSeasons(),
+    getOpponentNamesById(),
+  ]);
   const playerGames = games.filter((game) =>
     game.team.roster.some((entry) => entry.playerId === player._id),
   );
@@ -165,6 +175,7 @@ export default async function PlayerProfilePage({
             .filter((game) => game.seasonId === season._id)
             .sort((a, b) => a.date.getTime() - b.date.getTime())}
           stats={derivePlayerSeasonStats(games, player._id, season._id)}
+          opponentNames={opponentNames}
         />
       ))}
     </div>

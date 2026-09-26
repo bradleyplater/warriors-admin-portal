@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import type { ComponentProps, ReactNode } from "react";
 import { getGame, getSeason, listPlayers } from "@/lib/repositories";
+import { getOpponentName } from "@/lib/opponents/names";
 import { deriveScore } from "@/lib/derived/score";
 import { GOAL_TYPE_LABELS, PENALTY_CODE_LABELS } from "@/lib/schemas";
 import type { Player } from "@/lib/schemas";
@@ -139,9 +140,10 @@ export default async function GameDetailPage({
     notFound();
   }
 
-  const [season, players] = await Promise.all([
+  const [season, players, opponentName] = await Promise.all([
     getSeason(game.seasonId),
     listPlayers(),
+    getOpponentName(game.opponentTeam.opponentId),
   ]);
 
   const rosterPlayers = game.team.roster
@@ -156,7 +158,7 @@ export default async function GameDetailPage({
     <div className="flex flex-col gap-10">
       <PageHeader
         back={{ href: "/games", label: "Games" }}
-        title={`vs ${game.opponentTeam.name}`}
+        title={`vs ${opponentName}`}
         actions={
           <>
             <ButtonLink href={`/games/${game._id}/edit`} variant="secondary">
@@ -210,7 +212,7 @@ export default async function GameDetailPage({
                 <td className="wr-num wr-right wr-strong">{score.team}</td>
               </tr>
               <tr>
-                <td>{game.opponentTeam.name}</td>
+                <td>{opponentName}</td>
                 {score.periods.map((period, index) => (
                   <td
                     key={index}
@@ -234,7 +236,7 @@ export default async function GameDetailPage({
                 : `Decided by shootout — ${
                     score.shootout.team > score.shootout.opponent
                       ? "Warriors"
-                      : game.opponentTeam.name
+                      : opponentName
                   } won ${Math.max(score.shootout.team, score.shootout.opponent)}-${Math.min(score.shootout.team, score.shootout.opponent)}`}
             </p>
           )}

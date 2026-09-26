@@ -3,6 +3,7 @@ import { getGame, listPlayers } from "@/lib/repositories";
 import { compareByShirtNumber } from "@/lib/derived/player-order";
 import { GoalForm } from "../../../../GoalForm";
 import { PageHeader } from "@/app/_ui";
+import { getOpponentName } from "@/lib/opponents/names";
 
 export default async function EditGoalPage({
   params,
@@ -15,6 +16,8 @@ export default async function EditGoalPage({
   if (!game) {
     notFound();
   }
+
+  const opponentName = await getOpponentName(game.opponentTeam.opponentId);
 
   const goal = game.team.goals.find((entry) => entry._id === goalId);
 
@@ -35,7 +38,7 @@ export default async function EditGoalPage({
       <PageHeader
         back={{
           href: `/games/${game._id}`,
-          label: `vs ${game.opponentTeam.name}`,
+          label: `vs ${opponentName}`,
         }}
         title="Edit goal"
       />

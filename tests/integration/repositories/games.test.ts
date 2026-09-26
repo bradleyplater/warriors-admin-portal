@@ -34,7 +34,7 @@ function testGameInput(
       penalties: [],
     },
     opponentTeam: {
-      name: "Test Opponents",
+      opponentId: "OPN000001",
       goals: [],
       penalties: [],
     },
@@ -62,12 +62,12 @@ describe("games repository", () => {
     expect(created.createdAt.getTime()).toBe(created.updatedAt.getTime());
 
     const fetched = await getGame(created._id);
-    expect(fetched?.opponentTeam.name).toBe("Test Opponents");
+    expect(fetched?.opponentTeam.opponentId).toBe("OPN000001");
 
     const updated = await updateGame(created._id, {
-      opponentName: "Renamed Opponents",
+      opponentId: "OPN000002",
     });
-    expect(updated.opponentTeam.name).toBe("Renamed Opponents");
+    expect(updated.opponentTeam.opponentId).toBe("OPN000002");
     expect(updated.createdAt.getTime()).toBe(created.createdAt.getTime());
 
     await deleteGame(created._id);
@@ -482,7 +482,7 @@ describe("games repository", () => {
       const created = await createGame(
         testGameInput({
           opponentTeam: {
-            name: "Test Opponents",
+            opponentId: "OPN000001",
             goals: [{ scoredBy: "J. Smith", minute: 5, second: 0, type: "EVEN" }],
             penalties: [],
           },
@@ -512,7 +512,7 @@ describe("games repository", () => {
       const created = await createGame(
         testGameInput({
           opponentTeam: {
-            name: "Test Opponents",
+            opponentId: "OPN000001",
             goals: [{ scoredBy: "J. Smith", minute: 5, second: 0, type: "EVEN" }],
             penalties: [],
           },
@@ -554,7 +554,7 @@ describe("games repository", () => {
       const created = await createGame(
         testGameInput({
           opponentTeam: {
-            name: "Test Opponents",
+            opponentId: "OPN000001",
             goals: [
               { scoredBy: "J. Smith", minute: 5, second: 0, type: "EVEN" },
               { scoredBy: "A. Jones", minute: 10, second: 0, type: "PP" },
@@ -589,7 +589,7 @@ describe("games repository", () => {
       const created = await createGame(
         testGameInput({
           opponentTeam: {
-            name: "Test Opponents",
+            opponentId: "OPN000001",
             goals: [],
             penalties: [
               { offender: "J. Smith", minute: 2, second: 0, type: "TRIP", duration: 2 },
@@ -623,7 +623,7 @@ describe("games repository", () => {
       const created = await createGame(
         testGameInput({
           opponentTeam: {
-            name: "Test Opponents",
+            opponentId: "OPN000001",
             goals: [],
             penalties: [
               { offender: "J. Smith", minute: 2, second: 0, type: "TRIP", duration: 2 },
@@ -652,7 +652,7 @@ describe("games repository", () => {
       const created = await createGame(
         testGameInput({
           opponentTeam: {
-            name: "Test Opponents",
+            opponentId: "OPN000001",
             goals: [],
             penalties: [
               { offender: "J. Smith", minute: 2, second: 0, type: "TRIP", duration: 2 },
@@ -695,7 +695,7 @@ describe("games repository", () => {
       const created = await createGame(
         testGameInput({
           opponentTeam: {
-            name: "Test Opponents",
+            opponentId: "OPN000001",
             goals: [],
             penalties: [
               { offender: "J. Smith", minute: 2, second: 0, type: "TRIP", duration: 2 },
@@ -753,7 +753,7 @@ describe("games repository", () => {
       createdIds.push(created._id);
 
       const updated = await updateGame(created._id, {
-        opponentName: "Renamed Opponents",
+        opponentId: "OPN000002",
       });
       expect(updated.netminderPlayerId).toBe("PLRTEST1");
     });

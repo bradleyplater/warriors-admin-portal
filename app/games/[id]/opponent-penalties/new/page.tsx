@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { getGame } from "@/lib/repositories";
 import { OpponentPenaltyForm } from "../../../OpponentPenaltyForm";
 import { PageHeader } from "@/app/_ui";
+import { getOpponentName } from "@/lib/opponents/names";
 
 export default async function NewOpponentPenaltyPage({
   params,
@@ -15,12 +16,14 @@ export default async function NewOpponentPenaltyPage({
     notFound();
   }
 
+  const opponentName = await getOpponentName(game.opponentTeam.opponentId);
+
   return (
     <div className="flex flex-col gap-8">
       <PageHeader
         back={{
           href: `/games/${game._id}`,
-          label: `vs ${game.opponentTeam.name}`,
+          label: `vs ${opponentName}`,
         }}
         title="Record opponent penalty"
       />

@@ -33,7 +33,7 @@ interface GameFixture {
     penalties: PenaltyFixture[];
   };
   opponentTeam: {
-    name: string;
+    opponentId: string;
     goals: {
       _id: string;
       scoredBy: string;
@@ -89,7 +89,7 @@ function baseGame(): GameFixture {
       ],
     },
     opponentTeam: {
-      name: "Rival Team",
+      opponentId: "OPN000001",
       goals: [
         {
           _id: "OGL000001",
@@ -240,6 +240,27 @@ describe("GameSchema", () => {
     game.opponentTeam.penalties[0].offender = "Anyone At All";
     expect(GameSchema.safeParse(game).success).toBe(true);
   });
+
+  it("identifies the opponent by opponentId, with no name", () => {
+    const game = baseGame();
+    expect(GameSchema.safeParse(game).success).toBe(true);
+    expect(GameSchema.shape.opponentTeam.shape).not.toHaveProperty("name");
+  });
+
+  it.each([undefined, "", "OPN12", "Rival Team"])(
+    "rejects opponentId %j",
+    (opponentId) => {
+      const game = baseGame() as unknown as {
+        opponentTeam: { opponentId?: string };
+      };
+      game.opponentTeam.opponentId = opponentId;
+      const result = GameSchema.safeParse(game);
+      expect(result.success).toBe(false);
+      expect(result.error?.issues.map((issue) => issue.path.join("."))).toContain(
+        "opponentTeam.opponentId",
+      );
+    },
+  );
 });
 
 describe("GameCreateInputSchema", () => {
@@ -264,7 +285,7 @@ describe("GameCreateInputSchema", () => {
         penalties: [],
       },
       opponentTeam: {
-        name: "Rival Team",
+        opponentId: "OPN000001",
         goals: [],
         penalties: [],
       },
@@ -292,7 +313,7 @@ describe("GameCreateInputSchema", () => {
         penalties: [],
       },
       opponentTeam: {
-        name: "Rival Team",
+        opponentId: "OPN000001",
         goals: [],
         penalties: [],
       },

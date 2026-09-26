@@ -15,7 +15,7 @@ function game(overrides: Partial<Game> = {}): Game {
       goals: [],
       penalties: [],
     },
-    opponentTeam: { name: "Opponents", goals: [], penalties: [] },
+    opponentTeam: { opponentId: "OPN000001", goals: [], penalties: [] },
     createdAt: new Date(),
     updatedAt: new Date(),
     ...overrides,
@@ -167,7 +167,7 @@ describe("deriveTeamSeasonStats", () => {
     const games = [
       game({
         opponentTeam: {
-          name: "Opponents",
+          opponentId: "OPN000001",
           goals: [{ _id: "OGL1", scoredBy: "Rival", minute: 1, second: 0, type: "EVEN" }],
           penalties: [],
         },
@@ -192,7 +192,7 @@ describe("deriveTeamSeasonStats", () => {
           penalties: [],
         },
         opponentTeam: {
-          name: "Opponents",
+          opponentId: "OPN000001",
           goals: [{ _id: "OGL1", scoredBy: "Rival", minute: 1, second: 0, type: "EVEN" }],
           penalties: [],
         },
@@ -215,7 +215,7 @@ describe("deriveTeamSeasonStats", () => {
           penalties: [],
         },
         opponentTeam: {
-          name: "Opponents",
+          opponentId: "OPN000001",
           goals: [{ _id: "OGL1", scoredBy: "Rival", minute: 1, second: 0, type: "EVEN" }],
           penalties: [],
         },

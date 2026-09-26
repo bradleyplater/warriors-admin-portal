@@ -19,7 +19,7 @@ import type { BlockedRosterPlayer } from "@/lib/repositories";
 export function fieldKeyFor(path: (string | number)[]): string {
   const [first, second] = path;
   if (first === "team" && second === "roster") return "roster";
-  if (first === "opponentTeam" && second === "name") return "opponentName";
+  if (first === "opponentTeam" && second === "opponentId") return "opponentId";
   if (typeof first === "string") return first;
   return "form";
 }
@@ -55,7 +55,7 @@ export function parseGameFormData(formData: FormData, teamId: string) {
       penalties: [],
     },
     opponentTeam: {
-      name: formData.get("opponentName"),
+      opponentId: formData.get("opponentId"),
       goals: [],
       penalties: [],
     },
@@ -86,7 +86,7 @@ export function parseGameDetailsFormData(formData: FormData, existing: Game) {
     warriorOfTheGamePlayerId: existing.warriorOfTheGamePlayerId,
     team: existing.team,
     opponentTeam: {
-      name: formData.get("opponentName"),
+      opponentId: formData.get("opponentId"),
       goals: existing.opponentTeam.goals,
       penalties: existing.opponentTeam.penalties,
     },

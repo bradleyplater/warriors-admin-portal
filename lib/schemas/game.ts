@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { GameTypeSchema, GoalTypeSchema, PenaltyCodeSchema } from "./enums";
+import { OpponentIdSchema } from "./opponent";
 
 const SecondSchema = z
   .number()
@@ -250,7 +251,9 @@ const GameShape = z.object({
     penalties: z.array(PenaltySchema),
   }),
   opponentTeam: z.object({
-    name: z.string().min(1),
+    // Reference to an Opponent document. Whether it exists needs the DB, so
+    // that's checked by the game server actions, not here.
+    opponentId: OpponentIdSchema,
     goals: z.array(OpponentGoalSchema),
     penalties: z.array(OpponentPenaltySchema),
   }),
@@ -270,7 +273,9 @@ const GameCreateInputShape = z.object({
     penalties: z.array(PenaltyCreateInputSchema),
   }),
   opponentTeam: z.object({
-    name: z.string().min(1),
+    // Reference to an Opponent document. Whether it exists needs the DB, so
+    // that's checked by the game server actions, not here.
+    opponentId: OpponentIdSchema,
     goals: z.array(OpponentGoalCreateInputSchema),
     penalties: z.array(OpponentPenaltyCreateInputSchema),
   }),

@@ -2,6 +2,7 @@ import { listGames, listSeasons } from "@/lib/repositories";
 import { sortSeasonsAscending } from "@/lib/derived/season-order";
 import { ButtonLink, PageHeader, SectionHeading } from "@/app/_ui";
 import { GamesTable } from "./GamesTable";
+import { getOpponentNamesById } from "@/lib/opponents/names";
 import type { Game, Season } from "@/lib/schemas";
 
 // No dynamic route segment, so Next would otherwise statically prerender
@@ -9,7 +10,15 @@ import type { Game, Season } from "@/lib/schemas";
 // database held then. Force per-request rendering instead.
 export const dynamic = "force-dynamic";
 
-function SeasonSection({ season, games }: { season: Season; games: Game[] }) {
+function SeasonSection({
+  season,
+  games,
+  opponentNames,
+}: {
+  season: Season;
+  games: Game[];
+  opponentNames: Map<string, string>;
+}) {
   const seasonGames = games
     .filter((game) => game.seasonId === season._id)
     .sort((a, b) => b.date.getTime() - a.date.getTime());
@@ -22,13 +31,17 @@ function SeasonSection({ season, games }: { season: Season; games: Game[] }) {
       >
         {season.name}
       </SectionHeading>
-      <GamesTable games={seasonGames} />
+      <GamesTable games={seasonGames} opponentNames={opponentNames} />
     </div>
   );
 }
 
 export default async function GamesPage() {
-  const [games, seasons] = await Promise.all([listGames(), listSeasons()]);
+  const [games, seasons, opponentNames] = await Promise.all([
+    listGames(),
+    listSeasons(),
+    getOpponentNamesById(),
+  ]);
   const orderedSeasons = sortSeasonsAscending(seasons).reverse();
 
   return (
@@ -40,7 +53,12 @@ export default async function GamesPage() {
       />
 
       {orderedSeasons.map((season) => (
-        <SeasonSection key={season._id} season={season} games={games} />
+        <SeasonSection
+          key={season._id}
+          season={season}
+          games={games}
+          opponentNames={opponentNames}
+        />
       ))}
     </div>
   );
