@@ -1,6 +1,6 @@
 # 03 — Data Model
 
-MongoDB schema for database `HockeyTracker` — the target shape, which production has fully matched since the Step 6 cleanup (2026-09-26, [04 — Migration Plan](04-migration-plan.md)). The "Changes from today" tables below record what the migration changed from the old system's shape. Existing custom string IDs (`PLR######`, `GME######`, `SSN####`, `TM######`) are kept — they are stable, human-scannable, and already referenced throughout the data. New IDs use the same scheme (prefix + 6 random digits, retry on collision).
+MongoDB schema for database `HockeyTracker` — the target shape, which production has fully matched since the Step 6 cleanup (2026-09-26, [04 — Migration Plan](04-migration-plan.md)). The "Changes from today" tables below record what the migration changed from the old system's shape. Existing custom string IDs (`PLR######`, `GME######`, `SSN####`, `TM######`) are kept, and newer collections follow suit (`OPN######`, `PUB######`) — they are stable, human-scannable, and already referenced throughout the data. New IDs use the same scheme (prefix + 6 random digits, retry on collision).
 
 All documents gain `createdAt` / `updatedAt` audit timestamps (used by the unpublished-changes indicator).
 
@@ -85,7 +85,7 @@ Changes from the old shape (applied by the migration):
     }]
   },
   opponentTeam: {
-    name: string,           // free text
+    opponentId: string,     // → Opponent ("OPN######"); the name is resolved at read/publish time
     goals: [{ _id: string /* "OGL######" */, scoredBy: string /* free-text name */, minute, second, type: GoalType }],
     penalties: [{ _id: string /* "OPP######" */, offender: string /* free-text name */, minute, second, type: PenaltyCode, duration: number }]
   },
@@ -104,6 +104,23 @@ Changes from the old shape (applied by the migration):
 | `team.roster[].teamId` | removed | Redundant with `team.id` |
 | `score { team, opponent, periods[] }` | removed | D12 — fully derived (verified derivable from goal times) |
 | `type: "challenge"` (mixed casing) | normalised enum | D11 |
+| `opponentTeam.name` (free text, with typo variants) | `opponentTeam.opponentId` → Opponent | add-opponents — one canonical, logo-bearing opponent per club; backfilled from an agreed name mapping |
+
+### Opponent — new (add-opponents)
+
+```ts
+{
+  _id: string,             // "OPN######" (OPP is taken by embedded opponent penalties)
+  name: string,            // unique, case-insensitively
+  logo?: {
+    key: string,           // S3 key "opponents/<id>/logo-<epochMillis>.<ext>" — never a URL
+    contentType: "image/svg+xml" | "image/png" | "image/jpeg" | "image/webp"
+  },
+  createdAt: Date, updatedAt: Date
+}
+```
+
+The logo file lives in `S3_BUCKET` and is served by the CDN. The key's extension always matches `contentType`, which is also the object's S3 `Content-Type`. Every upload gets a fresh key, so replacing a logo never needs a CDN invalidation; the old object is deleted once the document points at the new one. The website never receives the opponents list: `results.json` is enriched at publish time with each game's opponent name and, when there is one, `logoImage` = the logo key.
 
 ### Publishes — new
 
@@ -181,6 +198,7 @@ Used by the old export system. Untouched during migration; deleted on 2026-09-26
 - **Goals:** scorer/assists must be rostered; assists distinct from scorer and each other; `second` 0–59; minute within game length (60 regulation; SO goals sit outside periods).
 - **Penalties:** offender rostered or the literal `BENCH`; duration > 0. Bench PIMs count toward team totals only.
 - **Awards/netminder:** must be rostered.
+- **Opponent:** name non-empty (trimmed) and unique ignoring case; logo optional, SVG/PNG/JPEG/WebP up to 5 MB. A game's `opponentId` must reference an existing opponent, and an opponent any game references cannot be deleted.
 - **Season:** id `SSN` + 4 digits; name `##/##`; both consistent with each other.
 
 ## Derived stats (the stats engine)
@@ -193,7 +211,8 @@ All computed from `Game` documents — never stored as editable data:
 
 ## Indexes
 
-- `Game`: `{ seasonId: 1, date: -1 }`, `{ "team.roster.playerId": 1 }`, `{ updatedAt: -1 }`
+- `Game`: `{ seasonId: 1, date: -1 }`, `{ "team.roster.playerId": 1 }`, `{ "opponentTeam.opponentId": 1 }`, `{ updatedAt: -1 }`
+- `Opponent`: unique `{ name: 1 }` with collation `{ locale: "en", strength: 2 }` (case-insensitive); `{ updatedAt: -1 }`
 - `Player`: unique partial index on `{ number: 1 }` where `active: true`; `{ updatedAt: -1 }`
 - `Seasons` / `Team`: `{ updatedAt: -1 }`
 
