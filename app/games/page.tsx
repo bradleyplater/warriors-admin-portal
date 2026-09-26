@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 function SeasonSection({ season, games }: { season: Season; games: Game[] }) {
   const seasonGames = games
     .filter((game) => game.seasonId === season._id)
-    .sort((a, b) => a.date.getTime() - b.date.getTime());
+    .sort((a, b) => b.date.getTime() - a.date.getTime());
 
   return (
     <div className="flex flex-col gap-4" data-testid={`season-${season._id}`}>
@@ -29,7 +29,7 @@ function SeasonSection({ season, games }: { season: Season; games: Game[] }) {
 
 export default async function GamesPage() {
   const [games, seasons] = await Promise.all([listGames(), listSeasons()]);
-  const orderedSeasons = sortSeasonsAscending(seasons);
+  const orderedSeasons = sortSeasonsAscending(seasons).reverse();
 
   return (
     <div className="flex flex-col gap-10">
