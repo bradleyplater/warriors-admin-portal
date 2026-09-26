@@ -37,7 +37,7 @@ The system SHALL provide a Zod schema for `Season` enforcing the id/name format 
 - **THEN** validation fails with a field-level error identifying the mismatch
 
 ### Requirement: Player schema and validation
-The system SHALL provide a Zod schema for `Player` enforcing number range, non-empty positions, and optional fields (`nickname`, `imagePath`) from `docs/03-data-model.md`. Uniqueness of `number` among active players is explicitly NOT enforced by this schema. `imagePath` is a bare S3 object key/filename (e.g. `"plr100010.jpg"`), not a full URL, so that stored documents remain portable across environments with different S3 hosts/buckets.
+The system SHALL provide a Zod schema for `Player` enforcing number range, non-empty positions, and optional fields (`nickname`, `imagePath`) from `docs/03-data-model.md`. `number` SHALL be required for active players and optional for inactive players, and whenever `number` is present it SHALL be an integer from 1 to 99 regardless of the player's `active` flag. Uniqueness of `number` among active players is explicitly NOT enforced by this schema. `imagePath` is a bare S3 object key/filename (e.g. `"plr100010.jpg"`), not a full URL, so that stored documents remain portable across environments with different S3 hosts/buckets.
 
 #### Scenario: Valid player passes
 - **WHEN** a document with `number: 42`, `positions: ["Forward"]`, and required identity fields is validated
@@ -46,6 +46,18 @@ The system SHALL provide a Zod schema for `Player` enforcing number range, non-e
 #### Scenario: Number out of range is rejected
 - **WHEN** a document's `number` is `0` or `100` or higher
 - **THEN** validation fails with a field-level error on `number`
+
+#### Scenario: Out-of-range number is rejected for an inactive player too
+- **WHEN** a document with `active: false` has `number: 134`
+- **THEN** validation fails with a field-level error on `number`
+
+#### Scenario: Active player without a number is rejected
+- **WHEN** a document with `active: true` has no `number`
+- **THEN** validation fails with a field-level error on `number`
+
+#### Scenario: Inactive player without a number passes
+- **WHEN** a document with `active: false` has no `number` and is otherwise valid
+- **THEN** validation succeeds
 
 #### Scenario: Empty positions array is rejected
 - **WHEN** a document's `positions` array is empty
