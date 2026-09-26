@@ -1,11 +1,12 @@
 import { getDb } from "../lib/mongodb";
 import { ensureIndexes } from "../lib/repositories";
 import { COLLECTION_NAMES } from "../lib/repositories/internal/collections";
-import type { Season, Team, Player, Game } from "./types";
+import type { Season, Team, Player, Game, Opponent } from "./types";
 import { seasons } from "./data/seasons";
 import { team } from "./data/team";
 import { players } from "./data/players";
 import { games } from "./data/games";
+import { opponents } from "./data/opponents";
 
 export async function runSeed(): Promise<void> {
   const db = await getDb();
@@ -19,17 +20,19 @@ export async function runSeed(): Promise<void> {
   const teamCollection = db.collection<Team>(COLLECTION_NAMES.team);
   const playersCollection = db.collection<Player>(COLLECTION_NAMES.player);
   const gamesCollection = db.collection<Game>(COLLECTION_NAMES.game);
+  const opponentsCollection = db.collection<Opponent>(COLLECTION_NAMES.opponent);
 
-  const [seasonCount, teamCount, playerCount, gameCount] = await Promise.all([
+  const counts = await Promise.all([
     seasonsCollection.countDocuments(),
     teamCollection.countDocuments(),
     playersCollection.countDocuments(),
     gamesCollection.countDocuments(),
+    opponentsCollection.countDocuments(),
   ]);
 
-  if (seasonCount > 0 || teamCount > 0 || playerCount > 0 || gameCount > 0) {
+  if (counts.some((count) => count > 0)) {
     console.log(
-      "Seed skipped: one or more of seasons/team/players/games already has documents.",
+      "Seed skipped: one or more of seasons/team/players/games/opponents already has documents.",
     );
     return;
   }
@@ -39,9 +42,10 @@ export async function runSeed(): Promise<void> {
     teamCollection.insertOne(team),
     playersCollection.insertMany(players),
     gamesCollection.insertMany(games),
+    opponentsCollection.insertMany(opponents),
   ]);
 
   console.log(
-    `Seeded ${seasons.length} seasons, 1 team, ${players.length} players, ${games.length} games.`,
+    `Seeded ${seasons.length} seasons, 1 team, ${players.length} players, ${games.length} games, ${opponents.length} opponents.`,
   );
 }

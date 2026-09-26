@@ -1,9 +1,10 @@
+import { ensureOpponent } from "./support/opponents";
 import { expect, test, type Page } from "@playwright/test";
 
-// Tests share the local seeded database, so each test uses a unique
-// opponent name unlikely to collide with the seed fixtures
-// (seed/data/games.ts) or with each other, rather than asserting on the
-// full list contents.
+// Tests share the local seeded database, so each test uses its own
+// opponent (created on first run by ensureOpponent) unlikely to collide with
+// the seed fixtures (seed/data/opponents.ts) or with each other, rather than
+// asserting on the full list contents.
 test.describe.configure({ mode: "serial" });
 
 async function readSeasonCount(page: Page, seasonId: string): Promise<number> {
@@ -22,11 +23,12 @@ test.describe("create a game", () => {
   test("valid submission creates a game and lands on its detail page", async ({
     page,
   }) => {
+    await ensureOpponent(page, "E2E Detail Test Opponent");
     await page.goto("/games/new");
 
     await page.getByLabel("Date").fill("2024-11-05");
     await page.getByLabel("Season").selectOption({ label: "23/24" });
-    await page.getByLabel("Opponent").fill("E2E Detail Test Opponent");
+    await page.getByLabel("Opponent").selectOption({ label: "E2E Detail Test Opponent" });
     await page.getByRole("radio", { name: "LLIHC" }).check();
     await page.getByRole("radio", { name: "Away" }).check();
     await page.getByRole("checkbox", { name: /Jamie Ashworth/ }).check();
@@ -75,10 +77,11 @@ test.describe("create a game", () => {
     await page.goto("/games");
     const before = await readSeasonCount(page, "SSN2223");
 
+    await ensureOpponent(page, "Season Count Test Opponent");
     await page.goto("/games/new");
     await page.getByLabel("Date").fill("2022-12-01");
     await page.getByLabel("Season").selectOption({ label: "22/23" });
-    await page.getByLabel("Opponent").fill("Season Count Test Opponent");
+    await page.getByLabel("Opponent").selectOption({ label: "Season Count Test Opponent" });
     await page.getByRole("checkbox", { name: /Jamie Ashworth/ }).check();
     await page.getByRole("button", { name: "Create game" }).click();
     await expect(page).toHaveURL(/\/games\/GME\d+$/);
@@ -100,10 +103,11 @@ test.describe("create a game", () => {
     await expect(page).toHaveURL(/\/players\/PLR\d+$/);
     const before = await readSeasonCount(page, "SSN2324");
 
+    await ensureOpponent(page, "Player Count Test Opponent");
     await page.goto("/games/new");
     await page.getByLabel("Date").fill("2023-12-01");
     await page.getByLabel("Season").selectOption({ label: "23/24" });
-    await page.getByLabel("Opponent").fill("Player Count Test Opponent");
+    await page.getByLabel("Opponent").selectOption({ label: "Player Count Test Opponent" });
     await page.getByRole("checkbox", { name: /Jamie Ashworth/ }).check();
     await page.getByRole("button", { name: "Create game" }).click();
     await expect(page).toHaveURL(/\/games\/GME\d+$/);
@@ -119,10 +123,11 @@ test.describe("create a game", () => {
   });
 
   test("missing date is rejected", async ({ page }) => {
+    await ensureOpponent(page, "Missing Date Test Opponent");
     await page.goto("/games/new");
 
     await page.getByLabel("Season").selectOption({ label: "23/24" });
-    await page.getByLabel("Opponent").fill("Missing Date Test Opponent");
+    await page.getByLabel("Opponent").selectOption({ label: "Missing Date Test Opponent" });
     await page.getByRole("checkbox", { name: /Jamie Ashworth/ }).check();
     await page.getByRole("button", { name: "Create game" }).click();
 
@@ -135,7 +140,7 @@ test.describe("create a game", () => {
     await expect(page.getByText("Missing Date Test Opponent")).toHaveCount(0);
   });
 
-  test("missing opponent name is rejected", async ({ page }) => {
+  test("missing opponent is rejected", async ({ page }) => {
     await page.goto("/games/new");
 
     await page.getByLabel("Date").fill("2024-10-01");
@@ -144,8 +149,6 @@ test.describe("create a game", () => {
     await page.getByRole("button", { name: "Create game" }).click();
 
     await expect(page).toHaveURL(/\/games\/new$/);
-    await expect(
-      page.getByText("Too small: expected string to have >=1 characters"),
-    ).toBeVisible();
+    await expect(page.getByText("Opponent is required")).toBeVisible();
   });
 });

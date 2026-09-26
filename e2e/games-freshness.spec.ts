@@ -1,4 +1,5 @@
 import { existsSync } from "node:fs";
+import { ensureOpponent } from "./support/opponents";
 import { expect, test } from "@playwright/test";
 import { createSeason } from "@/lib/repositories";
 import { getDb } from "@/lib/mongodb";
@@ -23,10 +24,11 @@ test.describe("games and games/new reflect data created after server start", () 
   test("a game created after server start appears on /games", async ({
     page,
   }) => {
+    await ensureOpponent(page, "Freshness Test Opponent");
     await page.goto("/games/new");
     await page.getByLabel("Date").fill("2023-09-01");
     await page.getByLabel("Season").selectOption({ label: "23/24" });
-    await page.getByLabel("Opponent").fill("Freshness Test Opponent");
+    await page.getByLabel("Opponent").selectOption({ label: "Freshness Test Opponent" });
     await page.getByRole("checkbox", { name: /Jamie Ashworth/ }).check();
     await page.getByRole("button", { name: "Create game" }).click();
     await expect(page).toHaveURL(/\/games\/GME\d+$/);

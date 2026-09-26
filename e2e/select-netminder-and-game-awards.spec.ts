@@ -1,3 +1,4 @@
+import { ensureOpponent } from "./support/opponents";
 import { expect, test, type Page } from "@playwright/test";
 
 // Creates its own game fixture via /games/new, same isolation approach as
@@ -16,10 +17,11 @@ async function createTestGame(
   page: Page,
   { opponentName, rosterNames }: { opponentName: string; rosterNames: string[] },
 ): Promise<string> {
+  await ensureOpponent(page, opponentName);
   await page.goto("/games/new");
   await page.getByLabel("Date").fill("2024-01-15");
   await page.getByLabel("Season").selectOption({ label: "23/24" });
-  await page.getByLabel("Opponent").fill(opponentName);
+  await page.getByLabel("Opponent").selectOption({ label: opponentName });
   for (const name of rosterNames) {
     await page.getByRole("checkbox", { name: new RegExp(name) }).check();
   }
