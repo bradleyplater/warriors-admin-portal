@@ -1,5 +1,6 @@
 import {
   getGamesLatestUpdatedAt,
+  getOpponentsLatestUpdatedAt,
   getLatestSuccessfulPublish,
   getPlayersLatestUpdatedAt,
   getSeasonsLatestUpdatedAt,
@@ -34,16 +35,30 @@ export function hasUnpublishedChangesSince(
 // internal/indexes.ts) — cheap, and covers every entity type so the
 // indicator can never false-negative.
 export async function getPublishStatus(): Promise<PublishStatus> {
-  const [playersUpdatedAt, gamesUpdatedAt, seasonsUpdatedAt, teamUpdatedAt, lastPublish] =
+  const [
+    playersUpdatedAt,
+    gamesUpdatedAt,
+    seasonsUpdatedAt,
+    teamUpdatedAt,
+    opponentsUpdatedAt,
+    lastPublish,
+  ] =
     await Promise.all([
       getPlayersLatestUpdatedAt(),
       getGamesLatestUpdatedAt(),
       getSeasonsLatestUpdatedAt(),
       getTeamLatestUpdatedAt(),
+      getOpponentsLatestUpdatedAt(),
       getLatestSuccessfulPublish(),
     ]);
 
-  const latestUpdatedAt = [playersUpdatedAt, gamesUpdatedAt, seasonsUpdatedAt, teamUpdatedAt]
+  const latestUpdatedAt = [
+    playersUpdatedAt,
+    gamesUpdatedAt,
+    seasonsUpdatedAt,
+    teamUpdatedAt,
+    opponentsUpdatedAt,
+  ]
     .filter((date): date is Date => date !== null)
     .reduce<Date | null>(
       (latest, date) => (latest === null || date > latest ? date : latest),

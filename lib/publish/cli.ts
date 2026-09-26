@@ -1,4 +1,4 @@
-import { listPlayers, listGames, listSeasons } from "../repositories";
+import { listPlayers, listGames, listSeasons, listOpponents } from "../repositories";
 import { generateAllArtifacts, writeArtifacts } from "./generate";
 
 const OUTPUT_DIR = "artifacts";
@@ -12,13 +12,14 @@ async function main(): Promise<void> {
     throw new Error("MONGODB_URI is not set");
   }
 
-  const [players, games, seasons] = await Promise.all([
+  const [players, games, seasons, opponents] = await Promise.all([
     listPlayers(),
     listGames(),
     listSeasons(),
+    listOpponents(),
   ]);
 
-  const artifacts = generateAllArtifacts(players, games, seasons);
+  const artifacts = generateAllArtifacts(players, games, seasons, opponents);
   const paths = await writeArtifacts(artifacts, OUTPUT_DIR);
 
   console.log(`Wrote ${paths.length} artifacts to ${OUTPUT_DIR}/:`);

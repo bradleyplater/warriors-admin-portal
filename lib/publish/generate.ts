@@ -1,6 +1,6 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import type { Player, Game, Season } from "../schemas";
+import type { Player, Game, Opponent, Season } from "../schemas";
 import {
   generatePlayersArtifact,
   generateRosterConfigArtifact,
@@ -21,12 +21,13 @@ export function generateAllArtifacts(
   players: Player[],
   games: Game[],
   seasons: Season[],
+  opponents: Opponent[],
 ): GeneratedArtifacts {
   return {
     "players.json": generatePlayersArtifact(players, games, seasons),
     "roster-config.json": generateRosterConfigArtifact(players),
     "team.json": generateTeamArtifact(games, seasons),
-    "results.json": generateResultsArtifact(games, seasons),
+    "results.json": generateResultsArtifact(games, seasons, opponents),
   };
 }
 
