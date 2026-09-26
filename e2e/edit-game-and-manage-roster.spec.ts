@@ -95,7 +95,7 @@ test.describe("manage roster", () => {
     await expect(page).toHaveURL(/\/players\/PLR\d+$/);
     const before = await page
       .getByTestId("season-SSN2324")
-      .locator("h3")
+      .getByTestId("season-count")
       .innerText();
 
     await page.goto(`/games/${gameId}/roster`);
@@ -109,7 +109,7 @@ test.describe("manage roster", () => {
     await page.getByRole("row", { name: /Callum Baxter/ }).click();
     const after = await page
       .getByTestId("season-SSN2324")
-      .locator("h3")
+      .getByTestId("season-count")
       .innerText();
     expect(after).not.toBe(before);
   });
@@ -126,7 +126,7 @@ test.describe("manage roster", () => {
     await page.getByRole("row", { name: /Callum Baxter/ }).click();
     const before = await page
       .getByTestId("season-SSN2324")
-      .locator("h3")
+      .getByTestId("season-count")
       .innerText();
 
     await page.goto(`/games/${gameId}/roster`);
@@ -140,7 +140,7 @@ test.describe("manage roster", () => {
     await page.getByRole("row", { name: /Callum Baxter/ }).click();
     const after = await page
       .getByTestId("season-SSN2324")
-      .locator("h3")
+      .getByTestId("season-count")
       .innerText();
     expect(after).not.toBe(before);
   });

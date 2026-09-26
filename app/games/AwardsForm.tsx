@@ -2,22 +2,16 @@
 
 import { useActionState } from "react";
 import type { Game, Player } from "@/lib/schemas";
+import {
+  Button,
+  ButtonLink,
+  FormActions,
+  FormErrorSummary,
+  Message,
+} from "@/app/_ui";
 import { updateGameAwardsAction } from "./actions";
 import { initialGameFormState, type GameFormState } from "./form-state";
 import { RosterSelect } from "./RosterSelect";
-
-function FieldErrors({ messages }: { messages?: string[] }) {
-  if (!messages || messages.length === 0) return null;
-  return (
-    <div className="flex flex-col gap-1">
-      {messages.map((message) => (
-        <p key={message} className="text-sm text-red-600">
-          {message}
-        </p>
-      ))}
-    </div>
-  );
-}
 
 type AwardsFormProps = {
   game: Game;
@@ -37,14 +31,15 @@ export function AwardsForm({ game, rosterPlayers }: AwardsFormProps) {
 
   if (rosterPlayers.length === 0) {
     return (
-      <p className="text-sm text-black/60 dark:text-white/60">
+      <Message tone="info" title="No roster yet" className="max-w-md">
         Add players to the roster first.
-      </p>
+      </Message>
     );
   }
 
   return (
-    <form action={formAction} className="flex max-w-sm flex-col gap-4">
+    <form action={formAction} className="flex max-w-md flex-col gap-5">
+      <FormErrorSummary errors={state.errors} />
       <RosterSelect
         id="manOfTheMatchPlayerId"
         name="manOfTheMatchPlayerId"
@@ -62,15 +57,14 @@ export function AwardsForm({ game, rosterPlayers }: AwardsFormProps) {
         errors={state.errors.warriorOfTheGamePlayerId}
       />
 
-      <FieldErrors messages={state.errors.form} />
-
-      <button
-        type="submit"
-        disabled={pending}
-        className="rounded border border-black/20 px-3 py-1.5 font-medium disabled:opacity-50 dark:border-white/20"
-      >
-        {pending ? "Saving…" : "Save awards"}
-      </button>
+      <FormActions>
+        <Button type="submit" size="lg" disabled={pending}>
+          {pending ? "Saving…" : "Save awards"}
+        </Button>
+        <ButtonLink href={`/games/${game._id}`} variant="ghost" size="lg">
+          Cancel
+        </ButtonLink>
+      </FormActions>
     </form>
   );
 }

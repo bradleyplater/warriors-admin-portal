@@ -1,6 +1,6 @@
-import Link from "next/link";
-import { listSeasons } from "@/lib/repositories";
+import { listGames, listSeasons } from "@/lib/repositories";
 import { sortSeasonsAscending } from "@/lib/derived/season-order";
+import { ButtonLink, Card, EmptyState, PageHeader } from "@/app/_ui";
 
 // No dynamic route segment, so Next would otherwise statically prerender
 // this page at build time and freeze the list to whatever the database
@@ -8,43 +8,45 @@ import { sortSeasonsAscending } from "@/lib/derived/season-order";
 export const dynamic = "force-dynamic";
 
 export default async function SeasonsPage() {
-  const seasons = await listSeasons();
+  const [seasons, games] = await Promise.all([listSeasons(), listGames()]);
   const orderedSeasons = sortSeasonsAscending(seasons);
 
   return (
-    <div className="flex flex-col gap-8">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Seasons</h1>
-        <Link
-          href="/seasons/new"
-          className="rounded border border-black/20 px-3 py-1.5 text-sm font-medium hover:bg-black/[0.03] dark:border-white/20 dark:hover:bg-white/[0.05]"
-        >
-          Add new season
-        </Link>
-      </div>
+    <div className="flex max-w-3xl flex-col gap-8">
+      <PageHeader
+        eyebrow="Database"
+        title="Seasons"
+        actions={<ButtonLink href="/seasons/new">Add new season</ButtonLink>}
+      />
 
       {orderedSeasons.length === 0 ? (
-        <p className="text-sm text-black/60 dark:text-white/60">None.</p>
+        <EmptyState>None.</EmptyState>
       ) : (
-        <table className="w-full max-w-sm text-left text-sm">
-          <thead>
-            <tr className="border-b border-black/10 dark:border-white/15">
-              <th className="py-2 pr-4 font-medium">Id</th>
-              <th className="py-2 pr-4 font-medium">Name</th>
-            </tr>
-          </thead>
-          <tbody>
-            {orderedSeasons.map((season) => (
-              <tr
-                key={season._id}
-                className="border-b border-black/5 dark:border-white/10"
-              >
-                <td className="py-2 pr-4">{season._id}</td>
-                <td className="py-2 pr-4">{season.name}</td>
+        <Card flush>
+          <table className="wr-table">
+            <thead>
+              <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th className="wr-right">Games</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {orderedSeasons.map((season) => (
+                <tr key={season._id}>
+                  <td className="wr-num">{season._id}</td>
+                  <td>{season.name}</td>
+                  <td className="wr-num wr-right">
+                    {
+                      games.filter((game) => game.seasonId === season._id)
+                        .length
+                    }
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </Card>
       )}
     </div>
   );

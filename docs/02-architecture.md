@@ -43,7 +43,7 @@ One Next.js (App Router) full-stack application. The server talks directly to Mo
 | DB access | Official `mongodb` driver | The schema uses custom string `_id`s (`PLR…`, `GME…`) and embedded documents that map poorly to Mongoose defaults; the driver plus explicit schemas is simpler and more predictable |
 | Validation | Zod schemas shared between client and server | One definition of every entity and enum; forms and API validate identically |
 | Forms/UI | React Hook Form + a component library (e.g. shadcn/ui) | Fast to build consistent CRUD screens |
-| S3 | AWS SDK v3 (`@aws-sdk/client-s3`) | Standard; also works against MinIO locally |
+| S3 | AWS SDK v3 (`@aws-sdk/client-s3`) | Standard; also works against Moto locally |
 | E2E | Playwright | See [05 — Testing Strategy](05-testing-strategy.md) |
 
 ## Layers
@@ -75,9 +75,9 @@ All environment-specific values are env vars — switching from local Docker to 
 | Variable | Local (Docker) | Production |
 |---|---|---|
 | `MONGODB_URI` | `mongodb://localhost:27017/HockeyTracker` | Atlas/production connection string |
-| `S3_ENDPOINT` | MinIO `http://localhost:9000` | real AWS endpoint (unset = default) |
+| `S3_ENDPOINT` | Moto `http://localhost:4566` | real AWS endpoint (unset = default) |
 | `S3_BUCKET` | `warriors-local` | production bucket |
-| `S3_ACCESS_KEY_ID` / `S3_SECRET_ACCESS_KEY` | MinIO defaults | IAM credentials |
+| `S3_ACCESS_KEY_ID` / `S3_SECRET_ACCESS_KEY` | `test` / `test` (Moto) | IAM credentials |
 | `CDN_INVALIDATION` | disabled | CloudFront distribution ID (optional) |
 
 ## Auth seam (future)

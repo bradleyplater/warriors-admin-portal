@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { Badge, Button } from "@/app/_ui";
 import { publishAction } from "./actions";
 import { initialPublishFormState } from "./publish-state";
 
@@ -11,23 +12,22 @@ export function PublishButton() {
   );
 
   return (
-    <form action={formAction} className="flex items-center gap-2">
-      <button
-        type="submit"
-        disabled={pending}
-        className="rounded border border-black/20 px-3 py-1.5 text-sm font-medium hover:bg-black/[0.03] disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/20 dark:hover:bg-white/[0.05]"
-      >
+    <form action={formAction} className="flex items-center gap-3">
+      <Button type="submit" size="sm" disabled={pending}>
         {pending ? "Publishing…" : "Publish"}
-      </button>
+      </Button>
+      {/* The live region wraps only the words, so the badge's glyph isn't
+          announced and the status reads exactly "Published". */}
       {state.status === "success" && (
-        <span role="status" className="text-sm text-green-600">
-          Published
-        </span>
+        <Badge tone="success">
+          <span role="status">Published</span>
+        </Badge>
       )}
       {state.status === "error" && (
-        <span role="alert" className="text-sm text-red-600">
+        <p role="alert" className="wr-field__error m-0 max-w-xs">
+          <span aria-hidden="true">{"✕"} </span>
           {state.message}
-        </span>
+        </p>
       )}
     </form>
   );

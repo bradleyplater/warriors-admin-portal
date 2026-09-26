@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import Link from "next/link";
 import type { Mismatch } from "@/lib/migration/reconcile/types";
+import { Badge, Button } from "@/app/_ui";
 import { acceptMismatchAction } from "./actions";
 import {
   initialReconciliationRowState,
@@ -37,48 +38,48 @@ export function ReconciliationRow({ mismatch }: { mismatch: Mismatch }) {
   const source = "source" in mismatch ? mismatch.source : null;
 
   return (
-    <tr className="border-b border-black/5 dark:border-white/10">
-      <td className="py-2 pr-4 text-xs text-black/50 dark:text-white/50">
+    <tr>
+      <td className="t-label text-fg-secondary">
         {DIMENSION_LABELS[mismatch.dimension]}
       </td>
-      <td className="py-2 pr-4">
+      <td>
         {href ? (
-          <Link href={href} className="underline">
+          <Link href={href} className="t-data">
             {mismatch.entityId}
           </Link>
         ) : (
-          mismatch.entityId
+          <span className="t-data">{mismatch.entityId}</span>
         )}
         {seasonId && (
-          <span className="ml-2 text-xs text-black/50 dark:text-white/50">
-            {seasonId}
-          </span>
+          <span className="t-data ml-2 text-fg-secondary">{seasonId}</span>
         )}
       </td>
-      <td className="py-2 pr-4">
+      <td>
         {mismatch.field}
         {source && (
-          <span className="ml-2 text-xs text-black/50 dark:text-white/50">
+          <span className="t-data ml-2 text-xs text-fg-secondary">
             ({source === "player" ? "Player.stats" : "Team.players[].stats"})
           </span>
         )}
       </td>
-      <td className="py-2 pr-4 tabular-nums">{mismatch.storedValue}</td>
-      <td className="py-2 pr-4 tabular-nums">{mismatch.computedValue}</td>
-      <td className="py-2 pr-4">
+      <td className="wr-num wr-right">{mismatch.storedValue}</td>
+      <td className="wr-num wr-right wr-strong">{mismatch.computedValue}</td>
+      <td>
         {mismatch.resolved ? (
-          <span className="text-sm font-medium">Resolved</span>
+          <Badge tone="success">Resolved</Badge>
         ) : (
-          <form action={formAction} className="flex items-center gap-2">
-            <button
-              type="submit"
-              disabled={pending}
-              className="rounded border border-black/20 px-3 py-1.5 text-sm font-medium hover:bg-black/[0.03] dark:border-white/20 dark:hover:bg-white/[0.05]"
-            >
+          <form
+            action={formAction}
+            className="flex flex-wrap items-center gap-2"
+          >
+            <Button type="submit" size="sm" disabled={pending}>
               Accept computed
-            </button>
+            </Button>
             {state.error && (
-              <span className="text-sm text-red-600">{state.error}</span>
+              <p role="alert" className="wr-field__error">
+                <span aria-hidden="true">{"✕"} </span>
+                {state.error}
+              </p>
             )}
           </form>
         )}

@@ -1,9 +1,18 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
+import type { ComponentProps, ReactNode } from "react";
 import { getGame, getSeason, listPlayers } from "@/lib/repositories";
 import { deriveScore } from "@/lib/derived/score";
 import { GOAL_TYPE_LABELS, PENALTY_CODE_LABELS } from "@/lib/schemas";
 import type { Player } from "@/lib/schemas";
+import {
+  Button,
+  ButtonLink,
+  Card,
+  EmptyState,
+  PageHeader,
+  SectionHeading,
+} from "@/app/_ui";
+import { formatDate } from "../GamesTable";
 import {
   deleteGoalAction,
   deleteOpponentGoalAction,
@@ -11,26 +20,111 @@ import {
   deletePenaltyAction,
 } from "../actions";
 
-function playerLabel(players: Player[], playerId: string): string {
+// "#14 Dean Crosbie", with the shirt number set in the data face.
+function PlayerName({ player }: { player: Player }) {
+  return (
+    <>
+      <span className="t-data text-fg-secondary">#{player.number ?? "—"}</span>{" "}
+      {player.firstName} {player.surname}
+    </>
+  );
+}
+
+function playerName(players: Player[], playerId: string): ReactNode {
   const player = players.find((entry) => entry._id === playerId);
-  return player
-    ? `#${player.number ?? "—"} ${player.firstName} ${player.surname}`
-    : playerId;
+  return player ? <PlayerName player={player} /> : playerId;
 }
 
-function offenderLabel(players: Player[], offender: string): string {
-  return offender === "BENCH" ? "Bench" : playerLabel(players, offender);
+function offenderName(players: Player[], offender: string): ReactNode {
+  return offender === "BENCH" ? "Bench" : playerName(players, offender);
 }
 
-function optionalPlayerLabel(
+function optionalPlayerName(
   players: Player[],
   playerId: string | undefined,
-): string {
-  return playerId === undefined ? "Not set" : playerLabel(players, playerId);
+): ReactNode {
+  return playerId === undefined ? "Not set" : playerName(players, playerId);
 }
 
 function formatMinuteSecond(minute: number, second: number): string {
   return `${minute}:${second.toString().padStart(2, "0")}`;
+}
+
+// Edit + Delete for one recorded event. Visible text is the bare verb; a
+// visually hidden object ("Edit goal") completes the accessible name so a
+// screen-reader user hearing a list of buttons knows what each acts on.
+// Hidden text rather than aria-label keeps the name derived from content,
+// so it can't be mistaken for a form-control label.
+function RowActions({
+  editHref,
+  deleteAction,
+  noun,
+}: {
+  editHref: string;
+  deleteAction: ComponentProps<"form">["action"];
+  noun: string;
+}) {
+  return (
+    <div className="flex justify-end gap-2">
+      <ButtonLink href={editHref} variant="secondary" size="sm">
+        Edit<span className="sr-only"> {noun}</span>
+      </ButtonLink>
+      <form action={deleteAction}>
+        <Button type="submit" variant="danger" size="sm">
+          Delete<span className="sr-only"> {noun}</span>
+        </Button>
+      </form>
+    </div>
+  );
+}
+
+function RecordSection({
+  title,
+  count,
+  level = "h2",
+  recordHref,
+  recordLabel,
+  empty,
+  children,
+}: {
+  title: string;
+  count: number;
+  level?: "h2" | "h3";
+  recordHref: string;
+  // The object of "Record", e.g. "goal", "opponent penalty".
+  recordLabel: string;
+  empty: boolean;
+  children: ReactNode;
+}) {
+  // The opponent sections are subordinate to the Warriors' own, so their
+  // record action steps down to a small secondary button whose visible
+  // text is just the verb (see RowActions for why the rest is hidden text).
+  const minor = level === "h3";
+  return (
+    <section className="flex flex-col gap-4">
+      <SectionHeading
+        as={level}
+        count={count}
+        actions={
+          <ButtonLink
+            href={recordHref}
+            variant={minor ? "secondary" : "primary"}
+            size={minor ? "sm" : "md"}
+          >
+            Record
+            {minor ? (
+              <span className="sr-only"> {recordLabel}</span>
+            ) : (
+              ` ${recordLabel}`
+            )}
+          </ButtonLink>
+        }
+      >
+        {title}
+      </SectionHeading>
+      {empty ? <EmptyState>None recorded.</EmptyState> : children}
+    </section>
+  );
 }
 
 export default async function GameDetailPage({
@@ -52,326 +146,381 @@ export default async function GameDetailPage({
 
   const rosterPlayers = game.team.roster
     .map((entry) => players.find((player) => player._id === entry.playerId))
-    .filter((player): player is NonNullable<typeof player> => player !== undefined);
+    .filter(
+      (player): player is NonNullable<typeof player> => player !== undefined,
+    );
 
   const score = deriveScore(game.team.goals, game.opponentTeam.goals);
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">
-          vs {game.opponentTeam.name} — {score.team}-{score.opponent}
-        </h1>
-        <div className="flex gap-2">
-          <Link
-            href={`/games/${game._id}/edit`}
-            className="rounded border border-black/20 px-3 py-1.5 text-sm font-medium hover:bg-black/[0.03] dark:border-white/20 dark:hover:bg-white/[0.05]"
-          >
-            Edit details
-          </Link>
-          <Link
-            href={`/games/${game._id}/roster`}
-            className="rounded border border-black/20 px-3 py-1.5 text-sm font-medium hover:bg-black/[0.03] dark:border-white/20 dark:hover:bg-white/[0.05]"
-          >
-            Manage roster
-          </Link>
-          <Link
-            href={`/games/${game._id}/awards`}
-            className="rounded border border-black/20 px-3 py-1.5 text-sm font-medium hover:bg-black/[0.03] dark:border-white/20 dark:hover:bg-white/[0.05]"
-          >
-            Manage awards
-          </Link>
-        </div>
-      </div>
+    <div className="flex flex-col gap-10">
+      <PageHeader
+        back={{ href: "/games", label: "Games" }}
+        title={`vs ${game.opponentTeam.name}`}
+        actions={
+          <>
+            <ButtonLink href={`/games/${game._id}/edit`} variant="secondary">
+              Edit details
+            </ButtonLink>
+            <ButtonLink href={`/games/${game._id}/roster`} variant="secondary">
+              Manage roster
+            </ButtonLink>
+            <ButtonLink href={`/games/${game._id}/awards`} variant="secondary">
+              Manage awards
+            </ButtonLink>
+          </>
+        }
+      />
 
-      <div className="flex flex-col gap-2" data-testid="score-breakdown">
-        <table className="w-full max-w-md text-left text-sm">
-          <thead>
-            <tr className="border-b border-black/10 dark:border-white/15">
-              <th className="py-1 pr-4 font-medium"></th>
-              <th className="py-1 pr-4 text-center font-medium">P1</th>
-              <th className="py-1 pr-4 text-center font-medium">P2</th>
-              <th className="py-1 pr-4 text-center font-medium">P3</th>
-              <th className="py-1 pr-4 text-center font-medium">Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td className="py-1 pr-4 font-medium">Team</td>
-              {score.periods.map((period, index) => (
-                <td
-                  key={index}
-                  className="py-1 pr-4 text-center"
-                  data-testid={`period-${index + 1}-team`}
-                >
-                  {period.team}
-                </td>
-              ))}
-              <td className="py-1 pr-4 text-center font-medium">
-                {score.team}
-              </td>
-            </tr>
-            <tr>
-              <td className="py-1 pr-4 font-medium">
-                {game.opponentTeam.name}
-              </td>
-              {score.periods.map((period, index) => (
-                <td
-                  key={index}
-                  className="py-1 pr-4 text-center"
-                  data-testid={`period-${index + 1}-opponent`}
-                >
-                  {period.opponent}
-                </td>
-              ))}
-              <td className="py-1 pr-4 text-center font-medium">
-                {score.opponent}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        {score.shootout && (
+      <div className="grid gap-6 md:grid-cols-2">
+        <Card data-testid="score-breakdown" className="flex flex-col gap-4">
+          <span className="t-label text-fg-secondary">
+            Final score · derived from goal times
+          </span>
           <p
-            className="text-sm text-black/60 dark:text-white/60"
-            data-testid="shootout-note"
+            data-testid="final-score"
+            className="t-display m-0 flex items-baseline gap-4 text-5xl tabular-nums"
           >
-            {score.shootout.team === score.shootout.opponent
-              ? `Shootout goals recorded (${score.shootout.team}-${score.shootout.opponent}) — no winner determined`
-              : `Decided by shootout — ${
-                  score.shootout.team > score.shootout.opponent
-                    ? "Team"
-                    : game.opponentTeam.name
-                } won ${Math.max(score.shootout.team, score.shootout.opponent)}-${Math.min(score.shootout.team, score.shootout.opponent)}`}
+            <span>{score.team}</span>{" "}
+            <span className="t-heading text-2xl text-fg-secondary">—</span>{" "}
+            <span>{score.opponent}</span>
           </p>
-        )}
+          <table className="wr-table">
+            <thead>
+              <tr>
+                <th>Team</th>
+                <th className="wr-right">P1</th>
+                <th className="wr-right">P2</th>
+                <th className="wr-right">P3</th>
+                <th className="wr-right">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Warriors</td>
+                {score.periods.map((period, index) => (
+                  <td
+                    key={index}
+                    className="wr-num wr-right"
+                    data-testid={`period-${index + 1}-team`}
+                  >
+                    {period.team}
+                  </td>
+                ))}
+                <td className="wr-num wr-right wr-strong">{score.team}</td>
+              </tr>
+              <tr>
+                <td>{game.opponentTeam.name}</td>
+                {score.periods.map((period, index) => (
+                  <td
+                    key={index}
+                    className="wr-num wr-right"
+                    data-testid={`period-${index + 1}-opponent`}
+                  >
+                    {period.opponent}
+                  </td>
+                ))}
+                <td className="wr-num wr-right wr-strong">{score.opponent}</td>
+              </tr>
+            </tbody>
+          </table>
+          {score.shootout && (
+            <p
+              className="m-0 text-sm text-fg-secondary"
+              data-testid="shootout-note"
+            >
+              {score.shootout.team === score.shootout.opponent
+                ? `Shootout goals recorded (${score.shootout.team}-${score.shootout.opponent}) — no winner determined`
+                : `Decided by shootout — ${
+                    score.shootout.team > score.shootout.opponent
+                      ? "Warriors"
+                      : game.opponentTeam.name
+                  } won ${Math.max(score.shootout.team, score.shootout.opponent)}-${Math.min(score.shootout.team, score.shootout.opponent)}`}
+            </p>
+          )}
+        </Card>
+
+        <Card className="flex flex-col gap-4">
+          <span className="t-label text-fg-secondary">Game record</span>
+          <dl className="m-0 grid grid-cols-[minmax(0,11rem)_1fr] items-baseline gap-x-4 gap-y-3">
+            <dt className="t-label text-fg-secondary">Date</dt>
+            <dd className="t-data m-0">{formatDate(game.date)}</dd>
+
+            <dt className="t-label text-fg-secondary">Season</dt>
+            <dd className="t-data m-0">{season?.name ?? game.seasonId}</dd>
+
+            <dt className="t-label text-fg-secondary">Type</dt>
+            <dd className="m-0">{game.type}</dd>
+
+            <dt className="t-label text-fg-secondary">Location</dt>
+            <dd className="m-0">
+              {game.location === "HOME" ? "Home" : "Away"}
+            </dd>
+
+            <dt className="t-label text-fg-secondary">Netminder</dt>
+            <dd className="m-0">
+              {optionalPlayerName(players, game.netminderPlayerId)}
+            </dd>
+
+            <dt className="t-label text-fg-secondary">Player of the Game</dt>
+            <dd className="m-0">
+              {optionalPlayerName(players, game.manOfTheMatchPlayerId)}
+            </dd>
+
+            <dt className="t-label text-fg-secondary">Warrior of the Game</dt>
+            <dd className="m-0">
+              {optionalPlayerName(players, game.warriorOfTheGamePlayerId)}
+            </dd>
+          </dl>
+        </Card>
       </div>
 
-      <dl className="grid max-w-md grid-cols-2 gap-y-2 text-sm">
-        <dt className="text-black/60 dark:text-white/60">Date</dt>
-        <dd>{game.date.toISOString().slice(0, 10)}</dd>
+      <RecordSection
+        title="Goals"
+        count={game.team.goals.length}
+        recordHref={`/games/${game._id}/goals/new`}
+        recordLabel="goal"
+        empty={game.team.goals.length === 0}
+      >
+        <Card flush>
+          <table className="wr-table">
+            <thead>
+              <tr>
+                <th className="w-24">Time</th>
+                <th>Scorer</th>
+                <th>Assists</th>
+                <th>Type</th>
+                <th className="wr-right">
+                  <span className="sr-only">Actions</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {game.team.goals.map((goal) => {
+                const assists = [goal.assist1, goal.assist2].filter(
+                  (playerId): playerId is string => playerId !== undefined,
+                );
+                return (
+                  <tr key={goal._id}>
+                    <td className="wr-num">
+                      {formatMinuteSecond(goal.minute, goal.second)}
+                    </td>
+                    <td>{playerName(players, goal.scoredBy)}</td>
+                    <td>
+                      {assists.length === 0
+                        ? "—"
+                        : assists.map((playerId, index) => (
+                            <span key={playerId}>
+                              {index > 0 && ", "}
+                              {playerName(players, playerId)}
+                            </span>
+                          ))}
+                    </td>
+                    <td className="t-label text-fg-secondary">
+                      {
+                        GOAL_TYPE_LABELS[
+                          goal.type as keyof typeof GOAL_TYPE_LABELS
+                        ]
+                      }
+                    </td>
+                    <td>
+                      <RowActions
+                        noun="goal"
+                        editHref={`/games/${game._id}/goals/${goal._id}/edit`}
+                        deleteAction={deleteGoalAction.bind(
+                          null,
+                          game._id,
+                          goal._id,
+                        )}
+                      />
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </Card>
+      </RecordSection>
 
-        <dt className="text-black/60 dark:text-white/60">Season</dt>
-        <dd>{season?.name ?? game.seasonId}</dd>
+      <RecordSection
+        title="Penalties"
+        count={game.team.penalties.length}
+        recordHref={`/games/${game._id}/penalties/new`}
+        recordLabel="penalty"
+        empty={game.team.penalties.length === 0}
+      >
+        <Card flush>
+          <table className="wr-table">
+            <thead>
+              <tr>
+                <th className="w-24">Time</th>
+                <th>Offender</th>
+                <th>Infraction</th>
+                <th className="wr-right">PIM</th>
+                <th className="wr-right">
+                  <span className="sr-only">Actions</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {game.team.penalties.map((penalty) => (
+                <tr key={penalty._id}>
+                  <td className="wr-num">
+                    {formatMinuteSecond(penalty.minute, penalty.second)}
+                  </td>
+                  <td>{offenderName(players, penalty.offender)}</td>
+                  <td>
+                    {
+                      PENALTY_CODE_LABELS[
+                        penalty.type as keyof typeof PENALTY_CODE_LABELS
+                      ]
+                    }
+                  </td>
+                  <td className="wr-num wr-right">{penalty.duration} min</td>
+                  <td>
+                    <RowActions
+                      noun="penalty"
+                      editHref={`/games/${game._id}/penalties/${penalty._id}/edit`}
+                      deleteAction={deletePenaltyAction.bind(
+                        null,
+                        game._id,
+                        penalty._id,
+                      )}
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </Card>
+      </RecordSection>
 
-        <dt className="text-black/60 dark:text-white/60">Type</dt>
-        <dd>{game.type}</dd>
+      <div className="grid gap-6 lg:grid-cols-2">
+        <RecordSection
+          level="h3"
+          title="Opponent goals"
+          count={game.opponentTeam.goals.length}
+          recordHref={`/games/${game._id}/opponent-goals/new`}
+          recordLabel="opponent goal"
+          empty={game.opponentTeam.goals.length === 0}
+        >
+          <Card flush>
+            <table className="wr-table">
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Scorer</th>
+                  <th>Type</th>
+                  <th className="wr-right">
+                    <span className="sr-only">Actions</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {game.opponentTeam.goals.map((goal) => (
+                  <tr key={goal._id}>
+                    <td className="wr-num">
+                      {formatMinuteSecond(goal.minute, goal.second)}
+                    </td>
+                    <td>{goal.scoredBy}</td>
+                    <td className="t-label text-fg-secondary">
+                      {
+                        GOAL_TYPE_LABELS[
+                          goal.type as keyof typeof GOAL_TYPE_LABELS
+                        ]
+                      }
+                    </td>
+                    <td>
+                      <RowActions
+                        noun="opponent goal"
+                        editHref={`/games/${game._id}/opponent-goals/${goal._id}/edit`}
+                        deleteAction={deleteOpponentGoalAction.bind(
+                          null,
+                          game._id,
+                          goal._id,
+                        )}
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </Card>
+        </RecordSection>
 
-        <dt className="text-black/60 dark:text-white/60">Location</dt>
-        <dd>{game.location === "HOME" ? "Home" : "Away"}</dd>
-
-        <dt className="text-black/60 dark:text-white/60">Netminder</dt>
-        <dd>{optionalPlayerLabel(players, game.netminderPlayerId)}</dd>
-      </dl>
-
-      <div className="flex flex-col gap-3">
-        <h2 className="text-xl font-semibold">Awards</h2>
-        <dl className="grid max-w-md grid-cols-2 gap-y-2 text-sm">
-          <dt className="text-black/60 dark:text-white/60">
-            Player of the Game
-          </dt>
-          <dd>{optionalPlayerLabel(players, game.manOfTheMatchPlayerId)}</dd>
-
-          <dt className="text-black/60 dark:text-white/60">
-            Warrior of the Game
-          </dt>
-          <dd>{optionalPlayerLabel(players, game.warriorOfTheGamePlayerId)}</dd>
-        </dl>
+        <RecordSection
+          level="h3"
+          title="Opponent penalties"
+          count={game.opponentTeam.penalties.length}
+          recordHref={`/games/${game._id}/opponent-penalties/new`}
+          recordLabel="opponent penalty"
+          empty={game.opponentTeam.penalties.length === 0}
+        >
+          <Card flush>
+            <table className="wr-table">
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Offender</th>
+                  <th>Infraction</th>
+                  <th className="wr-right">PIM</th>
+                  <th className="wr-right">
+                    <span className="sr-only">Actions</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {game.opponentTeam.penalties.map((penalty) => (
+                  <tr key={penalty._id}>
+                    <td className="wr-num">
+                      {formatMinuteSecond(penalty.minute, penalty.second)}
+                    </td>
+                    <td>{penalty.offender}</td>
+                    <td>
+                      {
+                        PENALTY_CODE_LABELS[
+                          penalty.type as keyof typeof PENALTY_CODE_LABELS
+                        ]
+                      }
+                    </td>
+                    <td className="wr-num wr-right">{penalty.duration} min</td>
+                    <td>
+                      <RowActions
+                        noun="opponent penalty"
+                        editHref={`/games/${game._id}/opponent-penalties/${penalty._id}/edit`}
+                        deleteAction={deleteOpponentPenaltyAction.bind(
+                          null,
+                          game._id,
+                          penalty._id,
+                        )}
+                      />
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </Card>
+        </RecordSection>
       </div>
 
-      <div className="flex flex-col gap-3">
-        <h2 className="text-xl font-semibold">
-          Roster ({rosterPlayers.length})
-        </h2>
+      <section className="flex flex-col gap-4">
+        <SectionHeading count={`${rosterPlayers.length} dressed`}>
+          Roster
+        </SectionHeading>
         {rosterPlayers.length === 0 ? (
-          <p className="text-sm text-black/60 dark:text-white/60">None.</p>
+          <EmptyState>None.</EmptyState>
         ) : (
-          <ul className="flex flex-col gap-1 text-sm">
-            {rosterPlayers.map((player) => (
-              <li key={player._id}>
-                #{player.number ?? "—"} {player.firstName} {player.surname}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-
-      <div className="flex flex-col gap-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold">
-            Goals ({game.team.goals.length})
-          </h2>
-          <Link
-            href={`/games/${game._id}/goals/new`}
-            className="rounded border border-black/20 px-3 py-1.5 text-sm font-medium hover:bg-black/[0.03] dark:border-white/20 dark:hover:bg-white/[0.05]"
-          >
-            Record goal
-          </Link>
-        </div>
-        {game.team.goals.length === 0 ? (
-          <p className="text-sm text-black/60 dark:text-white/60">None.</p>
-        ) : (
-          <ul className="flex flex-col gap-2 text-sm">
-            {game.team.goals.map((goal) => {
-              const assists = [goal.assist1, goal.assist2]
-                .filter((playerId): playerId is string => playerId !== undefined)
-                .map((playerId) => playerLabel(players, playerId));
-
-              return (
-                <li key={goal._id} className="flex items-center justify-between gap-2">
-                  <span>
-                    {formatMinuteSecond(goal.minute, goal.second)} —{" "}
-                    {playerLabel(players, goal.scoredBy)}
-                    {assists.length > 0 && ` (${assists.join(", ")})`} —{" "}
-                    {GOAL_TYPE_LABELS[goal.type as keyof typeof GOAL_TYPE_LABELS]}
-                  </span>
-                  <span className="flex items-center gap-2">
-                    <Link
-                      href={`/games/${game._id}/goals/${goal._id}/edit`}
-                      className="text-sm underline"
-                    >
-                      Edit goal
-                    </Link>
-                    <form action={deleteGoalAction.bind(null, game._id, goal._id)}>
-                      <button type="submit" className="text-sm text-red-600 underline">
-                        Delete goal
-                      </button>
-                    </form>
-                  </span>
+          <Card>
+            <ul className="m-0 grid list-none grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-x-6 gap-y-2 p-0">
+              {rosterPlayers.map((player) => (
+                <li key={player._id}>
+                  <PlayerName player={player} />
                 </li>
-              );
-            })}
-          </ul>
+              ))}
+            </ul>
+          </Card>
         )}
-      </div>
-
-      <div className="flex flex-col gap-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold">
-            Penalties ({game.team.penalties.length})
-          </h2>
-          <Link
-            href={`/games/${game._id}/penalties/new`}
-            className="rounded border border-black/20 px-3 py-1.5 text-sm font-medium hover:bg-black/[0.03] dark:border-white/20 dark:hover:bg-white/[0.05]"
-          >
-            Record penalty
-          </Link>
-        </div>
-        {game.team.penalties.length === 0 ? (
-          <p className="text-sm text-black/60 dark:text-white/60">None.</p>
-        ) : (
-          <ul className="flex flex-col gap-2 text-sm">
-            {game.team.penalties.map((penalty) => (
-              <li key={penalty._id} className="flex items-center justify-between gap-2">
-                <span>
-                  {formatMinuteSecond(penalty.minute, penalty.second)} —{" "}
-                  {offenderLabel(players, penalty.offender)} —{" "}
-                  {PENALTY_CODE_LABELS[penalty.type as keyof typeof PENALTY_CODE_LABELS]}{" "}
-                  ({penalty.duration} min)
-                </span>
-                <span className="flex items-center gap-2">
-                  <Link
-                    href={`/games/${game._id}/penalties/${penalty._id}/edit`}
-                    className="text-sm underline"
-                  >
-                    Edit penalty
-                  </Link>
-                  <form action={deletePenaltyAction.bind(null, game._id, penalty._id)}>
-                    <button type="submit" className="text-sm text-red-600 underline">
-                      Delete penalty
-                    </button>
-                  </form>
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-
-      <div className="flex flex-col gap-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold">
-            Opponent goals ({game.opponentTeam.goals.length})
-          </h2>
-          <Link
-            href={`/games/${game._id}/opponent-goals/new`}
-            className="rounded border border-black/20 px-3 py-1.5 text-sm font-medium hover:bg-black/[0.03] dark:border-white/20 dark:hover:bg-white/[0.05]"
-          >
-            Record opponent goal
-          </Link>
-        </div>
-        {game.opponentTeam.goals.length === 0 ? (
-          <p className="text-sm text-black/60 dark:text-white/60">None.</p>
-        ) : (
-          <ul className="flex flex-col gap-2 text-sm">
-            {game.opponentTeam.goals.map((goal) => (
-              <li key={goal._id} className="flex items-center justify-between gap-2">
-                <span>
-                  {formatMinuteSecond(goal.minute, goal.second)} — {goal.scoredBy} —{" "}
-                  {GOAL_TYPE_LABELS[goal.type as keyof typeof GOAL_TYPE_LABELS]}
-                </span>
-                <span className="flex items-center gap-2">
-                  <Link
-                    href={`/games/${game._id}/opponent-goals/${goal._id}/edit`}
-                    className="text-sm underline"
-                  >
-                    Edit opponent goal
-                  </Link>
-                  <form action={deleteOpponentGoalAction.bind(null, game._id, goal._id)}>
-                    <button type="submit" className="text-sm text-red-600 underline">
-                      Delete opponent goal
-                    </button>
-                  </form>
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-
-      <div className="flex flex-col gap-3">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold">
-            Opponent penalties ({game.opponentTeam.penalties.length})
-          </h2>
-          <Link
-            href={`/games/${game._id}/opponent-penalties/new`}
-            className="rounded border border-black/20 px-3 py-1.5 text-sm font-medium hover:bg-black/[0.03] dark:border-white/20 dark:hover:bg-white/[0.05]"
-          >
-            Record opponent penalty
-          </Link>
-        </div>
-        {game.opponentTeam.penalties.length === 0 ? (
-          <p className="text-sm text-black/60 dark:text-white/60">None.</p>
-        ) : (
-          <ul className="flex flex-col gap-2 text-sm">
-            {game.opponentTeam.penalties.map((penalty) => (
-              <li key={penalty._id} className="flex items-center justify-between gap-2">
-                <span>
-                  {formatMinuteSecond(penalty.minute, penalty.second)} —{" "}
-                  {penalty.offender} —{" "}
-                  {PENALTY_CODE_LABELS[penalty.type as keyof typeof PENALTY_CODE_LABELS]}{" "}
-                  ({penalty.duration} min)
-                </span>
-                <span className="flex items-center gap-2">
-                  <Link
-                    href={`/games/${game._id}/opponent-penalties/${penalty._id}/edit`}
-                    className="text-sm underline"
-                  >
-                    Edit opponent penalty
-                  </Link>
-                  <form
-                    action={deleteOpponentPenaltyAction.bind(null, game._id, penalty._id)}
-                  >
-                    <button type="submit" className="text-sm text-red-600 underline">
-                      Delete opponent penalty
-                    </button>
-                  </form>
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+      </section>
     </div>
   );
 }

@@ -64,7 +64,7 @@ test.describe("record and edit team goals", () => {
     await page.getByRole("button", { name: "Record goal" }).click();
 
     await expect(page).toHaveURL(new RegExp(`/games/${gameId}$`));
-    await expect(page.getByText(/10:15.*Dean Crosbie.*Ollie Dunmore.*Even Strength/)).toBeVisible();
+    await expect(page.getByRole("row", { name: /10:15.*Dean Crosbie.*Ollie Dunmore.*Even Strength/ })).toBeVisible();
 
     expect(
       await seasonStat(page, "Dean Crosbie", "season-SSN2324", "stat-goals"),
@@ -102,7 +102,7 @@ test.describe("record and edit team goals", () => {
     await page.getByRole("button", { name: "Save changes" }).click();
 
     await expect(page).toHaveURL(new RegExp(`/games/${gameId}$`));
-    await expect(page.getByText(/5:00.*Ollie Dunmore/)).toBeVisible();
+    await expect(page.getByRole("row", { name: /5:00.*Ollie Dunmore/ })).toBeVisible();
 
     expect(
       await seasonStat(page, "Dean Crosbie", "season-SSN2324", "stat-goals"),

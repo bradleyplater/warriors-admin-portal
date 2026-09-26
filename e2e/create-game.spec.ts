@@ -7,10 +7,13 @@ import { expect, test, type Page } from "@playwright/test";
 test.describe.configure({ mode: "serial" });
 
 async function readSeasonCount(page: Page, seasonId: string): Promise<number> {
-  const heading = await page.getByTestId(`season-${seasonId}`).locator("h2, h3").innerText();
-  const match = heading.match(/\((\d+)\)/);
+  const count = await page
+    .getByTestId(`season-${seasonId}`)
+    .getByTestId("season-count")
+    .innerText();
+  const match = count.match(/(\d+)/);
   if (!match) {
-    throw new Error(`Could not parse a games-played count from "${heading}"`);
+    throw new Error(`Could not parse a games-played count from "${count}"`);
   }
   return Number(match[1]);
 }
@@ -86,7 +89,7 @@ test.describe("create a game", () => {
 
     const row = page.getByRole("row", { name: /Season Count Test Opponent/ });
     await expect(row).toBeVisible();
-    await expect(row).toContainText("0-0");
+    await expect(row).toContainText("0 — 0");
   });
 
   test("creating a game increments a rostered player's games-played count for that season", async ({

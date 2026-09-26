@@ -1,0 +1,13 @@
+/* Elevation is theme-dependent: shadow Away, surface lightness + top highlight Home.
+   The --e1/--e2/--e3 and --e1-bg/--e2-bg/--e3-bg aliases are declared per theme. */
+:root {
+  --wr-shadow-1-away: 0 1px 2px rgb(12 16 19/0.06), 0 1px 3px rgb(12 16 19/0.1);
+  --wr-shadow-2-away:
+    0 2px 4px rgb(12 16 19/0.06), 0 4px 12px rgb(12 16 19/0.1);
+  --wr-shadow-3-away:
+    0 4px 8px rgb(12 16 19/0.08), 0 12px 32px rgb(12 16 19/0.14);
+  --wr-shadow-1-home: inset 0 1px 0 rgb(232 238 242/0.06);
+  --wr-shadow-2-home: inset 0 1px 0 rgb(232 238 242/0.08);
+  --wr-shadow-3-home:
+    inset 0 1px 0 rgb(232 238 242/0.1), 0 8px 24px rgb(0 0 0/0.5);
+}

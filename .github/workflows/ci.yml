@@ -6,10 +6,10 @@ on:
 
 env:
   MONGODB_URI: mongodb://localhost:27017/HockeyTracker
-  S3_ENDPOINT: http://localhost:9000
+  S3_ENDPOINT: http://localhost:4566
   S3_BUCKET: warriors-local
-  S3_ACCESS_KEY_ID: minioadmin
-  S3_SECRET_ACCESS_KEY: minioadmin
+  S3_ACCESS_KEY_ID: test
+  S3_SECRET_ACCESS_KEY: test
 
 jobs:
   lint-and-typecheck:
@@ -46,7 +46,7 @@ jobs:
           node-version-file: ".nvmrc"
           cache: npm
       - run: npm ci
-      - name: Start Docker services (Mongo + MinIO, seeded)
+      - name: Start Docker services (Mongo + S3, seeded)
         run: bash scripts/wait-for-docker-services.sh
       - run: npm run test:integration
       - name: Tear down services
@@ -63,7 +63,7 @@ jobs:
           node-version-file: ".nvmrc"
           cache: npm
       - run: npm ci
-      - name: Start Docker services (Mongo + MinIO, seeded)
+      - name: Start Docker services (Mongo + S3, seeded)
         run: bash scripts/wait-for-docker-services.sh
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium

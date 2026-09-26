@@ -1,0 +1,88 @@
+/* Base element styles and the type-role classes. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html {
+  scroll-behavior: smooth;
+}
+body {
+  margin: 0;
+  background: var(--bg-page);
+  color: var(--fg-primary);
+  font-family: var(--wr-font-body);
+  font-size: var(--wr-text-body);
+  line-height: var(--wr-lh-body);
+  font-variation-settings:
+    "wdth" var(--wr-w-normal),
+    "wght" 400;
+  transition:
+    background var(--wr-dur-normal) var(--wr-ease),
+    color var(--wr-dur-normal) var(--wr-ease);
+  -webkit-font-smoothing: antialiased;
+}
+a {
+  color: var(--link);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  text-decoration-thickness: 1px;
+}
+a:hover {
+  color: var(--link-hover);
+  text-decoration-thickness: 2px;
+}
+:focus-visible {
+  outline: var(--wr-bw-thick) solid var(--focus-ring);
+  outline-offset: var(--wr-bw-thick);
+  box-shadow: 0 0 0 4px var(--focus-halo);
+}
+
+.t-display {
+  font-family: var(--wr-font-display);
+  font-variation-settings:
+    "wdth" var(--wr-w-expanded),
+    "wght" 900;
+  text-transform: uppercase;
+  line-height: var(--wr-lh-display);
+  letter-spacing: var(--wr-ls-display);
+  margin: 0;
+}
+.t-heading {
+  font-family: var(--wr-font-display);
+  font-variation-settings:
+    "wdth" var(--wr-w-expanded),
+    "wght" 700;
+  line-height: var(--wr-lh-heading);
+  letter-spacing: var(--wr-ls-heading);
+  margin: 0;
+}
+.t-label {
+  font-family: var(--wr-font-body);
+  font-variation-settings:
+    "wdth" var(--wr-w-condensed),
+    "wght" 600;
+  text-transform: uppercase;
+  font-size: var(--wr-text-label);
+  letter-spacing: var(--wr-ls-label);
+  line-height: var(--wr-lh-tight);
+}
+.t-data {
+  font-family: var(--wr-font-mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--wr-text-sm);
+  font-weight: 500;
+}
+.muted {
+  color: var(--fg-secondary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition-duration: 1ms !important;
+    animation-duration: 1ms !important;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+}

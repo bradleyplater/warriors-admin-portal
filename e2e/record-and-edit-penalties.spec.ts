@@ -60,7 +60,7 @@ test.describe("record and edit team penalties", () => {
 
     await expect(page).toHaveURL(new RegExp(`/games/${gameId}$`));
     await expect(
-      page.getByText(/12:30.*Tom Garrity.*Tripping.*\(2 min\)/),
+      page.getByRole("row", { name: /12:30.*Tom Garrity.*Tripping.*2 min/ }),
     ).toBeVisible();
 
     expect(
@@ -94,7 +94,7 @@ test.describe("record and edit team penalties", () => {
     await page.getByRole("button", { name: "Save changes" }).click();
 
     await expect(page).toHaveURL(new RegExp(`/games/${gameId}$`));
-    await expect(page.getByText(/8:00.*Liam Hetherington/)).toBeVisible();
+    await expect(page.getByRole("row", { name: /8:00.*Liam Hetherington/ })).toBeVisible();
 
     expect(
       await seasonStat(page, "Tom Garrity", "season-SSN2324", "stat-pims"),
@@ -153,7 +153,7 @@ test.describe("record and edit team penalties", () => {
 
     await expect(page).toHaveURL(new RegExp(`/games/${gameId}$`));
     await expect(
-      page.getByText(/18:00.*Bench.*Too Many Men.*\(2 min\)/),
+      page.getByRole("row", { name: /18:00.*Bench.*Too Many Men.*2 min/ }),
     ).toBeVisible();
 
     // Bench penalties count toward the team's PIMs only — no page displays a

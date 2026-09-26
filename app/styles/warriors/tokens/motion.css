@@ -1,0 +1,5 @@
+:root {
+  --wr-dur-fast: 150ms; /* @kind other */
+  --wr-dur-normal: 200ms; /* @kind other */
+  --wr-ease: cubic-bezier(0.2, 0, 0, 1); /* @kind other */
+}

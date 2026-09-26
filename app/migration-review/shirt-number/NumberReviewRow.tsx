@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import type { NumberReviewPlayer } from "@/lib/migration/number-review/list";
+import { Button } from "@/app/_ui";
 import { setPlayerNumberAction } from "./actions";
 import {
   initialNumberReviewRowState,
@@ -16,30 +17,31 @@ export function NumberReviewRow({ player }: { player: NumberReviewPlayer }) {
   >(action, initialNumberReviewRowState);
 
   return (
-    <tr className="border-b border-black/5 dark:border-white/10">
-      <td className="py-2 pr-4">{player.currentNumber}</td>
-      <td className="py-2 pr-4">
+    <tr>
+      <td className="wr-num">{player.currentNumber}</td>
+      <td>
         {player.firstName} {player.surname}
       </td>
-      <td className="py-2 pr-4">
-        <form action={formAction} className="flex items-center gap-2">
+      <td>
+        <form action={formAction} className="flex flex-wrap items-center gap-2">
           <input
             type="text"
             inputMode="numeric"
             name="number"
             placeholder="1-99"
+            aria-label={`New number for ${player.firstName} ${player.surname}`}
+            aria-invalid={state.error ? true : undefined}
             disabled={pending}
-            className="w-16 rounded border border-black/20 px-2 py-1 text-sm dark:border-white/20"
+            className="wr-input w-20 py-1"
           />
-          <button
-            type="submit"
-            disabled={pending}
-            className="rounded border border-black/20 px-3 py-1.5 text-sm font-medium hover:bg-black/[0.03] dark:border-white/20 dark:hover:bg-white/[0.05]"
-          >
+          <Button type="submit" size="sm" disabled={pending}>
             Save
-          </button>
+          </Button>
           {state.error && (
-            <span className="text-sm text-red-600">{state.error}</span>
+            <p role="alert" className="wr-field__error">
+              <span aria-hidden="true">{"✕"} </span>
+              {state.error}
+            </p>
           )}
         </form>
       </td>

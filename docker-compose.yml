@@ -22,34 +22,29 @@ services:
       MONGODB_URI: mongodb://mongo:27017/HockeyTracker
     restart: "no"
 
-  minio:
-    image: quay.io/minio/minio
-    command: server /data --console-address ":9001"
+  # S3 emulator. LocalStack's image now refuses to start without a paid
+  # auth token, so this uses Moto (Apache-2.0, no licence). Host port 4566 is
+  # kept so S3_ENDPOINT stays the same. Moto is in-memory, so objects don't
+  # survive a restart, so s3-init recreates the bucket on every `up`.
+  s3:
+    image: motoserver/moto:5.1.12
     ports:
-      - "9000:9000"
-      - "9001:9001"
-    environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
-    volumes:
-      - minio-data:/data
+      - "4566:5000"
     healthcheck:
-      test: ["CMD", "mc", "ready", "local"]
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:5000/moto-api/')\""]
       interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 20
+      start_period: 5s
 
-  minio-init:
-    image: quay.io/minio/mc
+  s3-init:
+    image: curlimages/curl:8.16.0
     depends_on:
-      minio:
+      s3:
         condition: service_healthy
-    entrypoint: >
-      /bin/sh -c "
-      mc alias set local http://minio:9000 minioadmin minioadmin &&
-      mc mb --ignore-existing local/warriors-local
-      "
+    # Moto doesn't verify signatures, so an unsigned PUT creates the bucket.
+    command: ["-fsS", "-X", "PUT", "http://s3:5000/warriors-local"]
+    restart: "no"
 
 volumes:
   mongo-data:
-  minio-data:

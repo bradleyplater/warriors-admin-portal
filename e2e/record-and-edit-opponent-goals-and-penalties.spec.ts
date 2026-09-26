@@ -61,9 +61,9 @@ test.describe("record and edit opponent goals and penalties", () => {
     await page.getByRole("button", { name: "Record goal" }).click();
 
     await expect(page).toHaveURL(new RegExp(`/games/${gameId}$`));
-    await expect(page.getByText(/10:15.*J\. Rival.*Even Strength/)).toBeVisible();
+    await expect(page.getByRole("row", { name: /10:15.*J\. Rival.*Even Strength/ })).toBeVisible();
     // Score derived from opponentTeam.goals — opponent side is now 1.
-    await expect(page.getByRole("heading", { name: /— 0-1$/ })).toBeVisible();
+    await expect(page.getByTestId("final-score")).toHaveText("0 — 1");
 
     expect(
       await seasonStat(page, "Jamie Ashworth", "season-SSN2324", "stat-goals"),
@@ -76,7 +76,7 @@ test.describe("record and edit opponent goals and penalties", () => {
     await page.goto("/games");
     await expect(
       page.getByRole("row", { name: /Opponent Goal Test Opponent/ }),
-    ).toContainText("0-1");
+    ).toContainText("0 — 1");
 
     await page.goto(`/games/${gameId}`);
     await page.getByRole("link", { name: "Edit opponent goal" }).click();
@@ -85,14 +85,14 @@ test.describe("record and edit opponent goals and penalties", () => {
     await page.getByRole("button", { name: "Save changes" }).click();
 
     await expect(page).toHaveURL(new RegExp(`/games/${gameId}$`));
-    await expect(page.getByText(/10:15.*A\. Rival/)).toBeVisible();
+    await expect(page.getByRole("row", { name: /10:15.*A\. Rival/ })).toBeVisible();
 
     await page.goto(`/games/${gameId}`);
     await page.getByRole("button", { name: "Delete opponent goal" }).click();
 
     await expect(page).toHaveURL(new RegExp(`/games/${gameId}$`));
     await expect(page.getByText(/A\. Rival/)).toHaveCount(0);
-    await expect(page.getByRole("heading", { name: /— 0-0$/ })).toBeVisible();
+    await expect(page.getByTestId("final-score")).toHaveText("0 — 0");
 
     expect(
       await seasonStat(page, "Jamie Ashworth", "season-SSN2324", "stat-goals"),
@@ -122,7 +122,7 @@ test.describe("record and edit opponent goals and penalties", () => {
 
     await expect(page).toHaveURL(new RegExp(`/games/${gameId}$`));
     await expect(
-      page.getByText(/12:30.*J\. Rival.*Tripping.*\(2 min\)/),
+      page.getByRole("row", { name: /12:30.*J\. Rival.*Tripping.*2 min/ }),
     ).toBeVisible();
 
     expect(
@@ -138,7 +138,7 @@ test.describe("record and edit opponent goals and penalties", () => {
     await page.getByRole("button", { name: "Save changes" }).click();
 
     await expect(page).toHaveURL(new RegExp(`/games/${gameId}$`));
-    await expect(page.getByText(/12:30.*A\. Rival/)).toBeVisible();
+    await expect(page.getByRole("row", { name: /12:30.*A\. Rival/ })).toBeVisible();
 
     await page.goto(`/games/${gameId}`);
     await page.getByRole("button", { name: "Delete opponent penalty" }).click();

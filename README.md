@@ -13,10 +13,10 @@ Prerequisites: Node.js (version pinned in [.nvmrc](.nvmrc); `nvm use` if you use
 ```bash
 cp .env.example .env.local   # defaults already point at the Docker services
 npm install
-npm run dev   # starts MongoDB + MinIO via Docker Compose, then http://localhost:3000
+npm run dev   # starts MongoDB + S3 (Moto) via Docker Compose, then http://localhost:3000
 ```
 
-`npm run dev` brings up the local MongoDB and MinIO containers automatically (`docker compose up -d`) before starting the Next.js dev server — no separate step needed. Check `http://localhost:3000/api/health` to confirm both services are reachable. See [06 — Local Development](docs/06-local-development.md) for ports, credentials, and how to point at production instead. Seed data arrives with KAN-10.
+`npm run dev` brings up the local MongoDB and S3 (Moto) containers automatically (`docker compose up -d`) before starting the Next.js dev server — no separate step needed. Check `http://localhost:3000/api/health` to confirm both services are reachable. See [06 — Local Development](docs/06-local-development.md) for ports, credentials, and how to point at production instead. Seed data arrives with KAN-10.
 
 Other scripts:
 

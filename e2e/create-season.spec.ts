@@ -36,7 +36,8 @@ test.describe("create a season", () => {
     await page.goto("/games");
 
     const section = page.getByTestId("season-SSN7172");
-    await expect(section.locator("h2, h3")).toContainText("71/72 (0)");
+    await expect(section.getByRole("heading", { level: 2 })).toHaveText("71/72");
+    await expect(section.getByTestId("season-count")).toHaveText("0 games");
   });
 
   test("non-numeric start year is rejected", async ({ page }) => {

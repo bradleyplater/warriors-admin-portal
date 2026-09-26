@@ -1,4 +1,5 @@
 import { getPublishStatus } from "@/lib/publish/status";
+import { Badge } from "@/app/_ui";
 
 // The shell must still render every page with no database available (see
 // openspec/specs/portal-shell's "Runs without backing services" scenario) —
@@ -14,22 +15,12 @@ export async function PublishStatus() {
   }
 
   return (
-    <span
+    <Badge
       data-testid="publish-status"
       data-state={hasUnpublishedChanges ? "unpublished" : "up-to-date"}
-      className={`flex items-center gap-1.5 text-sm ${
-        hasUnpublishedChanges
-          ? "text-amber-600 dark:text-amber-400"
-          : "text-black/60 dark:text-white/60"
-      }`}
+      tone={hasUnpublishedChanges ? "warning" : "success"}
     >
-      <span
-        aria-hidden
-        className={`h-2 w-2 rounded-full ${
-          hasUnpublishedChanges ? "bg-amber-500" : "bg-green-500"
-        }`}
-      />
       {hasUnpublishedChanges ? "Unpublished changes" : "Up to date"}
-    </span>
+    </Badge>
   );
 }
