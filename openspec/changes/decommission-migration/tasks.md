@@ -48,10 +48,10 @@
 
 ## 6. Docs
 
-- [ ] 6.1 `docs/04-migration-plan.md`: mark Steps 4–6 done with dates, note that the review UI is gone and that cleanup was a one-off (design D1), and record the backup prefix
-- [ ] 6.2 `docs/07-build-roadmap.md`: mark Phases 6 and 7 done
-- [ ] 6.3 `docs/03-data-model.md`: turn the "Changes from today" tables and the ApiKeys section into brief history; document the number rule (1–99 when present, required when active)
-- [ ] 6.4 Update the Obsidian vault notes covering the migration, the review area, the data model and the roadmap to match
+- [x] 6.1 `docs/04-migration-plan.md`: mark Steps 4–6 done with dates, note that the review UI is gone and that cleanup was a one-off (design D1), and record the backup prefix
+- [x] 6.2 `docs/07-build-roadmap.md`: mark Phases 6 and 7 done
+- [x] 6.3 `docs/03-data-model.md`: turn the "Changes from today" tables and the ApiKeys section into brief history; document the number rule (1–99 when present, required when active)
+- [x] 6.4 Update the Obsidian vault notes covering the migration, the review area, the data model and the roadmap to match
 
 ## 7. Ship
 

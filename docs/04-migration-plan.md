@@ -1,5 +1,7 @@
 # 04 — Migration Plan
 
+> **Status: complete (2026-09-26).** Every step below has run against production. The old admin system and services are switched off, the website reads from S3, the legacy fields and the `ApiKeys` collection are gone, and the Migration Review area and migration code were removed from the portal (OpenSpec change `decommission-migration`). This document is kept as the historical record.
+
 How the existing `HockeyTracker` data moves to the target shape in [03 — Data Model](03-data-model.md) **without corrupting anything**. The guiding rules:
 
 1. **Backup before every mutating step** (`npm run backup:run`, timestamped, kept until decommission — see Step 0 below).
@@ -49,7 +51,7 @@ Position mapping (deterministic, reviewed via dry-run output):
 | `Defence / Goaltender`, `Defence/Goaltender` | `[Defence, Goaltender]` |
 | `Goalie / Defence` | `[Goaltender, Defence]` |
 
-### Step 2 — Interactive reviews (in the portal, before cutover)
+### Step 2 — Interactive reviews (in the portal, before cutover) ✅ KAN-35, KAN-36
 
 The portal ships a one-time **Migration Review** area with two checklists:
 
@@ -69,9 +71,9 @@ CLI: `npm run migrate:reconcile:preview` — read-only, prints the report, safe 
 - **Accept computed** — writes a `ReconciliationResolutions` record (the game records are right; stored aggregate was drifted, expected for the known cases above). Matched on re-run by mismatch key **and** the exact stored/computed values, so a later data change makes the mismatch reappear rather than staying silently accepted.
 - **Fix the games** — no action needed here; the row links to the relevant player/game, and correcting it there makes the mismatch stop appearing on the next run.
 
-`isReconciliationComplete()` reports whether every mismatch is resolved — same "nothing gates cutover on it yet" caveat as D8/D9. If a stored stat turns out to have no possible backing game record, that is a scope escalation — revisit the "adjustments ledger" option rather than invent game data.
+`isReconciliationComplete()` reported whether every mismatch was resolved — same "nothing gates cutover on it yet" caveat as D8/D9. All three reviews were completed on production, then the review area, its CLI and `ReconciliationResolutions` were removed in Step 6. If a stored stat turns out to have no possible backing game record, that is a scope escalation — revisit the "adjustments ledger" option rather than invent game data.
 
-### Step 4 — Cutover
+### Step 4 — Cutover ✅
 
 - `npm run backup:run` first (principle 1).
 - Re-run Steps 1–3 against the final data snapshot (scripts are idempotent).
@@ -79,19 +81,22 @@ CLI: `npm run migrate:reconcile:preview` — read-only, prints the report, safe 
 - The portal becomes the write path. It reads/writes only the new fields.
 - Old fields (`Player.position`, `Player.teams`, `Player.stats`, `Team.players`, `Team.stats`, `Game.score`, `Game.team.roster[].stats`) are **kept frozen** — not read, not written — as a rollback safety net.
 
-### Step 5 — Publish parity
+### Step 5 — Publish parity ✅
 
 - The publish service generates all JSON artifacts and diffs them against the golden fixtures.
 - Expected result: byte-identical output apart from approved differences (e.g. corrected drifted stats — each such diff is reviewed and traceable to a Step 3 resolution).
 - The website is switched to the S3/CDN URL only after you approve the diff.
 
-### Step 6 — Cleanup (destructive, last)
+### Step 6 — Cleanup (destructive, last) ✅ 2026-09-26
 
 After an agreed bedding-in period with the new system live:
 
-- `npm run backup:run` first (principle 1), then script `migrate-06-cleanup` drops the frozen legacy fields.
-- `ApiKeys` collection deleted.
+- `npm run backup:run` first (principle 1) — backup prefix `backups/2026-09-26T11-43-14-422Z`.
+- The frozen legacy fields were dropped: `Player.position`/`teams`/`stats` (84 docs), `Game.score`/`team.roster[].stats`/`team.roster[].teamId` (88 docs), `Team.players`/`stats` (1 doc). The 11 inactive players with numbers over 99 had their number removed; every stored number is now 1–99.
+- `ApiKeys` and `ReconciliationResolutions` collections deleted.
 - Old admin services decommissioned.
+
+This ran as a one-off after a dry run of expected counts, not as a committed `migrate-06-cleanup` script: it could only ever run once. The exact commands and results are recorded in the `decommission-migration` OpenSpec change.
 
 ## Rollback story
 
@@ -99,8 +104,10 @@ After an agreed bedding-in period with the new system live:
 |---|---|
 | Steps 1–3 | Nothing destructive has happened; old system still primary. `npm run backup:restore` from the Step 1 backup only if additive fields somehow cause trouble (they shouldn't — old system ignores unknown fields; verify this assumption on a staging copy first — see Step 0's known gap). |
 | Step 4–5 | Old fields are frozen but intact and the old services still exist — point the website back at the repo JSON and resume the old workflow. |
-| Step 6 | Timestamped backups retained; `npm run backup:restore` restores everything. |
+| Step 6 | Old services are gone, so rollback means restoring data only: `npm run backup:restore:prod -- --prefix=backups/2026-09-26T11-43-14-422Z --allow-remote` restores the pre-cleanup state (losing anything entered since). |
 
 ## Testing the migration itself
 
-Every script runs in CI against a Docker MongoDB seeded with a **sanitised copy of the real production shapes** (same structures, same edge cases: bench penalties, missing award fields, out-of-range numbers, all 8 position spellings, shootout goals). See [05 — Testing Strategy](05-testing-strategy.md).
+While the migration was live, every script ran in CI against a Docker MongoDB seeded with a **sanitised copy of the real production shapes** (same structures, same edge cases: bench penalties, missing award fields, out-of-range numbers, all 8 position spellings, shootout goals). See [05 — Testing Strategy](05-testing-strategy.md).
+
+Those scripts, their tests and the legacy-shaped seed fixtures were removed with the review area in Step 6; the seed data now holds target-shape documents only.
