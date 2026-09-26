@@ -29,9 +29,8 @@ async function uploadBackupFile(bucket: string, key: string, body: string): Prom
   );
 }
 
-// Full-database backup (Migration Plan Step 0): every collection in the
-// source DB — including legacy ones no repository knows about, e.g.
-// ApiKeys — is EJSON-dumped and uploaded to S3 under a single timestamped
+// Full-database backup: every collection in the source DB — including any
+// no repository knows about — is EJSON-dumped and uploaded to S3 under a single timestamped
 // prefix, one object per collection plus a manifest. Driver-based rather
 // than shelling out to mongodump, which isn't installed in this environment
 // or CI (docs/04-migration-plan.md).
