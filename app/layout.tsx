@@ -35,11 +35,6 @@ const navItems = [
   { href: "/players", label: "Players" },
   { href: "/games", label: "Games" },
   { href: "/seasons", label: "Seasons" },
-  {
-    href: "/migration-review/reconciliation",
-    label: "Migration review",
-    section: "/migration-review",
-  },
 ];
 
 export default function RootLayout({

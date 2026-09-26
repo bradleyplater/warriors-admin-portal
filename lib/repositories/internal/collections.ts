@@ -5,10 +5,8 @@
 // which matched nothing in production: every repository read against a
 // database, correctly connected, that simply had no documents under those
 // names, so every page silently showed empty rather than erroring.
-// `ApiKeys` (a legacy collection this app never writes to, only backs up
-// generically via listCollections()) already matched and needs no entry
-// here — see lib/backup/run.ts. `publishes` is a new collection this app
-// introduced itself and has no legacy counterpart, so it's unaffected.
+// `publishes` is a new collection this app introduced itself and has no
+// legacy counterpart, so it's unaffected.
 export const COLLECTION_NAMES = {
   player: "Player",
   game: "Game",

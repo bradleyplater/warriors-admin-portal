@@ -25,7 +25,9 @@ const PlayerArtifactSchema = z.object({
   id: z.string(),
   name: z.string(),
   nickname: z.string().optional(),
-  number: z.number().int(),
+  // Absent for an inactive player without a number; the golden fixture
+  // predates any such player.
+  number: z.number().int().optional(),
   position: z.string(),
   stats: z.array(PlayerSeasonStatsArtifactSchema),
 });

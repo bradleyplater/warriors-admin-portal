@@ -74,21 +74,24 @@ describe("PlayerSchema", () => {
     expect(PlayerSchema.safeParse(other).success).toBe(true);
   });
 
-  it("accepts an inactive player with no number at all (D9)", () => {
+  it("accepts an inactive player with no number at all", () => {
     const { number: _number, ...rest } = validPlayer;
     const result = PlayerSchema.safeParse({ ...rest, active: false });
     expect(result.success).toBe(true);
   });
 
-  it.each([134, 900])(
-    "accepts an inactive player with an out-of-range legacy number %d (D9)",
+  it.each([0, 100, 134])(
+    "rejects an inactive player with an out-of-range number %d",
     (number) => {
       const result = PlayerSchema.safeParse({
         ...validPlayer,
         active: false,
         number,
       });
-      expect(result.success).toBe(true);
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues[0].path).toEqual(["number"]);
+      }
     },
   );
 
@@ -104,9 +107,13 @@ describe("PlayerSchema", () => {
     }
   });
 
-  it("still rejects an active player with an out-of-range number (D9 unaffected for active players)", () => {
+  it("rejects an active player with an out-of-range number with a single error", () => {
     const result = PlayerSchema.safeParse({ ...validPlayer, number: 134 });
     expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error.issues).toHaveLength(1);
+      expect(result.error.issues[0].path).toEqual(["number"]);
+    }
   });
 });
 

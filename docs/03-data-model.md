@@ -1,6 +1,6 @@
 # 03 — Data Model
 
-Target MongoDB schema for database `HockeyTracker`. Existing custom string IDs (`PLR######`, `GME######`, `SSN####`, `TM######`) are kept — they are stable, human-scannable, and already referenced throughout the data. New IDs use the same scheme (prefix + 6 random digits, retry on collision).
+MongoDB schema for database `HockeyTracker` — the target shape, which production has fully matched since the Step 6 cleanup (2026-09-26, [04 — Migration Plan](04-migration-plan.md)). The "Changes from today" tables below record what the migration changed from the old system's shape. Existing custom string IDs (`PLR######`, `GME######`, `SSN####`, `TM######`) are kept — they are stable, human-scannable, and already referenced throughout the data. New IDs use the same scheme (prefix + 6 random digits, retry on collision).
 
 All documents gain `createdAt` / `updatedAt` audit timestamps (used by the unpublished-changes indicator).
 
@@ -23,7 +23,7 @@ All documents gain `createdAt` / `updatedAt` audit timestamps (used by the unpub
   _id: string,               // "PLR502819"
   firstName: string,
   surname: string,
-  number: number,            // 1–99, unique among active players
+  number?: number,           // 1–99; required when active, unique among active players; inactive players may have none
   positions: Position[],     // ≥1 of "Forward" | "Defence" | "Goaltender"
   active: boolean,
   nickname?: string,         // single value (D10)
@@ -33,9 +33,9 @@ All documents gain `createdAt` / `updatedAt` audit timestamps (used by the unpub
 }
 ```
 
-Changes from today:
+Changes from the old shape (applied by the migration):
 
-| Today | Target | Why |
+| Old | Target | Why |
 |---|---|---|
 | `position: string` (8 inconsistent spellings) | `positions: Position[]` | D7 — PRD requires multi-position; current free text has already diverged ("Goalie / Defence", "Defence/Goaltender", …) |
 | `teams: [{ teamId, number }]` | `teamId` + top-level `number` | D9 — one team exists; the array indirection only created a second place for numbers to live |
@@ -53,7 +53,7 @@ Changes from today:
 }
 ```
 
-`players[]` (a full copy of every player's number and season stats) and `stats[]` (team season aggregates) are **removed** — both are derived. These two arrays are where the observed drift lived.
+`players[]` (a full copy of every player's number and season stats) and `stats[]` (team season aggregates) were **removed** — both are derived. These two arrays are where the observed drift lived.
 
 ### Game — the source of truth (minor slimming)
 
@@ -96,9 +96,9 @@ Changes from today:
 }
 ```
 
-Changes from today:
+Changes from the old shape (applied by the migration):
 
-| Today | Target | Why |
+| Old | Target | Why |
 |---|---|---|
 | `team.roster[].stats {goals, assists, pims}` | removed | Derivable from the goals/penalties arrays in the same document |
 | `team.roster[].teamId` | removed | Redundant with `team.id` |
@@ -121,7 +121,7 @@ Latest successful document drives the unpublished-changes indicator.
 
 ### ApiKeys — retired
 
-Used by the old export system. Untouched during migration; deleted when the old services are decommissioned.
+Used by the old export system. Untouched during migration; deleted on 2026-09-26 once the old services were decommissioned.
 
 ## Enums
 
@@ -176,7 +176,7 @@ Used by the old export system. Untouched during migration; deleted when the old 
 
 ## Validation rules
 
-- **Player:** number integer 1–99 (D9), unique among `active: true` players; `positions` non-empty.
+- **Player:** number, when present, integer 1–99 (D9); required and unique among `active: true` players, optional for inactive players; `positions` non-empty.
 - **Game roster:** only existing players; no duplicates. Removing a player who is referenced by a goal, assist, penalty, netminder, or award is blocked with a clear message until those references are removed.
 - **Goals:** scorer/assists must be rostered; assists distinct from scorer and each other; `second` 0–59; minute within game length (60 regulation; SO goals sit outside periods).
 - **Penalties:** offender rostered or the literal `BENCH`; duration > 0. Bench PIMs count toward team totals only.

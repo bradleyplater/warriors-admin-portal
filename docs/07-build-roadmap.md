@@ -43,23 +43,23 @@ Phased so that every phase ends with something verifiable, and the risky/destruc
 ## Phase 5 — Publish pipeline
 
 - JSON artifact generation matching the golden fixtures (unit-tested for byte parity on seeded equivalents).
-- S3 upload + checksum skip + `Publishes` log + CDN invalidation hook, all working against MinIO locally.
+- S3 upload + checksum skip + `Publishes` log + CDN invalidation hook, all working against a local S3 emulator (now Moto).
 - Unpublished-changes indicator.
 
 **Exit:** publish Playwright journey passes; artifact diff vs golden fixtures reviewed.
 
-## Phase 6 — Migration & cutover ([04 — Migration Plan](04-migration-plan.md))
+## Phase 6 — Migration & cutover ([04 — Migration Plan](04-migration-plan.md)) ✅
 
-- Migration scripts (additive, reconcile, cleanup) built and proven on seeded legacy-shaped data in CI.
+- Migration scripts (additive, reconcile) built and proven on seeded legacy-shaped data in CI; the cleanup ran as a one-off (see Phase 7).
 - Migration Review screens (active checklist, renumbering).
 - Execute against production: additive → reviews → reconciliation sign-off → cutover → publish parity diff → website switched to S3/CDN.
 
 **Exit:** portal is the write path; website reads from S3; old fields frozen; old services idle but available for rollback.
 
-## Phase 7 — Bedding-in & decommission
+## Phase 7 — Bedding-in & decommission ✅ 2026-09-26
 
 - Agreed bedding-in period using the portal for real games.
-- Cleanup migration drops frozen legacy fields; `ApiKeys` deleted; old services switched off.
+- Cleanup migration drops frozen legacy fields; `ApiKeys` deleted; old services switched off. The Migration Review area and all migration code were removed from the portal at the same time.
 - (Optional, deferred items become candidates here: auth, image upload flow, hosting hardening.)
 
 **Exit:** one system. The PRD's goal.

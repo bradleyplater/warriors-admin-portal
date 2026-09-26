@@ -209,8 +209,6 @@ export const players: Player[] = [
     createdAt: now,
     updatedAt: now,
   },
-  // Legacy-shaped drift fixtures: target-shape fields plus the old
-  // free-text `position` and `teams[]` fields, side by side (see design.md).
   {
     _id: "PLR100018",
     firstName: "Pete",
@@ -221,9 +219,6 @@ export const players: Player[] = [
     teamId: TEAM_ID,
     createdAt: now,
     updatedAt: now,
-    position: "Goalie / Defence",
-    teams: [{ teamId: TEAM_ID, number: 22 }],
-    stats: [{ seasonId: "SSN2425", goals: 5, assists: 3, pims: 2 }],
   },
   {
     _id: "PLR100019",
@@ -235,8 +230,17 @@ export const players: Player[] = [
     teamId: TEAM_ID,
     createdAt: now,
     updatedAt: now,
-    position: "Defence/Goaltender",
-    teams: [{ teamId: TEAM_ID, number: 41 }],
-    stats: [{ seasonId: "SSN2425", goals: 0, assists: 4, pims: 6 }],
+  },
+  // Inactive with no shirt number: a valid shape (only active players need
+  // one), and real production data has several.
+  {
+    _id: "PLR100021",
+    firstName: "Mick",
+    surname: "Haddow",
+    positions: ["Defence"],
+    active: false,
+    teamId: TEAM_ID,
+    createdAt: now,
+    updatedAt: now,
   },
 ];
