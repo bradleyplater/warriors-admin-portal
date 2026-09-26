@@ -2,15 +2,13 @@ import { describe, expect, it } from "vitest";
 import { deriveTeamSeasonStats } from "./team-stats";
 import { games } from "../../seed/data/games";
 
-// Sanity check against the documented "Actual computed totals from the
-// seeded games" comment in seed/data/team.ts (legacyStats) — an independent
-// oracle for the derivation formulas, not just a self-referential test.
-// gamesPlayed is hand-counted directly from seed/data/games.ts (number of
-// entries per seasonId), not from legacyStats, which has no gamesPlayed
-// field: SSN2223: 2, SSN2324: 2, SSN2425: 3, SSN2526: 3. goalsFor/
-// goalsAgainst/wins/draws/losses are hand-computed by running deriveScore
-// over each seeded game's goals — there is no separate legacy oracle for
-// these, since the legacy stats[] array never tracked them.
+// Sanity check against totals hand-computed from seed/data/games.ts — an
+// independent oracle for the derivation formulas, not just a
+// self-referential test. goals/assists/pims per season: SSN2223 {3,3,4},
+// SSN2324 {2,1,6}, SSN2425 {5,3,4}, SSN2526 {5,5,8}. gamesPlayed is the
+// number of seeded games per seasonId: SSN2223: 2, SSN2324: 2, SSN2425: 3,
+// SSN2526: 3. goalsFor/goalsAgainst/wins/draws/losses come from running
+// deriveScore over each seeded game's goals.
 describe("deriveTeamSeasonStats against seeded games (sanity check)", () => {
   it.each([
     [

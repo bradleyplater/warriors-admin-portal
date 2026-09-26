@@ -15,35 +15,36 @@
 
 ## 2. Remove the Migration Review area
 
-- [ ] 2.1 Remove the "Migration review" nav item from `app/layout.tsx`
-- [ ] 2.2 Delete `app/migration-review/` (reconciliation, active, shirt-number, the layout and `ReviewProgress`)
-- [ ] 2.3 Delete `e2e/migration-review-active.spec.ts` and `e2e/migration-review-number.spec.ts`
+- [x] 2.1 Remove the "Migration review" nav item from `app/layout.tsx`
+- [x] 2.2 Delete `app/migration-review/` (reconciliation, active, shirt-number, the layout and `ReviewProgress`)
+- [x] 2.3 Delete `e2e/migration-review-active.spec.ts` and `e2e/migration-review-number.spec.ts`
 
 ## 3. Remove the migration library and reconciliation persistence
 
-- [ ] 3.1 Delete `lib/migration/` (active-review, number-review, reconcile, additive) and their unit tests
-- [ ] 3.2 Delete `lib/schemas/reconciliation.ts` and its test, and remove their exports from `lib/schemas` and any index
-- [ ] 3.3 Delete `lib/repositories/reconciliation-resolutions.ts` and its collection-name entry, and remove its exports from `lib/repositories/index.ts`
-- [ ] 3.4 Delete `tests/integration/migration-*.test.ts` and `tests/integration/repositories/reconciliation-resolutions.test.ts`
-- [ ] 3.5 Remove the `migrate:*` scripts from `package.json`
-- [ ] 3.6 Grep for leftover references (`migration-review`, `lib/migration`, `Reconciliation`, `reconciliationResolutions`, `migrate:`) and clean up stale comments that point at removed code
+- [x] 3.1 Delete `lib/migration/` (active-review, number-review, reconcile, additive) and their unit tests
+- [x] 3.2 Delete `lib/schemas/reconciliation.ts` and its test, and remove their exports from `lib/schemas` and any index
+- [x] 3.3 Delete `lib/repositories/reconciliation-resolutions.ts` and its collection-name entry, and remove its exports from `lib/repositories/index.ts`
+- [x] 3.4 Delete `tests/integration/migration-*.test.ts` and `tests/integration/repositories/reconciliation-resolutions.test.ts`
+- [x] 3.5 Remove the `migrate:*` scripts from `package.json`
+- [x] 3.6 Grep for leftover references (`migration-review`, `lib/migration`, `Reconciliation`, `reconciliationResolutions`, `migrate:`) and clean up stale comments that point at removed code
 
 ## 4. Tighten the Player number rule
 
-- [ ] 4.1 In `lib/schemas/player.ts`, make `number` `ShirtNumberSchema.optional()` (valid 1–99 whenever present); keep `requireNumberWhenActive` for presence; update the KAN-36 comments
-- [ ] 4.2 Unit tests in `lib/schemas/player.test.ts`: an inactive player with 134 is rejected, an inactive player with no number passes, an active player with no number is rejected
-- [ ] 4.3 Make `PlayerArtifactSchema.number` optional in `lib/publish/schemas.ts`; add a `players.ts` artifact test with a numberless inactive player that validates against the contract schema and emits no `number` key
-- [ ] 4.4 Update comments that describe out-of-range legacy numbers (e.g. `lib/derived/player-order.ts`, `lib/publish/artifacts/roster-config.ts`) so they describe only the numberless-inactive case
+- [x] 4.1 In `lib/schemas/player.ts`, make `number` `ShirtNumberSchema.optional()` (valid 1–99 whenever present); keep `requireNumberWhenActive` for presence; update the KAN-36 comments
+- [x] 4.2 Unit tests in `lib/schemas/player.test.ts`: an inactive player with 134 is rejected, an inactive player with no number passes, an active player with no number is rejected
+- [x] 4.3 Make `PlayerArtifactSchema.number` optional in `lib/publish/schemas.ts`; add a `players.ts` artifact test with a numberless inactive player that validates against the contract schema and emits no `number` key
+- [x] 4.4 Update comments that describe out-of-range legacy numbers (e.g. `lib/derived/player-order.ts`, `lib/publish/artifacts/roster-config.ts`) so they describe only the numberless-inactive case
 
 ## 5. Seed data and test harness
 
-- [ ] 5.1 Remove the legacy fields from the `seed/data/players.ts` fixtures (`PLR100018`, `PLR100019`) and the `players[]`/`stats[]` arrays from `seed/data/team.ts`
-- [ ] 5.2 Remove `LegacyStatsLine` and the legacy optional fields from `seed/types.ts`, and make `Player.number` optional there
-- [ ] 5.3 Add a seeded inactive player with no `number`; fix any seed-verify or e2e assertions that count players or depend on seed numbers
-- [ ] 5.4 Add a seed test for the new seed-data requirement: no legacy fields, and a numberless inactive player present
-- [ ] 5.5 In `e2e/roster-list.spec.ts`, replace the KAN-36 out-of-range regression test with "a numberless inactive player renders in the Inactive section with `—`", using the seed player instead of a direct DB write
-- [ ] 5.6 Remove the `chromium-legacy-fixtures` project and `LEGACY_FIXTURE_SPECS` from `playwright.config.ts`
+- [x] 5.1 Remove the legacy fields from the `seed/data/players.ts` fixtures (`PLR100018`, `PLR100019`) and the `players[]`/`stats[]` arrays from `seed/data/team.ts`
+- [x] 5.2 Remove `LegacyStatsLine` and the legacy optional fields from `seed/types.ts`, and make `Player.number` optional there
+- [x] 5.3 Add a seeded inactive player with no `number`; fix any seed-verify or e2e assertions that count players or depend on seed numbers
+- [x] 5.4 Add a seed test for the new seed-data requirement: no legacy fields, and a numberless inactive player present
+- [x] 5.5 In `e2e/roster-list.spec.ts`, replace the KAN-36 out-of-range regression test with "a numberless inactive player renders in the Inactive section with `—`", using the seed player instead of a direct DB write
+- [x] 5.6 Remove the `chromium-legacy-fixtures` project and `LEGACY_FIXTURE_SPECS` from `playwright.config.ts`
 - [ ] 5.7 Run lint, typecheck, `test:unit`, `test:integration` and `test:e2e` locally; all green
+  - 2026-09-26: lint (0 errors), typecheck, unit (271) and integration (72) green locally on a fresh seed. e2e NOT run locally: the :3000 server is a prod-connected `next dev` and Playwright reuses it outside CI, so e2e would write to prod. e2e runs in CI on the PR instead
 
 ## 6. Docs
 

@@ -53,6 +53,18 @@ describe("generatePlayersArtifact", () => {
     expect(() => PlayersArtifactSchema.parse(artifact)).not.toThrow();
   });
 
+  it("omits number for an inactive player without one, sorts them last, and still validates", () => {
+    const { number: _number, ...withoutNumber } = player({ _id: "PLR2", active: false });
+    const artifact = generatePlayersArtifact(
+      [withoutNumber, player({ _id: "PLR1", number: 20 })],
+      [],
+      seasons,
+    );
+    expect(artifact.map((p) => p.id)).toEqual(["PLR1", "PLR2"]);
+    expect("number" in artifact[1]).toBe(false);
+    expect(() => PlayersArtifactSchema.parse(artifact)).not.toThrow();
+  });
+
   it("sorts players by shirt number ascending", () => {
     const artifact = generatePlayersArtifact(
       [player({ _id: "PLR1", number: 20 }), player({ _id: "PLR2", number: 3 })],

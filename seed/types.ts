@@ -1,5 +1,4 @@
-// Local, seed-only types mirroring docs/03-data-model.md's target shapes,
-// plus the legacy fields needed for migration/reconciliation drift fixtures.
+// Local, seed-only types mirroring docs/03-data-model.md's target shapes.
 // Not shared with application code — KAN-13 owns the real schema layer.
 
 export type Position = "Forward" | "Defence" | "Goaltender";
@@ -28,32 +27,18 @@ export interface Season {
   updatedAt: Date;
 }
 
-// Legacy per-season stats line as it lived on Team.stats[] / Player.stats[]
-// before it was derived from Game documents.
-export interface LegacyStatsLine {
-  seasonId: string;
-  goals: number;
-  assists: number;
-  pims: number;
-}
-
 export interface Team {
   _id: string; // "TM551420"
   name: string;
   createdAt: Date;
   updatedAt: Date;
-  // Legacy aggregate fields — removed in the target shape, kept here only
-  // so the seed dataset can carry deliberately drifted values for the
-  // reconciliation report (KAN-37) to detect.
-  players?: Array<{ playerId: string; number: number }>;
-  stats?: LegacyStatsLine[];
 }
 
 export interface Player {
   _id: string; // "PLR502819"
   firstName: string;
   surname: string;
-  number: number; // 1-99 for active players; legacy fixtures may exceed this
+  number?: number; // 1-99; required for active players, may be absent for inactive ones
   positions: Position[];
   active: boolean;
   nickname?: string;
@@ -61,10 +46,6 @@ export interface Player {
   teamId: string;
   createdAt: Date;
   updatedAt: Date;
-  // Legacy fields — present only on drift fixtures used for migration testing.
-  position?: string; // old free-text spelling, e.g. "Goalie / Defence"
-  teams?: Array<{ teamId: string; number: number }>;
-  stats?: LegacyStatsLine[];
 }
 
 export interface Goal {

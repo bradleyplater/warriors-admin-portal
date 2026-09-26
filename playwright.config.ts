@@ -1,18 +1,5 @@
 import { defineConfig, devices } from "@playwright/test";
 
-// These specs write deliberately invalid legacy Player documents (missing
-// `active`, out-of-range shirt numbers) straight into the shared database
-// to exercise the migration-review screens. While one exists, every page
-// that validates the full player list (/players, /games/new, roster
-// pages) returns a 500 — so any spec running alongside them on another
-// worker fails at random. They run in their own project, after all other
-// specs have finished, one at a time.
-const LEGACY_FIXTURE_SPECS = [
-  "**/migration-review-active.spec.ts",
-  "**/migration-review-number.spec.ts",
-  "**/roster-list.spec.ts",
-];
-
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: true,
@@ -27,14 +14,6 @@ export default defineConfig({
     {
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
-      testIgnore: LEGACY_FIXTURE_SPECS,
-    },
-    {
-      name: "chromium-legacy-fixtures",
-      use: { ...devices["Desktop Chrome"] },
-      testMatch: LEGACY_FIXTURE_SPECS,
-      dependencies: ["chromium"],
-      workers: 1,
     },
   ],
   webServer: {

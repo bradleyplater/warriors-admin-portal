@@ -20,8 +20,8 @@ export function parsePlayerFormData(formData: FormData, teamId: string) {
     // Omit rather than set to `undefined`: the MongoDB driver serializes an
     // explicit `undefined` value as BSON null, which then fails the
     // optional (not nullable) schema field on read-back. A blank number is
-    // valid for an inactive player (D9, KAN-36) — the schema's
-    // requireNumberWhenActive refine is what rejects it for an active one.
+    // valid for an inactive player — the schema's requireNumberWhenActive
+    // refine is what rejects it for an active one.
     ...(nickname !== undefined ? { nickname } : {}),
     ...(imagePath !== undefined ? { imagePath } : {}),
     ...(numberRaw !== undefined ? { number: Number(numberRaw) } : {}),

@@ -130,25 +130,10 @@ describe("players repository", () => {
     expect(inactive._id).not.toBe(active._id);
   });
 
-  it("does not throw on listPlayers() for an inactive player with an out-of-range legacy number (D9, KAN-36)", async () => {
-    // Real production shape: an inactive player whose number was never
-    // resolved by the D9 migration review — that review only requires it
-    // for active players, so this is expected to persist indefinitely.
-    // /players (and anything else calling listPlayers()) must not crash on
-    // it — this is the regression covered by the KAN-36 follow-up fix.
-    const inactive = await createPlayer(
-      testPlayerInput({ active: false, surname: "LegacyNumber" }),
-    );
-    createdIds.push(inactive._id);
-    const db = await getDb();
-    await db
-      .collection<RawDoc>("Player")
-      .updateOne({ _id: inactive._id }, { $set: { number: 134 } });
-
-    const players = await listPlayers();
-    const found = players.find((p) => p._id === inactive._id);
-    expect(found?.number).toBe(134);
-    expect(found?.active).toBe(false);
+  it("rejects creating an inactive player with an out-of-range number", async () => {
+    await expect(
+      createPlayer(testPlayerInput({ active: false, number: 134 })),
+    ).rejects.toThrow("Number must be between 1 and 99");
   });
 
   it("rejects creating an active player with no number", async () => {
@@ -165,6 +150,9 @@ describe("players repository", () => {
     const created = await createPlayer(withoutNumber);
     createdIds.push(created._id);
     expect(created.number).toBeUndefined();
+
+    const listed = (await listPlayers()).find((p) => p._id === created._id);
+    expect(listed?.number).toBeUndefined();
   });
 
   it("retries id generation against a real MongoDB duplicate _id error", async () => {
