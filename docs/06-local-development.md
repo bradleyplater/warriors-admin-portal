@@ -7,7 +7,8 @@ Per the PRD: local development spins up Docker services with seeded data, and mo
 | Service | Image | Port | Purpose |
 |---|---|---|---|
 | `mongo` | `mongo:7` | 27017 | Local `HockeyTracker` database |
-| `localstack` | `localstack/localstack` | 4566 | S3-compatible storage so the publish pipeline runs for real locally |
+| `s3` | `motoserver/moto` | 4566 | S3-compatible storage so the publish pipeline runs for real locally (in-memory: objects don't survive a restart) |
+| `s3-init` | `curlimages/curl` | — | Creates the `warriors-local` bucket on every `up` |
 | `mongo-seed` | one-shot node script | — | Seeds the database on first run |
 
 ## First run
@@ -59,6 +60,6 @@ Swap `MONGODB_URI` (and the S3 values) for the production ones and the same buil
 | `npm run test:e2e` / `test:e2e:ui` | Playwright headless / UI mode |
 | `npm run migrate -- --dry-run` | Migration scripts in dry-run |
 | `npm run publish:preview` | Generate JSON artifacts locally without uploading |
-| `npm run publish:run` | Run the full publish pipeline against the configured S3 bucket (LocalStack locally) |
-| `npm run backup:run` | Back up every collection in the configured DB to S3 (LocalStack locally) under a timestamped prefix |
+| `npm run publish:run` | Run the full publish pipeline against the configured S3 bucket (Moto locally) |
+| `npm run backup:run` | Back up every collection in the configured DB to S3 (Moto locally) under a timestamped prefix |
 | `npm run backup:restore -- --prefix=<ts>` | Restore a backup prefix into the configured DB; refuses a non-local target unless `--allow-remote` is passed |

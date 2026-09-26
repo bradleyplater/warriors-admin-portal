@@ -22,21 +22,29 @@ services:
       MONGODB_URI: mongodb://mongo:27017/HockeyTracker
     restart: "no"
 
-  localstack:
-    image: localstack/localstack
+  # S3 emulator. LocalStack's image now refuses to start without a paid
+  # auth token, so this uses Moto (Apache-2.0, no licence). Host port 4566 is
+  # kept so S3_ENDPOINT stays the same. Moto is in-memory, so objects don't
+  # survive a restart, so s3-init recreates the bucket on every `up`.
+  s3:
+    image: motoserver/moto:5.1.12
     ports:
-      - "4566:4566"
-    environment:
-      SERVICES: s3
-    volumes:
-      - localstack-data:/var/lib/localstack
+      - "4566:5000"
     healthcheck:
-      test: ["CMD-SHELL", "python3 -c \"import urllib.request; urllib.request.urlopen('http://localhost:4566/_localstack/health')\""]
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:5000/moto-api/')\""]
       interval: 5s
-      timeout: 10s
+      timeout: 5s
       retries: 20
-      start_period: 15s
+      start_period: 5s
+
+  s3-init:
+    image: curlimages/curl:8.16.0
+    depends_on:
+      s3:
+        condition: service_healthy
+    # Moto doesn't verify signatures, so an unsigned PUT creates the bucket.
+    command: ["-fsS", "-X", "PUT", "http://s3:5000/warriors-local"]
+    restart: "no"
 
 volumes:
   mongo-data:
-  localstack-data:

@@ -46,7 +46,7 @@ jobs:
           node-version-file: ".nvmrc"
           cache: npm
       - run: npm ci
-      - name: Start Docker services (Mongo + MinIO, seeded)
+      - name: Start Docker services (Mongo + S3, seeded)
         run: bash scripts/wait-for-docker-services.sh
       - run: npm run test:integration
       - name: Tear down services
@@ -63,7 +63,7 @@ jobs:
           node-version-file: ".nvmrc"
           cache: npm
       - run: npm ci
-      - name: Start Docker services (Mongo + MinIO, seeded)
+      - name: Start Docker services (Mongo + S3, seeded)
         run: bash scripts/wait-for-docker-services.sh
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
