@@ -43,8 +43,9 @@
 - [x] 5.4 Add a seed test for the new seed-data requirement: no legacy fields, and a numberless inactive player present
 - [x] 5.5 In `e2e/roster-list.spec.ts`, replace the KAN-36 out-of-range regression test with "a numberless inactive player renders in the Inactive section with `—`", using the seed player instead of a direct DB write
 - [x] 5.6 Remove the `chromium-legacy-fixtures` project and `LEGACY_FIXTURE_SPECS` from `playwright.config.ts`
-- [ ] 5.7 Run lint, typecheck, `test:unit`, `test:integration` and `test:e2e` locally; all green
+- [x] 5.7 Run lint, typecheck, `test:unit`, `test:integration` and `test:e2e` locally; all green
   - 2026-09-26: lint (0 errors), typecheck, unit (271) and integration (72) green locally on a fresh seed. e2e NOT run locally: the :3000 server is a prod-connected `next dev` and Playwright reuses it outside CI, so e2e would write to prod. e2e runs in CI on the PR instead
+  - CI run 36240579861 on PR #35: lint-and-typecheck, unit, integration and e2e all green
 
 ## 6. Docs
 
@@ -55,6 +56,7 @@
 
 ## 7. Ship
 
-- [ ] 7.1 Open a PR; the description states that the prod cleanup (section 1) has already run and must precede the merge
+- [x] 7.1 Open a PR; the description states that the prod cleanup (section 1) has already run and must precede the merge
+  - PR #35
 - [ ] 7.2 After merge: check how the website repo renders a player without `number` before the next real publish, then publish
 - [ ] 7.3 Sync delta specs and archive the change
