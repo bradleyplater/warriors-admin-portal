@@ -23,8 +23,7 @@ services:
     restart: "no"
 
   minio:
-    image: quay.io/minio/minio
-    command: server /data --console-address ":9001"
+    image: bitnami/minio
     ports:
       - "9000:9000"
       - "9001:9001"
@@ -32,15 +31,15 @@ services:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
     volumes:
-      - minio-data:/data
+      - minio-data:/bitnami/minio/data
     healthcheck:
-      test: ["CMD", "mc", "ready", "local"]
+      test: ["CMD-SHELL", "curl -sf http://localhost:9000/minio/health/live"]
       interval: 5s
       timeout: 5s
       retries: 5
 
   minio-init:
-    image: quay.io/minio/mc
+    image: bitnami/minio-client
     depends_on:
       minio:
         condition: service_healthy
