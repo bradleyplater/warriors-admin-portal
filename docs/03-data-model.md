@@ -104,7 +104,7 @@ Changes from the old shape (applied by the migration):
 | `team.roster[].teamId` | removed | Redundant with `team.id` |
 | `score { team, opponent, periods[] }` | removed | D12 — fully derived (verified derivable from goal times) |
 | `type: "challenge"` (mixed casing) | normalised enum | D11 |
-| `opponentTeam.name` (free text, with typo variants) | `opponentTeam.opponentId` → Opponent | add-opponents — one canonical, logo-bearing opponent per club; backfilled from an agreed name mapping |
+| `opponentTeam.name` (free text, with typo variants) | `opponentTeam.opponentId` → Opponent | add-opponents — one canonical, logo-bearing opponent per club; backfilled from an agreed name mapping on 2026-09-27 (32 names → 31 opponents, 91 games; backup `backups/2026-09-27T08-57-49-275Z`) |
 
 ### Opponent — new (add-opponents)
 

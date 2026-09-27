@@ -63,5 +63,5 @@
 ## 10. Docs and cleanup
 
 - [x] 10.1 Update `docs/03-data-model.md` (Opponent entity, `Game.opponentTeam.opponentId`, logo key layout) and the Obsidian vault data-model note
-- [ ] 10.2 Record the migration run (backup prefix, counts) in the docs/vault
+- [x] 10.2 Record the migration run (backup prefix, counts) in the docs/vault
 - [ ] 10.3 After the prod run, remove `lib/migration/opponents/` and its npm script in a follow-up commit
