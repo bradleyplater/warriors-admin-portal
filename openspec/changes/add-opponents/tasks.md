@@ -16,7 +16,7 @@
 - [x] 3.1 Add an opponent-logo storage module (build key `opponents/<id>/logo-<ms>.<ext>`, `PutObject` with Content-Type, `DeleteObject`) using `getS3Client()`/`S3_BUCKET`
 - [x] 3.2 Add upload validation (allowlisted MIME, ≤ 5 MB, extension derived from MIME) with unit tests
 - [x] 3.3 Set `experimental.serverActions.bodySizeLimit: "6mb"` (or the Next 16 equivalent) in `next.config.ts`
-- [ ] 3.4 Add `s3:DeleteObject` scoped to `opponents/*` to `infra/terraform/iam.tf` and run `terraform plan` (apply in task 9.1)
+- [x] 3.4 Add `s3:DeleteObject` scoped to `opponents/*` to `infra/terraform/iam.tf` and run `terraform plan` (apply in task 9.1)
 
 ## 4. Opponent service and pages
 
@@ -54,9 +54,9 @@
 
 ## 9. Production rollout
 
-- [ ] 9.1 Apply the Terraform IAM change to prod
+- [x] 9.1 Apply the Terraform IAM change to prod
 - [ ] 9.2 Take a prod backup with the existing backup CLI and record its prefix
-- [ ] 9.3 Run the migration dry-run against prod and review the output with the user; it must be clean
+- [x] 9.3 Run the migration dry-run against prod and review the output with the user; it must be clean
 - [ ] 9.4 Run `--apply` against prod (only with this branch's code as the running portal) and record the counts
 - [ ] 9.5 Smoke-test against prod: `/games`, a game detail, `/opponents`, one logo upload, publish generation without upload
 
