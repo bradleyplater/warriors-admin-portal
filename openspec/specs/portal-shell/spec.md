@@ -16,7 +16,7 @@ The portal SHALL render a shared shell layout on every page, containing navigati
 - **THEN** the portal navigates to that area's page without a full-page error
 
 ### Requirement: Placeholder area pages
-`/players` is no longer a placeholder — it serves the player roster list (see the `roster-list` capability), `/players/new` serves the create-player form and `/players/[id]` serves the player profile (see the `player-management` and `player-profile` capabilities). `/games` is no longer a placeholder — it serves the season-grouped games list, `/games/new` serves the create-game form, and `/games/[id]` serves the game detail page (see the `game-management` capability). `/seasons` is no longer a placeholder — it serves the season list, and `/seasons/new` serves the create-season form.
+Each area route SHALL serve its real page inside the shared shell, not a placeholder. `/players` is no longer a placeholder — it serves the player roster list (see the `roster-list` capability), `/players/new` serves the create-player form and `/players/[id]` serves the player profile (see the `player-management` and `player-profile` capabilities). `/games` is no longer a placeholder — it serves the season-grouped games list, `/games/new` serves the create-game form, and `/games/[id]` serves the game detail page (see the `game-management` capability). `/seasons` is no longer a placeholder — it serves the season list, and `/seasons/new` serves the create-season form.
 
 #### Scenario: Players is no longer a placeholder
 - **WHEN** a user opens `/players` directly in the browser
