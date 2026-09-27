@@ -21,7 +21,7 @@ function game(overrides: Partial<Game> = {}): Game {
       goals: [{ _id: "GOL1", scoredBy: "PLR1", minute: 5, second: 0, type: "EVEN" }],
       penalties: [],
     },
-    opponentTeam: { name: "Opponents", goals: [], penalties: [] },
+    opponentTeam: { opponentId: "OPN000001", goals: [], penalties: [] },
     createdAt: new Date(),
     updatedAt: new Date(),
     ...overrides,

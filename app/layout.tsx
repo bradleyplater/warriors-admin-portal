@@ -28,12 +28,13 @@ const chivoMono = Chivo_Mono({
 
 export const metadata: Metadata = {
   title: "Warriors Admin Portal",
-  description: "Admin portal for managing Warriors players, games and seasons",
+  description: "Admin portal for managing Warriors players, games, opponents and seasons",
 };
 
 const navItems = [
   { href: "/players", label: "Players" },
   { href: "/games", label: "Games" },
+  { href: "/opponents", label: "Opponents" },
   { href: "/seasons", label: "Seasons" },
 ];
 

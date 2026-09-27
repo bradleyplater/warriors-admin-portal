@@ -9,6 +9,16 @@ export async function ensureIndexes(db: Db): Promise<void> {
     db.collection(COLLECTION_NAMES.game).createIndex({ seasonId: 1, date: -1 }),
     db.collection(COLLECTION_NAMES.game).createIndex({ "team.roster.playerId": 1 }),
     db.collection(COLLECTION_NAMES.game).createIndex({ updatedAt: -1 }),
+    db.collection(COLLECTION_NAMES.game).createIndex({ "opponentTeam.opponentId": 1 }),
+    // Case-insensitive uniqueness, so "cleveland comets" can't sit alongside
+    // "Cleveland Comets" — the variant problem this collection exists to fix.
+    db
+      .collection(COLLECTION_NAMES.opponent)
+      .createIndex(
+        { name: 1 },
+        { unique: true, collation: { locale: "en", strength: 2 } },
+      ),
+    db.collection(COLLECTION_NAMES.opponent).createIndex({ updatedAt: -1 }),
     db
       .collection(COLLECTION_NAMES.player)
       .createIndex(

@@ -1,9 +1,15 @@
 import { notFound } from "next/navigation";
-import { getGame, listPlayers, listSeasons } from "@/lib/repositories";
+import {
+  getGame,
+  listOpponents,
+  listPlayers,
+  listSeasons,
+} from "@/lib/repositories";
 import { sortSeasonsAscending } from "@/lib/derived/season-order";
 import { compareByShirtNumber } from "@/lib/derived/player-order";
 import { GameForm } from "../../GameForm";
 import { PageHeader } from "@/app/_ui";
+import { UNKNOWN_OPPONENT } from "@/lib/opponents/names";
 
 export default async function EditGamePage({
   params,
@@ -17,7 +23,14 @@ export default async function EditGamePage({
     notFound();
   }
 
-  const [seasons, players] = await Promise.all([listSeasons(), listPlayers()]);
+  const [seasons, players, opponents] = await Promise.all([
+    listSeasons(),
+    listPlayers(),
+    listOpponents(),
+  ]);
+  const opponentName =
+    opponents.find((opponent) => opponent._id === game.opponentTeam.opponentId)
+      ?.name ?? UNKNOWN_OPPONENT;
   const rosterPlayers = game.team.roster
     .map((entry) => players.find((player) => player._id === entry.playerId))
     .filter(
@@ -30,12 +43,13 @@ export default async function EditGamePage({
       <PageHeader
         back={{
           href: `/games/${game._id}`,
-          label: `vs ${game.opponentTeam.name}`,
+          label: `vs ${opponentName}`,
         }}
         title="Edit game details"
       />
       <GameForm
         seasons={sortSeasonsAscending(seasons)}
+        opponents={opponents}
         rosterPlayers={rosterPlayers}
         initialValues={game}
       />

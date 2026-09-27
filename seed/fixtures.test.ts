@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { players } from "./data/players";
 import { team } from "./data/team";
+import { games } from "./data/games";
+import { opponents } from "./data/opponents";
+import { OpponentSchema } from "../lib/schemas";
 
 // The seed data uses the target shape only (docs/03-data-model.md) — the
 // legacy aggregate fields were dropped from production in Step 6 of the
@@ -28,5 +31,28 @@ describe("seed fixtures", () => {
     expect(
       players.some((player) => !player.active && !("number" in player)),
     ).toBe(true);
+  });
+
+  it("has every game reference a seeded opponent, with no free-text name", () => {
+    const opponentIds = new Set(opponents.map((opponent) => opponent._id));
+    for (const game of games) {
+      expect(opponentIds.has(game.opponentTeam.opponentId)).toBe(true);
+      expect(game.opponentTeam).not.toHaveProperty("name");
+    }
+  });
+
+  it("has valid opponents with and without a logo, and one no game references", () => {
+    for (const opponent of opponents) {
+      expect(OpponentSchema.safeParse(opponent).success).toBe(true);
+    }
+    expect(opponents.some((opponent) => opponent.logo)).toBe(true);
+    expect(opponents.some((opponent) => !opponent.logo)).toBe(true);
+    const referenced = new Set(games.map((game) => game.opponentTeam.opponentId));
+    expect(opponents.some((opponent) => !referenced.has(opponent._id))).toBe(true);
+  });
+
+  it("has unique opponent ids and names", () => {
+    expect(new Set(opponents.map((o) => o._id)).size).toBe(opponents.length);
+    expect(new Set(opponents.map((o) => o.name.toLowerCase())).size).toBe(opponents.length);
   });
 });

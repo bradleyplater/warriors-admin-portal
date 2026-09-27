@@ -8,7 +8,7 @@ test.describe("portal shell", () => {
     ).toBeVisible();
   });
 
-  test("navigates to Players, Games, and Seasons", async ({ page }) => {
+  test("navigates to Players, Games, Opponents, and Seasons", async ({ page }) => {
     await page.goto("/");
 
     await page.getByRole("link", { name: "Players" }).click();
@@ -18,6 +18,12 @@ test.describe("portal shell", () => {
     await page.getByRole("link", { name: "Games" }).click();
     await expect(page).toHaveURL(/\/games$/);
     await expect(page.getByRole("heading", { name: "Games" })).toBeVisible();
+
+    await page.getByRole("link", { name: "Opponents", exact: true }).click();
+    await expect(page).toHaveURL(/\/opponents$/);
+    await expect(
+      page.getByRole("heading", { name: "Opponents", exact: true }),
+    ).toBeVisible();
 
     await page.getByRole("link", { name: "Seasons" }).click();
     await expect(page).toHaveURL(/\/seasons$/);

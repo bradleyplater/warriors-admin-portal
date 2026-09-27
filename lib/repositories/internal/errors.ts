@@ -18,6 +18,16 @@ export class DuplicateSeasonError extends Error {
   }
 }
 
+export class DuplicateOpponentNameError extends Error {
+  readonly opponentName: string;
+
+  constructor(opponentName: string) {
+    super(`An opponent named "${opponentName}" already exists`);
+    this.name = "DuplicateOpponentNameError";
+    this.opponentName = opponentName;
+  }
+}
+
 export class NotFoundError extends Error {
   constructor(collection: string, id: string) {
     super(`${collection} "${id}" not found`);

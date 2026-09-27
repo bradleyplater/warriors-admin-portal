@@ -10,6 +10,7 @@ const { notFoundMock, getGameMock } = vi.hoisted(() => ({
 vi.mock("next/navigation", () => ({ notFound: notFoundMock }));
 vi.mock("@/lib/repositories", () => ({
   getGame: getGameMock,
+  getOpponent: vi.fn().mockResolvedValue(null),
   listPlayers: vi.fn(),
 }));
 
@@ -34,7 +35,7 @@ describe("EditGoalPage", () => {
   it("renders a 404 (calls notFound()) for a goal id not on the game", async () => {
     getGameMock.mockResolvedValue({
       _id: "GME000001",
-      opponentTeam: { name: "Opponents", goals: [], penalties: [] },
+      opponentTeam: { opponentId: "OPN000001", goals: [], penalties: [] },
       team: { id: "TM551420", roster: [], goals: [], penalties: [] },
     });
 

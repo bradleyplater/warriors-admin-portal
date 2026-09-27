@@ -1,3 +1,4 @@
+import { ensureOpponent } from "./support/opponents";
 import { expect, test, type Page } from "@playwright/test";
 
 // Editing-details and roster-add/remove tests create their own game fixture
@@ -22,10 +23,11 @@ async function createTestGame(
     rosterNames,
   }: { opponentName: string; rosterNames: string[] },
 ): Promise<string> {
+  await ensureOpponent(page, opponentName);
   await page.goto("/games/new");
   await page.getByLabel("Date").fill("2024-01-15");
   await page.getByLabel("Season").selectOption({ label: "23/24" });
-  await page.getByLabel("Opponent").fill(opponentName);
+  await page.getByLabel("Opponent").selectOption({ label: opponentName });
   for (const name of rosterNames) {
     await page.getByRole("checkbox", { name: new RegExp(name) }).check();
   }
@@ -38,6 +40,7 @@ test.describe("edit game details", () => {
   test("editing details updates the game and redirects to its detail page", async ({
     page,
   }) => {
+    await ensureOpponent(page, "Renamed Opponent");
     await createTestGame(page, {
       opponentName: "Edit Details Test Opponent",
       rosterNames: ["Mark Kinnear"],
@@ -45,11 +48,11 @@ test.describe("edit game details", () => {
 
     await page.getByRole("link", { name: "Edit details" }).click();
     await expect(page).toHaveURL(/\/games\/GME\d+\/edit$/);
-    await expect(page.getByLabel("Opponent")).toHaveValue(
-      "Edit Details Test Opponent",
-    );
+    await expect(
+      page.getByLabel("Opponent").locator("option:checked"),
+    ).toHaveText("Edit Details Test Opponent");
 
-    await page.getByLabel("Opponent").fill("Renamed Opponent");
+    await page.getByLabel("Opponent").selectOption({ label: "Renamed Opponent" });
     await page.getByLabel("Date").fill("2024-02-20");
     await page.getByRole("radio", { name: "LLIHC" }).check();
     await page.getByRole("radio", { name: "Away" }).check();
@@ -64,20 +67,22 @@ test.describe("edit game details", () => {
     await expect(page.getByText("Away")).toBeVisible();
   });
 
-  test("invalid edit is rejected with the same validation as creation", async ({
-    page,
-  }) => {
+  test("an opponent that doesn't exist is rejected", async ({ page }) => {
     await createTestGame(page, {
       opponentName: "Invalid Edit Test Opponent",
       rosterNames: ["Mark Kinnear"],
     });
 
     await page.getByRole("link", { name: "Edit details" }).click();
-    await page.getByLabel("Opponent").fill("");
+    // Simulates a tampered request, or an opponent deleted after the form
+    // loaded — the picker itself only ever offers existing opponents.
+    await page.getByLabel("Opponent").evaluate((select: HTMLSelectElement) => {
+      select.add(new Option("Ghost Opponent", "OPN999999", true, true));
+    });
     await page.getByRole("button", { name: "Save changes" }).click();
 
     await expect(page).toHaveURL(/\/games\/GME\d+\/edit$/);
-    await expect(page.getByText(/too small|required|empty/i)).toBeVisible();
+    await expect(page.getByText("Select an existing opponent")).toBeVisible();
   });
 });
 

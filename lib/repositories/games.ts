@@ -24,7 +24,7 @@ export interface GameUpdateInput {
   type?: Game["type"];
   location?: Game["location"];
   roster?: { playerId: string }[];
-  opponentName?: string;
+  opponentId?: string;
   // undefined = leave unchanged; null = explicitly clear. These three are
   // the only genuinely optional, clearable fields on Game — the merge below
   // must delete the key rather than set it to `undefined`, since the
@@ -134,6 +134,13 @@ export async function getGamesLatestUpdatedAt(): Promise<Date | null> {
   return doc?.updatedAt ?? null;
 }
 
+// Used to block deleting an opponent that games still reference — served
+// by the { "opponentTeam.opponentId": 1 } index in internal/indexes.ts.
+export async function countGamesByOpponentId(opponentId: string): Promise<number> {
+  const col = await collection();
+  return col.countDocuments({ "opponentTeam.opponentId": opponentId });
+}
+
 async function loadExisting(col: Awaited<ReturnType<typeof collection>>, id: string): Promise<Game> {
   const existing = await col.findOne({ _id: id });
   if (!existing) {
@@ -161,7 +168,7 @@ export async function updateGame(
     },
     opponentTeam: {
       ...existing.opponentTeam,
-      ...(patch.opponentName !== undefined && { name: patch.opponentName }),
+      ...(patch.opponentId !== undefined && { opponentId: patch.opponentId }),
     },
     ...stampUpdate(),
   };

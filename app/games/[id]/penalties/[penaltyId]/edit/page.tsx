@@ -3,6 +3,7 @@ import { getGame, listPlayers } from "@/lib/repositories";
 import { compareByShirtNumber } from "@/lib/derived/player-order";
 import { PenaltyForm } from "../../../../PenaltyForm";
 import { PageHeader } from "@/app/_ui";
+import { getOpponentName } from "@/lib/opponents/names";
 
 export default async function EditPenaltyPage({
   params,
@@ -15,6 +16,8 @@ export default async function EditPenaltyPage({
   if (!game) {
     notFound();
   }
+
+  const opponentName = await getOpponentName(game.opponentTeam.opponentId);
 
   const penalty = game.team.penalties.find((entry) => entry._id === penaltyId);
 
@@ -35,7 +38,7 @@ export default async function EditPenaltyPage({
       <PageHeader
         back={{
           href: `/games/${game._id}`,
-          label: `vs ${game.opponentTeam.name}`,
+          label: `vs ${opponentName}`,
         }}
         title="Edit penalty"
       />

@@ -3,6 +3,7 @@ import { getGame, listPlayers } from "@/lib/repositories";
 import { compareByShirtNumber } from "@/lib/derived/player-order";
 import { RosterForm } from "../../RosterForm";
 import { PageHeader } from "@/app/_ui";
+import { getOpponentName } from "@/lib/opponents/names";
 
 export default async function GameRosterPage({
   params,
@@ -16,6 +17,8 @@ export default async function GameRosterPage({
     notFound();
   }
 
+  const opponentName = await getOpponentName(game.opponentTeam.opponentId);
+
   const players = await listPlayers();
   const rosteredIds = new Set(game.team.roster.map((entry) => entry.playerId));
   const pickerPlayers = players
@@ -27,7 +30,7 @@ export default async function GameRosterPage({
       <PageHeader
         back={{
           href: `/games/${game._id}`,
-          label: `vs ${game.opponentTeam.name}`,
+          label: `vs ${opponentName}`,
         }}
         title="Manage roster"
       />

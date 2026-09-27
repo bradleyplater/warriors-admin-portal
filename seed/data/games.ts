@@ -1,6 +1,7 @@
 import { genId } from "../ids";
 import type { Game } from "../types";
 import { TEAM_ID } from "./constants";
+import { OPPONENT_IDS } from "./opponents";
 
 const now = new Date();
 
@@ -67,7 +68,7 @@ export const games: Game[] = [
       ],
     },
     opponentTeam: {
-      name: "Rivals HC",
+      opponentId: OPPONENT_IDS.rivalsHc,
       goals: [
         {
           _id: genId("OGL"),
@@ -124,7 +125,7 @@ export const games: Game[] = [
       ],
     },
     opponentTeam: {
-      name: "Ice Hawks",
+      opponentId: OPPONENT_IDS.iceHawks,
       goals: [
         {
           _id: genId("OGL"),
@@ -176,7 +177,7 @@ export const games: Game[] = [
       ],
     },
     opponentTeam: {
-      name: "Northern Blades",
+      opponentId: OPPONENT_IDS.northernBlades,
       goals: [],
       penalties: [
         {
@@ -234,7 +235,7 @@ export const games: Game[] = [
       ],
     },
     opponentTeam: {
-      name: "Metro Kings",
+      opponentId: OPPONENT_IDS.metroKings,
       goals: [
         {
           _id: genId("OGL"),
@@ -286,7 +287,7 @@ export const games: Game[] = [
       ],
     },
     opponentTeam: {
-      name: "Border Reivers",
+      opponentId: OPPONENT_IDS.borderReivers,
       goals: [
         {
           _id: genId("OGL"),
@@ -353,7 +354,7 @@ export const games: Game[] = [
       ],
     },
     opponentTeam: {
-      name: "Coastal Storm",
+      opponentId: OPPONENT_IDS.coastalStorm,
       goals: [
         {
           _id: genId("OGL"),
@@ -390,7 +391,7 @@ export const games: Game[] = [
       penalties: [],
     },
     opponentTeam: {
-      name: "Historic Cup Rivals",
+      opponentId: OPPONENT_IDS.historicCupRivals,
       goals: [],
       penalties: [
         {
@@ -449,7 +450,7 @@ export const games: Game[] = [
       ],
     },
     opponentTeam: {
-      name: "Valley Vipers",
+      opponentId: OPPONENT_IDS.valleyVipers,
       goals: [
         {
           _id: genId("OGL"),
@@ -502,7 +503,7 @@ export const games: Game[] = [
       ],
     },
     opponentTeam: {
-      name: "Summit Sabres",
+      opponentId: OPPONENT_IDS.summitSabres,
       goals: [],
       penalties: [
         {
@@ -560,7 +561,7 @@ export const games: Game[] = [
       ],
     },
     opponentTeam: {
-      name: "Eastside Eagles",
+      opponentId: OPPONENT_IDS.eastsideEagles,
       goals: [
         {
           _id: genId("OGL"),

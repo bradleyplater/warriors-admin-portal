@@ -2,7 +2,12 @@ import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import { listPlayers, listGames, listSeasons } from "../../lib/repositories";
+import {
+  listPlayers,
+  listGames,
+  listSeasons,
+  listOpponents,
+} from "../../lib/repositories";
 import { generateAllArtifacts, writeArtifacts } from "../../lib/publish/generate";
 import {
   PlayersArtifactSchema,
@@ -19,10 +24,11 @@ describe("publish preview generation", () => {
   let paths: string[];
 
   beforeAll(async () => {
-    const [players, games, seasons] = await Promise.all([
+    const [players, games, seasons, opponents] = await Promise.all([
       listPlayers(),
       listGames(),
       listSeasons(),
+      listOpponents(),
     ]);
     if (players.length === 0 || games.length === 0 || seasons.length === 0) {
       throw new Error(
@@ -31,7 +37,7 @@ describe("publish preview generation", () => {
     }
 
     outputDir = await mkdtemp(join(tmpdir(), "warriors-publish-preview-"));
-    const artifacts = generateAllArtifacts(players, games, seasons);
+    const artifacts = generateAllArtifacts(players, games, seasons, opponents);
     paths = await writeArtifacts(artifacts, outputDir);
   });
 

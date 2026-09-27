@@ -48,6 +48,17 @@ export interface Player {
   updatedAt: Date;
 }
 
+export interface Opponent {
+  _id: string; // "OPN######"
+  name: string;
+  logo?: {
+    key: string; // "opponents/<id>/logo-<ms>.<ext>"
+    contentType: "image/svg+xml" | "image/png" | "image/jpeg" | "image/webp";
+  };
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface Goal {
   _id: string; // "GOL######"
   scoredBy: string; // playerId, must be in roster
@@ -97,7 +108,7 @@ export interface Game {
     penalties: Penalty[];
   };
   opponentTeam: {
-    name: string;
+    opponentId: string; // "OPN######"
     goals: OpponentGoal[];
     penalties: OpponentPenalty[];
   };

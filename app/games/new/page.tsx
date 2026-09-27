@@ -1,16 +1,20 @@
-import { listPlayers, listSeasons } from "@/lib/repositories";
+import { listOpponents, listPlayers, listSeasons } from "@/lib/repositories";
 import { sortSeasonsAscending } from "@/lib/derived/season-order";
 import { compareByShirtNumber } from "@/lib/derived/player-order";
 import { PageHeader } from "@/app/_ui";
 import { GameForm } from "../GameForm";
 
 // No dynamic route segment, so Next would otherwise statically prerender
-// this page at build time and freeze the roster/season pickers to whatever
+// this page at build time and freeze the roster/season/opponent pickers to whatever
 // the database held then. Force per-request rendering instead.
 export const dynamic = "force-dynamic";
 
 export default async function NewGamePage() {
-  const [players, seasons] = await Promise.all([listPlayers(), listSeasons()]);
+  const [players, seasons, opponents] = await Promise.all([
+    listPlayers(),
+    listSeasons(),
+    listOpponents(),
+  ]);
   const activePlayers = players
     .filter((player) => player.active)
     .sort(compareByShirtNumber);
@@ -20,6 +24,7 @@ export default async function NewGamePage() {
       <PageHeader back={{ href: "/games", label: "Games" }} title="Add game" />
       <GameForm
         seasons={sortSeasonsAscending(seasons)}
+        opponents={opponents}
         activePlayers={activePlayers}
       />
     </div>

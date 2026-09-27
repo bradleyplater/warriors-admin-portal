@@ -17,6 +17,7 @@ import {
   editOpponentPenalty,
   editPenalty,
   getGame,
+  getOpponent,
   getTheTeam,
   listPlayers,
   updateGame,
@@ -36,6 +37,16 @@ import {
   parsePenaltyFormData,
 } from "./form-parsing";
 
+// The schema only checks the id's shape; whether the opponent exists needs
+// the DB (e.g. a tampered request, or an opponent deleted after the form
+// loaded), so it's checked here, like roster players.
+async function missingOpponentErrors(
+  opponentId: string,
+): Promise<GameFormState | undefined> {
+  if (await getOpponent(opponentId)) return undefined;
+  return { errors: { opponentId: ["Select an existing opponent"] } };
+}
+
 export async function createGameAction(
   _prevState: GameFormState,
   formData: FormData,
@@ -52,6 +63,11 @@ export async function createGameAction(
   if (!parsed.success) {
     return { errors: mapFieldErrors(parsed.error) };
   }
+
+  const missingOpponent = await missingOpponentErrors(
+    parsed.data.opponentTeam.opponentId,
+  );
+  if (missingOpponent) return missingOpponent;
 
   const game = await createGame(parsed.data);
 
@@ -83,12 +99,17 @@ export async function updateGameAction(
     return { errors: mapFieldErrors(parsed.error) };
   }
 
+  const missingOpponent = await missingOpponentErrors(
+    parsed.data.opponentTeam.opponentId,
+  );
+  if (missingOpponent) return missingOpponent;
+
   await updateGame(id, {
     date: parsed.data.date,
     seasonId: parsed.data.seasonId,
     type: parsed.data.type,
     location: parsed.data.location,
-    opponentName: parsed.data.opponentTeam.name,
+    opponentId: parsed.data.opponentTeam.opponentId,
     netminderPlayerId: parsed.data.netminderPlayerId ?? null,
   });
 

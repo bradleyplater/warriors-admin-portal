@@ -23,13 +23,22 @@ resource "aws_iam_user_policy" "app_bucket_access" {
         Resource = [aws_s3_bucket.app.arn]
       },
       {
-        # No s3:DeleteObject: the app only ever reads/writes objects
-        # (backup, restore, publish). Expiring old backups is handled by
-        # the bucket's own lifecycle rule, which needs no user permission.
+        # No s3:DeleteObject here: backup, restore, and publish only ever
+        # read/write objects. Expiring old backups is handled by the
+        # bucket's own lifecycle rule, which needs no user permission.
         Sid      = "ReadWriteObjects"
         Effect   = "Allow"
         Action   = ["s3:GetObject", "s3:PutObject"]
         Resource = ["${aws_s3_bucket.app.arn}/*"]
+      },
+      {
+        # Replacing or deleting an opponent's logo removes the old object
+        # (add-opponents design D2/D7). Scoped to opponents/ only, so these
+        # credentials still can't delete publish artifacts or backups.
+        Sid      = "DeleteOpponentLogos"
+        Effect   = "Allow"
+        Action   = ["s3:DeleteObject"]
+        Resource = ["${aws_s3_bucket.app.arn}/opponents/*"]
       },
       {
         # lib/publish/cdn.ts calls CreateInvalidationCommand using these
