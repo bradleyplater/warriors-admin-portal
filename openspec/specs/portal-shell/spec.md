@@ -2,14 +2,14 @@
 
 ## Purpose
 
-Defines the shared shell layout and top-level pages of the Warriors Admin Portal, providing navigation across the Players, Games, and Seasons areas and a seam for future authentication.
+Defines the shared shell layout and top-level pages of the Warriors Admin Portal, providing navigation across the Players, Games, Opponents, and Seasons areas and a seam for future authentication.
 ## Requirements
 ### Requirement: Shared shell with area navigation
-The portal SHALL render a shared shell layout on every page, containing navigation links to the Players, Games, and Seasons areas.
+The portal SHALL render a shared shell layout on every page, containing navigation links to the Players, Games, Opponents, and Seasons areas.
 
 #### Scenario: Navigation visible on every page
-- **WHEN** a user visits any portal page (home, Players, Games, or Seasons)
-- **THEN** the shell navigation with links to Players, Games, and Seasons is visible
+- **WHEN** a user visits any portal page (home, Players, Games, Opponents, or Seasons)
+- **THEN** the shell navigation with links to Players, Games, Opponents, and Seasons is visible
 
 #### Scenario: Navigating between areas
 - **WHEN** the user clicks an area link in the navigation
