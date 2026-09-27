@@ -42,6 +42,12 @@
     ]
   },
   {
+    "canonicalName": "Cambridge Warbirds",
+    "rawNames": [
+      "Warbirds"
+    ]
+  },
+  {
     "canonicalName": "Cardiff Dragons",
     "rawNames": [
       "Cardiff Dragons"
@@ -91,12 +97,6 @@
     ]
   },
   {
-    "canonicalName": "Ice Breakers",
-    "rawNames": [
-      "Ice Breakers"
-    ]
-  },
-  {
     "canonicalName": "Leeds Warriors",
     "rawNames": [
       "Leeds Warriors"
@@ -106,6 +106,18 @@
     "canonicalName": "Manchester Swarm",
     "rawNames": [
       "Manchester Swarm"
+    ]
+  },
+  {
+    "canonicalName": "Milton Keynes Ice Breakers",
+    "rawNames": [
+      "Ice Breakers"
+    ]
+  },
+  {
+    "canonicalName": "Milton Keynes Storm Wreck",
+    "rawNames": [
+      "Storm Wreck"
     ]
   },
   {
@@ -163,12 +175,6 @@
     ]
   },
   {
-    "canonicalName": "Storm Wreck",
-    "rawNames": [
-      "Storm Wreck"
-    ]
-  },
-  {
     "canonicalName": "Streatham Night Wolves",
     "rawNames": [
       "Streatham Night Wolves"
@@ -178,12 +184,6 @@
     "canonicalName": "Telford Spartans",
     "rawNames": [
       "Telford Spartans"
-    ]
-  },
-  {
-    "canonicalName": "Warbirds",
-    "rawNames": [
-      "Warbirds"
     ]
   }
 ]
