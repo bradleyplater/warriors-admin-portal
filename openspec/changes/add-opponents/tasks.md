@@ -55,7 +55,7 @@
 ## 9. Production rollout
 
 - [x] 9.1 Apply the Terraform IAM change to prod
-- [ ] 9.2 Take a prod backup with the existing backup CLI and record its prefix
+- [x] 9.2 Take a prod backup with the existing backup CLI and record its prefix — `backups/2026-09-27T08-57-49-275Z` (Seasons 4, publishes 7, Player 86, Team 1, Game 91)
 - [x] 9.3 Run the migration dry-run against prod and review the output with the user; it must be clean
 - [ ] 9.4 Run `--apply` against prod (only with this branch's code as the running portal) and record the counts
 - [ ] 9.5 Smoke-test against prod: `/games`, a game detail, `/opponents`, one logo upload, publish generation without upload
