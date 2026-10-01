@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useState } from "react";
+import { startTransition, useActionState, useState, type FormEvent } from "react";
 import type { Opponent, UpcomingGame } from "@/lib/schemas";
 import {
   Button,
@@ -45,8 +45,15 @@ export function UpcomingGameForm({ opponents, initialValues }: UpcomingGameFormP
     initialUpcomingGameFormState,
   );
 
-  // Controlled, so a submit that comes back with errors keeps what was
-  // entered — React only resets uncontrolled fields after a form action.
+  // A form `action` makes React reset the form once it settles, which also
+  // unchecks controlled radios. Dispatching from onSubmit skips that reset,
+  // so a submit that comes back with errors keeps everything entered.
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    startTransition(() => formAction(formData));
+  }
+
   const [values, setValues] = useState({
     opponentId: initialValues?.opponentId ?? "",
     date: initialValues?.date ?? "",
@@ -61,7 +68,7 @@ export function UpcomingGameForm({ opponents, initialValues }: UpcomingGameFormP
   }
 
   return (
-    <form action={formAction} className="flex max-w-md flex-col gap-5">
+    <form onSubmit={handleSubmit} className="flex max-w-md flex-col gap-5">
       <FormErrorSummary errors={state.errors} />
 
       <SelectField

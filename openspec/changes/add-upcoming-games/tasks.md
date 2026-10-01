@@ -42,8 +42,8 @@
 
 ## 8. End-to-end
 
-- [ ] 8.1 `e2e/upcoming-games.spec.ts`: create an away game (venue appears when Away is chosen, and is required), edit it to Home (venue gone), see it under Upcoming, delete it
-- [ ] 8.2 Extend `e2e/publish.spec.ts` (or the publish integration test) to assert that `upcoming-games.json` is uploaded with the expected entry shape
+- [x] 8.1 `e2e/upcoming-games.spec.ts`: create an away game (venue appears when Away is chosen, and is required), edit it to Home (venue gone), see it under Upcoming, delete it
+- [x] 8.2 Extend `e2e/publish.spec.ts` (or the publish integration test) to assert that `upcoming-games.json` is uploaded with the expected entry shape
 
 ## 9. Docs and verification
 
