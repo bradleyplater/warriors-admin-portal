@@ -24,5 +24,5 @@
 
 - [x] 5.1 Run the website locally against the live CDN and check home, `/results`, a game page and `/schedule`: each crest is either initials or an S3 image, with no `team-logos` 404s
 - [x] 5.2 Update the docs (portal `docs/` and the Obsidian vault) to say the website consumes S3 logos and CDN fixtures
-- [ ] 5.3 Open PRs in both repos
+- [x] 5.3 Open PRs in both repos
 - [ ] 5.4 (Manual, needs user sign-off) Republish prod so the live `results.json` and `upcoming-games.json` carry logo keys, then deploy the website
