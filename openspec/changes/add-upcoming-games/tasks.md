@@ -37,8 +37,8 @@
 
 ## 7. Seed
 
-- [ ] 7.1 Add `seed/data/upcoming-games.ts` (about 4 games dated relative to the seed day: one past, home and away, logo and no-logo opponents, all three types), keeping the existing unreferenced opponent unreferenced; wire it into seed and reset
-- [ ] 7.2 Extend `seed/fixtures.test.ts` for the new coverage and reference rules
+- [x] 7.1 Add `seed/data/upcoming-games.ts` (about 4 games dated relative to the seed day: one past, home and away, logo and no-logo opponents, all three types), keeping the existing unreferenced opponent unreferenced; wire it into seed and reset
+- [x] 7.2 Extend `seed/fixtures.test.ts` for the new coverage and reference rules
 
 ## 8. End-to-end
 

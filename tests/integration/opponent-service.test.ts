@@ -185,7 +185,7 @@ describe("opponent service", () => {
       await createOpponentWithLogo(`${NAME_PREFIX} Scheduled`, file("image/svg+xml")),
     );
     const db = await getDb();
-    await db.collection<{ _id: string }>("UpcomingGame").insertOne({
+    await db.collection<{ _id: string; opponentId: string }>("UpcomingGame").insertOne({
       _id: "UPG999801",
       opponentId: opponent._id,
     });
