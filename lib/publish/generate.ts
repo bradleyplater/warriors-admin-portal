@@ -8,6 +8,7 @@ import {
   generateTeamArtifact,
   generateResultsArtifact,
   generateUpcomingGamesArtifact,
+  generateSeasonsArtifact,
 } from "./artifacts";
 
 export interface GeneratedArtifacts {
@@ -16,6 +17,7 @@ export interface GeneratedArtifacts {
   "team.json": unknown;
   "results.json": unknown;
   "upcoming-games.json": unknown;
+  "seasons.json": unknown;
 }
 
 // Shared by lib/publish/cli.ts (the real `npm run publish:preview` path) and
@@ -36,6 +38,7 @@ export function generateAllArtifacts(
     "team.json": generateTeamArtifact(games, seasons),
     "results.json": generateResultsArtifact(games, seasons, opponents),
     "upcoming-games.json": generateUpcomingGamesArtifact(upcomingGames, opponents, today),
+    "seasons.json": generateSeasonsArtifact(seasons),
   };
 }
 

@@ -3,3 +3,4 @@ export * from "./roster-config";
 export * from "./team";
 export * from "./results";
 export * from "./upcoming-games";
+export * from "./seasons";

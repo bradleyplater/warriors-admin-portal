@@ -41,6 +41,7 @@ describe("runPublish", () => {
         { path: "team.json", checksum: "bogus", changed: true },
         { path: "results.json", checksum: "bogus", changed: true },
         { path: "upcoming-games.json", checksum: "bogus", changed: true },
+        { path: "seasons.json", checksum: "bogus", changed: true },
       ],
       status: "success",
     });
@@ -82,7 +83,7 @@ describe("runPublish", () => {
     createdIds.push(second._id);
 
     expect(second.status).toBe("success");
-    expect(second.artifacts).toHaveLength(5);
+    expect(second.artifacts).toHaveLength(6);
     for (const artifact of second.artifacts) {
       expect(artifact.changed).toBe(false);
     }

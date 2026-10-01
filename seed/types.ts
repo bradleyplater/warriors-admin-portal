@@ -23,6 +23,7 @@ export type PenaltyCode =
 export interface Season {
   _id: string; // "SSN2526"
   name: string; // "25/26"
+  active?: boolean; // the website's current season; at most one
   createdAt: Date;
   updatedAt: Date;
 }
