@@ -26,6 +26,17 @@ describe("SeasonSchema", () => {
     expect(result.success).toBe(false);
   });
 
+  it("accepts an active flag", () => {
+    const result = SeasonSchema.safeParse({ ...validSeason, active: true });
+    expect(result.success && result.data.active).toBe(true);
+  });
+
+  it("rejects a non-boolean active flag", () => {
+    const result = SeasonSchema.safeParse({ ...validSeason, active: "yes" });
+    expect(result.success).toBe(false);
+    expect(result.error?.issues[0]?.path).toEqual(["active"]);
+  });
+
   it("rejects an id/name mismatch", () => {
     const result = SeasonSchema.safeParse({ ...validSeason, name: "24/25" });
     expect(result.success).toBe(false);

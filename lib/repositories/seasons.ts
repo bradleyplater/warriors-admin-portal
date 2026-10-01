@@ -5,9 +5,9 @@ import {
   type Season,
   type SeasonCreateInput,
 } from "../schemas";
-import { stampCreate } from "./internal/audit";
+import { stampCreate, stampUpdate } from "./internal/audit";
 import { isDuplicateKeyErrorForField } from "./internal/ids";
-import { DuplicateSeasonError } from "./internal/errors";
+import { DuplicateSeasonError, NotFoundError } from "./internal/errors";
 import { COLLECTION_NAMES } from "./internal/collections";
 
 async function collection() {
@@ -48,6 +48,25 @@ export async function listSeasons(): Promise<Season[]> {
   const col = await collection();
   const docs = await col.find().toArray();
   return docs.map((doc) => SeasonSchema.parse(doc));
+}
+
+// Makes `id` the website's current season. Sets the new flag before clearing
+// the others: if the second write never lands, two seasons are flagged and
+// resolveActiveSeason picks the newer — re-running this repairs it. Both
+// writes bump updatedAt so the unpublished-changes indicator notices.
+export async function setActiveSeason(id: string): Promise<void> {
+  const col = await collection();
+  const { matchedCount } = await col.updateOne(
+    { _id: id },
+    { $set: { active: true, ...stampUpdate() } },
+  );
+  if (matchedCount === 0) {
+    throw new NotFoundError("season", id);
+  }
+  await col.updateMany(
+    { _id: { $ne: id }, active: true },
+    { $unset: { active: "" }, $set: stampUpdate() },
+  );
 }
 
 // The unpublished-changes indicator's per-collection freshness check (see
