@@ -77,7 +77,7 @@ This is one more entry in `getPublishStatus`'s `Promise.all`, like opponents.
 
 ## Migration Plan
 
-No data migration is needed. `ensureIndexes` creates the new collection's indexes on first run against prod. The first publish after merge uploads `upcoming-games.json`, which replaces the hand-maintained one on the website's bucket path (an empty array if no games have been added yet). Add the real fixtures before that first publish. Rollback is to revert the code. The collection can be left in place or dropped.
+No data migration is needed. Mongo creates the `UpcomingGame` collection on the first insert. `ensureIndexes` only runs from the seed, so prod gets no indexes for it automatically. At a handful of documents they don't matter for speed, and none of them enforce a rule, so this is left as-is. The first publish after merge uploads `upcoming-games.json`, which replaces the hand-maintained one on the website's bucket path (an empty array if no games have been added yet). Add the real fixtures before that first publish. Rollback is to revert the code. The collection can be left in place or dropped.
 
 ## Open Questions
 

@@ -47,6 +47,6 @@
 
 ## 9. Docs and verification
 
-- [ ] 9.1 Update `docs/02-architecture.md` (5 of 6 artifacts generated), `docs/03-data-model.md` (UpcomingGame), `fixtures/golden/README.md` if needed, and the Obsidian vault data-model/publish notes
-- [ ] 9.2 Run lint, typecheck, unit, integration, and e2e suites green
+- [x] 9.1 Update `docs/02-architecture.md` (5 of 6 artifacts generated), `docs/03-data-model.md` (UpcomingGame), `fixtures/golden/README.md` if needed, and the Obsidian vault data-model/publish notes
+- [x] 9.2 Run lint, typecheck, unit, integration, and e2e suites green
 - [ ] 9.3 Manual check against prod (local portal): add the real upcoming fixtures, run `publish:preview` and inspect `artifacts/upcoming-games.json`, then publish
