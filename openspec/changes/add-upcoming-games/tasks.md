@@ -29,11 +29,11 @@
 
 ## 6. Pages
 
-- [ ] 6.1 `/upcoming-games` list page (dynamic, Upcoming and Past sections split by `todayInLondon`, opponent names from one `listOpponents()` map, rows link to edit, empty state, "Add upcoming game" link)
-- [ ] 6.2 `UpcomingGameForm.tsx` (opponent select, date, time, Home/Away radio, venue shown only when Away, competition select; field errors; values kept on error) and a form-parsing helper with unit tests (venue discarded for HOME)
-- [ ] 6.3 `/upcoming-games/new` and `/upcoming-games/[id]/edit` with server actions (parse → opponent existence check → write → `revalidatePath` → redirect); the edit page returns 404 on an unknown id
-- [ ] 6.4 `DeleteUpcomingGameForm` on the edit page with a delete server action
-- [ ] 6.5 Add "Upcoming Games" to the shell nav between Games and Opponents; update the portal-shell e2e/nav test
+- [x] 6.1 `/upcoming-games` list page (dynamic, Upcoming and Past sections split by `todayInLondon`, opponent names from one `listOpponents()` map, rows link to edit, empty state, "Add upcoming game" link)
+- [x] 6.2 `UpcomingGameForm.tsx` (opponent select, date, time, Home/Away radio, venue shown only when Away, competition select; field errors; values kept on error) and a form-parsing helper with unit tests (venue discarded for HOME)
+- [x] 6.3 `/upcoming-games/new` and `/upcoming-games/[id]/edit` with server actions (parse → opponent existence check → write → `revalidatePath` → redirect); the edit page returns 404 on an unknown id
+- [x] 6.4 `DeleteUpcomingGameForm` on the edit page with a delete server action
+- [x] 6.5 Add "Upcoming Games" to the shell nav between Games and Opponents; update the portal-shell e2e/nav test
 
 ## 7. Seed
 
