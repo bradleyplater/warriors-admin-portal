@@ -16,6 +16,7 @@ import {
   TeamArtifactSchema,
   ResultsArtifactSchema,
   UpcomingGamesArtifactSchema,
+  SeasonsArtifactSchema,
 } from "../../lib/publish/schemas";
 
 // Exercises the same generation + write path as `npm run publish:preview`
@@ -56,8 +57,8 @@ describe("publish preview generation", () => {
     }
   });
 
-  it("writes all five artifacts to disk", () => {
-    expect(paths).toHaveLength(5);
+  it("writes all six artifacts to disk", () => {
+    expect(paths).toHaveLength(6);
   });
 
   it("players.json on disk validates against PlayersArtifactSchema", async () => {
@@ -87,5 +88,10 @@ describe("publish preview generation", () => {
       await readFile(join(outputDir, "upcoming-games.json"), "utf-8"),
     );
     expect(() => UpcomingGamesArtifactSchema.parse(contents)).not.toThrow();
+  });
+
+  it("seasons.json on disk validates against SeasonsArtifactSchema", async () => {
+    const contents = JSON.parse(await readFile(join(outputDir, "seasons.json"), "utf-8"));
+    expect(() => SeasonsArtifactSchema.parse(contents)).not.toThrow();
   });
 });

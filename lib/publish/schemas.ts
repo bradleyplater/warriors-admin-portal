@@ -125,3 +125,10 @@ const UpcomingGameArtifactSchema = z.object({
 });
 
 export const UpcomingGamesArtifactSchema = z.array(UpcomingGameArtifactSchema);
+
+// seasons.json is new with the active-season change, so there's no golden
+// fixture for it — only the generator's own tests check it.
+export const SeasonsArtifactSchema = z.object({
+  activeSeason: z.string().nullable(),
+  seasons: z.array(z.string()),
+});

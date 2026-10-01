@@ -16,6 +16,10 @@ const SeasonShape = z.object({
       SEASON_NAME_PATTERN,
       'Season name must match "##/##" (e.g. "25/26")',
     ),
+  // The website's current season (see lib/derived/season-order.ts's
+  // resolveActiveSeason). Missing means not active; cleared flags are
+  // unset rather than stored as false.
+  active: z.boolean().optional(),
   createdAt: z.date(),
   updatedAt: z.date(),
 });
@@ -42,6 +46,7 @@ export type Season = z.infer<typeof SeasonSchema>;
 
 export const SeasonCreateInputSchema = SeasonShape.omit({
   _id: true,
+  active: true,
   createdAt: true,
   updatedAt: true,
 });
