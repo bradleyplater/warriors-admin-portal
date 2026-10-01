@@ -32,12 +32,12 @@
 
 ## 6. Website (`D:\Projects\warriors-website`, branch `active-season` off `website-s3-images`)
 
-- [ ] 6.1 `app/data/client.ts`: add `getSeasons()` (cached, resolves `null` on fetch failure); add a `SeasonsFile` type in `app/data/types.ts`
-- [ ] 6.2 Add `app/helpers/seasons.ts` with `currentSeason(file, results)`, `seasonOptions(file, results)` (newest first, union with the results' seasons) and `seasonHeading("26/27")` → `"2026/27 season"`, plus unit tests (including the `null`-file fallback and an active season with no games)
-- [ ] 6.3 Home: add `getSeasons()` to the loader; `SeasonLeaders` takes a `season` prop (delete `CURRENT_SEASON`) and shows "No games played yet this season." when empty; the heading uses `seasonHeading`
-- [ ] 6.4 Stats, Team Stats, Results: add `getSeasons()` to the loaders; build the chips from `seasonOptions` and default to `currentSeason`; check each page's zero-games empty state renders cleanly
-- [ ] 6.5 Replace the `Season` union in `app/types/season.ts` with `string`; fix any fallout in `data-helpers.ts`, `player.tsx` and `types.ts`
-- [ ] 6.6 Run the website's typecheck, tests and build; run it locally against a `seasons.json` with an empty 26/27 to eyeball the four pages; open the website PR
+- [x] 6.1 `app/data/client.ts`: add `getSeasons()` (cached, resolves `null` on fetch failure); add a `SeasonsFile` type in `app/data/types.ts`
+- [x] 6.2 Add `app/helpers/seasons.ts` with `currentSeason(file, results)`, `seasonOptions(file, results)` (newest first, union with the results' seasons) and `seasonHeading("26/27")` → `"2026/27 season"`, plus unit tests (including the `null`-file fallback and an active season with no games)
+- [x] 6.3 Home: add `getSeasons()` to the loader; `SeasonLeaders` takes a `season` prop (delete `CURRENT_SEASON`) and shows "No games played yet this season." when empty; the heading uses `seasonHeading`
+- [x] 6.4 Stats, Team Stats, Results: add `getSeasons()` to the loaders; build the chips from `seasonOptions` and default to `currentSeason`; check each page's zero-games empty state renders cleanly
+- [x] 6.5 Replace the `Season` union in `app/types/season.ts` with `string`; fix any fallout in `data-helpers.ts`, `player.tsx` and `types.ts`
+- [x] 6.6 Run the website's typecheck, tests and build; run it locally against a `seasons.json` with an empty 26/27 to eyeball the four pages; open the website PR
 
 ## 7. Prod rollout (manual, after both PRs merge)
 
