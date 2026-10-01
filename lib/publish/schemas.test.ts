@@ -6,6 +6,7 @@ import {
   RosterConfigArtifactSchema,
   TeamArtifactSchema,
   ResultsArtifactSchema,
+  UpcomingGamesArtifactSchema,
 } from "./schemas";
 
 const GOLDEN_DIR = join(__dirname, "../../fixtures/golden");
@@ -34,5 +35,11 @@ describe("artifact schemas against the golden fixtures", () => {
 
   it("results.json matches ResultsArtifactSchema", () => {
     expect(() => ResultsArtifactSchema.parse(readFixture("results.json"))).not.toThrow();
+  });
+
+  it("upcoming-games.json matches UpcomingGamesArtifactSchema", () => {
+    expect(() =>
+      UpcomingGamesArtifactSchema.parse(readFixture("upcoming-games.json")),
+    ).not.toThrow();
   });
 });

@@ -7,6 +7,7 @@ import {
   listGames,
   listSeasons,
   listOpponents,
+  listUpcomingGames,
 } from "../../lib/repositories";
 import { generateAllArtifacts, writeArtifacts } from "../../lib/publish/generate";
 import {
@@ -14,6 +15,7 @@ import {
   RosterConfigArtifactSchema,
   TeamArtifactSchema,
   ResultsArtifactSchema,
+  UpcomingGamesArtifactSchema,
 } from "../../lib/publish/schemas";
 
 // Exercises the same generation + write path as `npm run publish:preview`
@@ -24,11 +26,12 @@ describe("publish preview generation", () => {
   let paths: string[];
 
   beforeAll(async () => {
-    const [players, games, seasons, opponents] = await Promise.all([
+    const [players, games, seasons, opponents, upcomingGames] = await Promise.all([
       listPlayers(),
       listGames(),
       listSeasons(),
       listOpponents(),
+      listUpcomingGames(),
     ]);
     if (players.length === 0 || games.length === 0 || seasons.length === 0) {
       throw new Error(
@@ -37,7 +40,13 @@ describe("publish preview generation", () => {
     }
 
     outputDir = await mkdtemp(join(tmpdir(), "warriors-publish-preview-"));
-    const artifacts = generateAllArtifacts(players, games, seasons, opponents);
+    const artifacts = generateAllArtifacts(
+      players,
+      games,
+      seasons,
+      opponents,
+      upcomingGames,
+    );
     paths = await writeArtifacts(artifacts, outputDir);
   });
 
@@ -47,8 +56,8 @@ describe("publish preview generation", () => {
     }
   });
 
-  it("writes all four artifacts to disk", () => {
-    expect(paths).toHaveLength(4);
+  it("writes all five artifacts to disk", () => {
+    expect(paths).toHaveLength(5);
   });
 
   it("players.json on disk validates against PlayersArtifactSchema", async () => {
@@ -71,5 +80,12 @@ describe("publish preview generation", () => {
   it("results.json on disk validates against ResultsArtifactSchema", async () => {
     const contents = JSON.parse(await readFile(join(outputDir, "results.json"), "utf-8"));
     expect(() => ResultsArtifactSchema.parse(contents)).not.toThrow();
+  });
+
+  it("upcoming-games.json on disk validates against UpcomingGamesArtifactSchema", async () => {
+    const contents = JSON.parse(
+      await readFile(join(outputDir, "upcoming-games.json"), "utf-8"),
+    );
+    expect(() => UpcomingGamesArtifactSchema.parse(contents)).not.toThrow();
   });
 });

@@ -5,6 +5,7 @@ import {
   getPlayersLatestUpdatedAt,
   getSeasonsLatestUpdatedAt,
   getTeamLatestUpdatedAt,
+  getUpcomingGamesLatestUpdatedAt,
 } from "../repositories";
 import type { Publishes } from "../schemas";
 
@@ -41,6 +42,7 @@ export async function getPublishStatus(): Promise<PublishStatus> {
     seasonsUpdatedAt,
     teamUpdatedAt,
     opponentsUpdatedAt,
+    upcomingGamesUpdatedAt,
     lastPublish,
   ] =
     await Promise.all([
@@ -49,6 +51,7 @@ export async function getPublishStatus(): Promise<PublishStatus> {
       getSeasonsLatestUpdatedAt(),
       getTeamLatestUpdatedAt(),
       getOpponentsLatestUpdatedAt(),
+      getUpcomingGamesLatestUpdatedAt(),
       getLatestSuccessfulPublish(),
     ]);
 
@@ -58,6 +61,7 @@ export async function getPublishStatus(): Promise<PublishStatus> {
     seasonsUpdatedAt,
     teamUpdatedAt,
     opponentsUpdatedAt,
+    upcomingGamesUpdatedAt,
   ]
     .filter((date): date is Date => date !== null)
     .reduce<Date | null>(

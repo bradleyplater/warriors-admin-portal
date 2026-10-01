@@ -5,6 +5,7 @@ import {
   listGames,
   listSeasons,
   listOpponents,
+  listUpcomingGames,
   createPublish,
   getLatestSuccessfulPublish,
 } from "../repositories";
@@ -40,14 +41,21 @@ export async function runPublish(): Promise<Publishes> {
   const results: PublishArtifactResult[] = [];
 
   try {
-    const [players, games, seasons, opponents] = await Promise.all([
+    const [players, games, seasons, opponents, upcomingGames] = await Promise.all([
       listPlayers(),
       listGames(),
       listSeasons(),
       listOpponents(),
+      listUpcomingGames(),
     ]);
 
-    const generated = generateAllArtifacts(players, games, seasons, opponents);
+    const generated = generateAllArtifacts(
+      players,
+      games,
+      seasons,
+      opponents,
+      upcomingGames,
+    );
     const lastPublish = await getLatestSuccessfulPublish();
     const baseline = new Map(
       lastPublish?.artifacts.map((artifact) => [artifact.path, artifact.checksum]) ?? [],

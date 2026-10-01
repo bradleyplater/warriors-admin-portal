@@ -1,11 +1,13 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import type { Player, Game, Opponent, Season } from "../schemas";
+import type { Player, Game, Opponent, Season, UpcomingGame } from "../schemas";
+import { todayInLondon } from "../upcoming-games/time";
 import {
   generatePlayersArtifact,
   generateRosterConfigArtifact,
   generateTeamArtifact,
   generateResultsArtifact,
+  generateUpcomingGamesArtifact,
 } from "./artifacts";
 
 export interface GeneratedArtifacts {
@@ -13,6 +15,7 @@ export interface GeneratedArtifacts {
   "roster-config.json": unknown;
   "team.json": unknown;
   "results.json": unknown;
+  "upcoming-games.json": unknown;
 }
 
 // Shared by lib/publish/cli.ts (the real `npm run publish:preview` path) and
@@ -22,12 +25,17 @@ export function generateAllArtifacts(
   games: Game[],
   seasons: Season[],
   opponents: Opponent[],
+  upcomingGames: UpcomingGame[],
+  // Decides which upcoming games are still upcoming — a parameter so tests
+  // are deterministic; real callers take the default.
+  today: string = todayInLondon(),
 ): GeneratedArtifacts {
   return {
     "players.json": generatePlayersArtifact(players, games, seasons),
     "roster-config.json": generateRosterConfigArtifact(players),
     "team.json": generateTeamArtifact(games, seasons),
     "results.json": generateResultsArtifact(games, seasons, opponents),
+    "upcoming-games.json": generateUpcomingGamesArtifact(upcomingGames, opponents, today),
   };
 }
 
