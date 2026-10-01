@@ -52,7 +52,7 @@ export async function listSeasons(): Promise<Season[]> {
 
 // Makes `id` the website's current season. Sets the new flag before clearing
 // the others: if the second write never lands, two seasons are flagged and
-// resolveActiveSeason picks the newer — re-running this repairs it. Both
+// resolveActiveSeason picks the newer â€” re-running this repairs it. Both
 // writes bump updatedAt so the unpublished-changes indicator notices.
 export async function setActiveSeason(id: string): Promise<void> {
   const col = await collection();

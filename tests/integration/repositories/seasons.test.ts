@@ -52,7 +52,7 @@ describe("seasons repository", () => {
 
   describe("setActiveSeason", () => {
     // setActiveSeason touches every season, including seeded ones other
-    // tests read — put the original flags back afterwards.
+    // tests read â€” put the original flags back afterwards.
     let originallyActive: string[] = [];
 
     beforeEach(async () => {
