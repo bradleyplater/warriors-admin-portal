@@ -54,6 +54,9 @@ describe("opponent service", () => {
   afterEach(async () => {
     const db = await getDb();
     await db.collection<{ _id: string }>("Game").deleteMany({ _id: { $regex: /^GME9998/ } });
+    await db
+      .collection<{ _id: string }>("UpcomingGame")
+      .deleteMany({ _id: { $regex: /^UPG9998/ } });
     while (createdIds.length > 0) {
       const id = createdIds.pop();
       if (id) await deleteOpponent(id).catch(() => undefined);
@@ -171,6 +174,26 @@ describe("opponent service", () => {
     expect(await deleteOpponentIfUnreferenced(opponent._id)).toEqual({
       ok: false,
       referencingGameCount: 3,
+      referencingUpcomingGameCount: 0,
+    });
+    expect(await getOpponent(opponent._id)).not.toBeNull();
+    expect(await objectExists(opponent.logo!.key)).toBe(true);
+  });
+
+  it("blocks deleting an opponent only an upcoming game references", async () => {
+    const opponent = await created(
+      await createOpponentWithLogo(`${NAME_PREFIX} Scheduled`, file("image/svg+xml")),
+    );
+    const db = await getDb();
+    await db.collection<{ _id: string }>("UpcomingGame").insertOne({
+      _id: "UPG999801",
+      opponentId: opponent._id,
+    });
+
+    expect(await deleteOpponentIfUnreferenced(opponent._id)).toEqual({
+      ok: false,
+      referencingGameCount: 0,
+      referencingUpcomingGameCount: 1,
     });
     expect(await getOpponent(opponent._id)).not.toBeNull();
     expect(await objectExists(opponent.logo!.key)).toBe(true);
