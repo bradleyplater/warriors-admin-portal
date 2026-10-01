@@ -58,7 +58,8 @@
 - [x] 9.2 Take a prod backup with the existing backup CLI and record its prefix — `backups/2026-09-27T08-57-49-275Z` (Seasons 4, publishes 7, Player 86, Team 1, Game 91)
 - [x] 9.3 Run the migration dry-run against prod and review the output with the user; it must be clean
 - [x] 9.4 Run `--apply` against prod (only with this branch's code as the running portal) and record the counts — 2026-09-27: created 31 opponents, updated 91 games, verification clean
-- [ ] 9.5 Smoke-test against prod: `/games`, a game detail, `/opponents`, one logo upload, publish generation without upload
+- [x] 9.5 Smoke-test against prod: `/games`, a game detail, `/opponents`, one logo upload, publish generation without upload
+  - Confirmed by Bradley 2026-09-27
 
 ## 10. Docs and cleanup
 

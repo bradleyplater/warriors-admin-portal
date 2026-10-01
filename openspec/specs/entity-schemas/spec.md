@@ -83,7 +83,15 @@ The system SHALL provide a Zod schema for `Team` covering identity fields only (
 - **THEN** the schema has no fields for `players[]` or `stats[]`
 
 ### Requirement: Game schema and nested validation
-The system SHALL provide a Zod schema for `Game`, including nested `Goal`, `Penalty`, `OpponentGoal`, and `OpponentPenalty` shapes, enforcing all single-document validation rules from `docs/03-data-model.md`: assist distinctness, time bounds, roster membership for goals, penalties, netminder, and awards, and no duplicate roster entries.
+The system SHALL provide a Zod schema for `Game`, including nested `Goal`, `Penalty`, `OpponentGoal`, and `OpponentPenalty` shapes, enforcing all single-document validation rules from `docs/03-data-model.md`: assist distinctness, time bounds, roster membership for goals, penalties, netminder, and awards, and no duplicate roster entries. The opponent is identified by `opponentTeam.opponentId`, a reference to an `Opponent` document (`OPN` followed by exactly 6 digits); `opponentTeam` SHALL NOT carry a `name`. Whether the referenced opponent exists requires the database and is enforced by the service layer, not this schema.
+
+#### Scenario: Game references its opponent by id
+- **WHEN** a game document has `opponentTeam.opponentId: "OPN123456"` and no `opponentTeam.name`
+- **THEN** validation succeeds
+
+#### Scenario: Missing or malformed opponent id is rejected
+- **WHEN** a game document's `opponentTeam.opponentId` is missing or does not match `OPN` followed by 6 digits
+- **THEN** validation fails with a field-level error on `opponentTeam.opponentId`
 
 #### Scenario: Valid game passes
 - **WHEN** a document with a roster, goals referencing rostered players, and penalties referencing rostered players or `"BENCH"` is validated
