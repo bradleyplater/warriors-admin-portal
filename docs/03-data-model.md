@@ -6,15 +6,18 @@ All documents gain `createdAt` / `updatedAt` audit timestamps (used by the unpub
 
 ## Collections
 
-### Seasons — unchanged
+### Seasons — gains `active` (active-season)
 
 ```ts
 {
   _id: string,        // "SSN2526"
   name: string,       // "25/26"
+  active?: boolean,   // the website's current season; absent = not active
   createdAt: Date, updatedAt: Date
 }
 ```
+
+The **active season** is the one flagged `active: true`, or, when none is flagged, the newest by id (`resolveActiveSeason` in `lib/derived/season-order.ts`). If several are ever flagged, the newest flagged one wins. "Set active" on `/seasons` flags the chosen season and unsets the flag on the rest, bumping `updatedAt` on each one it changes. It is published as `seasons.json` and drives the website's default season.
 
 ### Player — restructured
 
@@ -217,7 +220,7 @@ Used by the old export system. Untouched during migration; deleted on 2026-09-26
 - **Awards/netminder:** must be rostered.
 - **Opponent:** name non-empty (trimmed) and unique ignoring case; logo optional, SVG/PNG/JPEG/WebP up to 5 MB. A game's or upcoming game's `opponentId` must reference an existing opponent, and an opponent any game or upcoming game references cannot be deleted.
 - **UpcomingGame:** a real calendar date and a valid 24-hour time; a venue for away games and none for home games; NIHC can't be scheduled.
-- **Season:** id `SSN` + 4 digits; name `##/##`; both consistent with each other.
+- **Season:** id `SSN` + 4 digits; name `##/##`; both consistent with each other; `active`, when present, is a boolean.
 
 ## Derived stats (the stats engine)
 
