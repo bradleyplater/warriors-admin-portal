@@ -120,7 +120,7 @@ Changes from the old shape (applied by the migration):
 }
 ```
 
-The logo file lives in `S3_BUCKET` and is served by the CDN. The key's extension always matches `contentType`, which is also the object's S3 `Content-Type`. Every upload gets a fresh key, so replacing a logo never needs a CDN invalidation; the old object is deleted once the document points at the new one. The website never receives the opponents list: `results.json` is enriched at publish time with each game's opponent name and, when there is one, `logoImage` = the logo key.
+The logo file lives in `S3_BUCKET` and is served by the CDN. The key's extension always matches `contentType`, which is also the object's S3 `Content-Type`. Every upload gets a fresh key, so replacing a logo never needs a CDN invalidation; the old object is deleted once the document points at the new one. The website never receives the opponents list: `results.json` is enriched at publish time with each game's opponent name and, when there is one, `logoImage` = the logo key. Since the website-s3-images change, the website renders crests from `<CDN>/<logoImage>` and shows initials when there is none. It no longer bundles its own `team-logos/` images, so a logo uploaded here is the only crest the site has.
 
 ### UpcomingGame — new (add-upcoming-games)
 
