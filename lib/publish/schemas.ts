@@ -6,9 +6,8 @@ import { z } from "zod";
 // and this generator's own output (lib/publish/artifacts/*.test.ts) — the
 // same contract, checked from both directions.
 //
-// awards.json and upcoming-games.json are deliberately not covered here —
-// KAN-30 doesn't generate them (see docs/02-architecture.md's publish
-// pipeline section for why).
+// awards.json is deliberately not covered here — nothing generates it yet
+// (see docs/02-architecture.md's publish pipeline section for why).
 
 const PlayerSeasonStatsArtifactSchema = z.object({
   season: z.string(),
@@ -111,3 +110,18 @@ const ResultArtifactSchema = z.object({
 });
 
 export const ResultsArtifactSchema = z.array(ResultArtifactSchema);
+
+const UpcomingGameArtifactSchema = z.object({
+  opponentTeam: z.string(),
+  // The opponent logo's S3 key, or "" when it has none; the legacy golden
+  // fixture has a bare filename here.
+  logoImage: z.string(),
+  // A plain string, not the portal's enum: the legacy fixture says "BOTB"
+  // where the portal emits "BOTBC" (the same label results.json uses).
+  gameType: z.string(),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  time: z.string().regex(/^\d{1,2}:\d{2} (AM|PM)$/),
+  location: z.string(),
+});
+
+export const UpcomingGamesArtifactSchema = z.array(UpcomingGameArtifactSchema);

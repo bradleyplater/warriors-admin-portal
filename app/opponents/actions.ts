@@ -8,7 +8,10 @@ import {
   logoFromFormData,
   updateOpponentWithLogo,
 } from "@/lib/opponents/service";
-import type { OpponentFormState } from "./form-state";
+import {
+  describeBlockedOpponentDelete,
+  type OpponentFormState,
+} from "./form-state";
 
 // Opponent names show on the games list and detail pages, so any change
 // here must refresh those too.
@@ -57,11 +60,13 @@ export async function deleteOpponentAction(
 ): Promise<OpponentFormState> {
   const result = await deleteOpponentIfUnreferenced(id);
   if (!result.ok) {
-    const count = result.referencingGameCount;
     return {
       errors: {
         form: [
-          `This opponent is used by ${count} ${count === 1 ? "game" : "games"}, so it can't be deleted.`,
+          describeBlockedOpponentDelete(
+            result.referencingGameCount,
+            result.referencingUpcomingGameCount,
+          ),
         ],
       },
     };

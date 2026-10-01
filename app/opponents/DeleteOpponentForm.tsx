@@ -15,7 +15,7 @@ export function DeleteOpponentForm({ opponentId }: { opponentId: string }) {
     <form action={formAction} className="flex max-w-md flex-col gap-4">
       <FormErrorSummary errors={state.errors} />
       <p className="m-0 text-fg-secondary">
-        Only opponents that no game uses can be deleted.
+        Only opponents that no game or upcoming game uses can be deleted.
       </p>
       <div>
         <Button type="submit" variant="danger" disabled={pending}>

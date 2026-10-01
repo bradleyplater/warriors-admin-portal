@@ -4,7 +4,10 @@ import { getDb } from "../../lib/mongodb";
 import { getS3Client } from "../../lib/s3";
 import { runPublish } from "../../lib/publish/run";
 import { createPublish } from "../../lib/repositories";
-import { PlayersArtifactSchema } from "../../lib/publish/schemas";
+import {
+  PlayersArtifactSchema,
+  UpcomingGamesArtifactSchema,
+} from "../../lib/publish/schemas";
 import type { Publishes } from "../../lib/schemas";
 
 // Runs the real pipeline against the local Docker Mongo + MinIO (see
@@ -37,6 +40,7 @@ describe("runPublish", () => {
         { path: "roster-config.json", checksum: "bogus", changed: true },
         { path: "team.json", checksum: "bogus", changed: true },
         { path: "results.json", checksum: "bogus", changed: true },
+        { path: "upcoming-games.json", checksum: "bogus", changed: true },
       ],
       status: "success",
     });
@@ -60,6 +64,14 @@ describe("runPublish", () => {
     const body = await response.Body?.transformToString();
     const parsed: unknown = JSON.parse(body ?? "");
     expect(() => PlayersArtifactSchema.parse(parsed)).not.toThrow();
+
+    const upcoming = await getS3Client().send(
+      new GetObjectCommand({ Bucket: bucket, Key: "upcoming-games.json" }),
+    );
+    const upcomingBody = await upcoming.Body?.transformToString();
+    expect(() =>
+      UpcomingGamesArtifactSchema.parse(JSON.parse(upcomingBody ?? "")),
+    ).not.toThrow();
   });
 
   it("a second run with unchanged data marks every artifact unchanged", async () => {
@@ -70,7 +82,7 @@ describe("runPublish", () => {
     createdIds.push(second._id);
 
     expect(second.status).toBe("success");
-    expect(second.artifacts).toHaveLength(4);
+    expect(second.artifacts).toHaveLength(5);
     for (const artifact of second.artifacts) {
       expect(artifact.changed).toBe(false);
     }

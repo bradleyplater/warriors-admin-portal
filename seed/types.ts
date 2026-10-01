@@ -59,6 +59,18 @@ export interface Opponent {
   updatedAt: Date;
 }
 
+export interface UpcomingGame {
+  _id: string; // "UPG######"
+  opponentId: string;
+  date: string; // "YYYY-MM-DD", UK local
+  time: string; // "HH:mm", 24h
+  location: "HOME" | "AWAY";
+  venue?: string; // away games only
+  type: "CHALLENGE" | "LLIHC" | "BOTBC";
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface Goal {
   _id: string; // "GOL######"
   scoredBy: string; // playerId, must be in roster

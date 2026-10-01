@@ -3,7 +3,9 @@ import { players } from "./data/players";
 import { team } from "./data/team";
 import { games } from "./data/games";
 import { opponents } from "./data/opponents";
-import { OpponentSchema } from "../lib/schemas";
+import { upcomingGames } from "./data/upcoming-games";
+import { OpponentSchema, UpcomingGameSchema } from "../lib/schemas";
+import { todayInLondon } from "../lib/upcoming-games/time";
 
 // The seed data uses the target shape only (docs/03-data-model.md) — the
 // legacy aggregate fields were dropped from production in Step 6 of the
@@ -41,14 +43,32 @@ describe("seed fixtures", () => {
     }
   });
 
-  it("has valid opponents with and without a logo, and one no game references", () => {
+  it("has valid opponents with and without a logo, and one nothing references", () => {
     for (const opponent of opponents) {
       expect(OpponentSchema.safeParse(opponent).success).toBe(true);
     }
     expect(opponents.some((opponent) => opponent.logo)).toBe(true);
     expect(opponents.some((opponent) => !opponent.logo)).toBe(true);
-    const referenced = new Set(games.map((game) => game.opponentTeam.opponentId));
+    const referenced = new Set([
+      ...games.map((game) => game.opponentTeam.opponentId),
+      ...upcomingGames.map((game) => game.opponentId),
+    ]);
     expect(opponents.some((opponent) => !referenced.has(opponent._id))).toBe(true);
+  });
+
+  it("has valid upcoming games covering home, away, past, and future", () => {
+    const opponentIds = new Set(opponents.map((opponent) => opponent._id));
+    for (const game of upcomingGames) {
+      expect(UpcomingGameSchema.safeParse(game).success).toBe(true);
+      expect(opponentIds.has(game.opponentId)).toBe(true);
+    }
+    const today = todayInLondon();
+    expect(upcomingGames.some((game) => game.location === "HOME")).toBe(true);
+    expect(upcomingGames.some((game) => game.location === "AWAY")).toBe(true);
+    expect(upcomingGames.some((game) => game.date < today)).toBe(true);
+    expect(upcomingGames.some((game) => game.date >= today)).toBe(true);
+    const logoIds = new Set(opponents.filter((o) => o.logo).map((o) => o._id));
+    expect(upcomingGames.some((game) => logoIds.has(game.opponentId))).toBe(true);
   });
 
   it("has unique opponent ids and names", () => {

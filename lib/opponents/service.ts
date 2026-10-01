@@ -1,5 +1,6 @@
 import {
   countGamesByOpponentId,
+  countUpcomingGamesByOpponentId,
   createOpponent,
   deleteOpponent,
   DuplicateOpponentNameError,
@@ -153,7 +154,11 @@ export async function updateOpponentWithLogo(
 
 export type DeleteOpponentResult =
   | { ok: true }
-  | { ok: false; referencingGameCount: number };
+  | {
+      ok: false;
+      referencingGameCount: number;
+      referencingUpcomingGameCount: number;
+    };
 
 export async function deleteOpponentIfUnreferenced(
   id: string,
@@ -163,9 +168,14 @@ export async function deleteOpponentIfUnreferenced(
     throw new NotFoundError("opponent", id);
   }
 
-  const referencingGameCount = await countGamesByOpponentId(id);
-  if (referencingGameCount > 0) {
-    return { ok: false, referencingGameCount };
+  // Upcoming games count too: deleting their opponent would make the next
+  // publish fail on the dangling reference.
+  const [referencingGameCount, referencingUpcomingGameCount] = await Promise.all([
+    countGamesByOpponentId(id),
+    countUpcomingGamesByOpponentId(id),
+  ]);
+  if (referencingGameCount > 0 || referencingUpcomingGameCount > 0) {
+    return { ok: false, referencingGameCount, referencingUpcomingGameCount };
   }
 
   await deleteOpponent(id);

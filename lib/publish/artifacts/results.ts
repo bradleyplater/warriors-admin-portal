@@ -1,4 +1,5 @@
-import type { Game, GameType, Opponent, Season } from "../../schemas";
+import type { Game, Opponent, Season } from "../../schemas";
+import { competitionLabel } from "./competition";
 import { deriveResultsScore, type ResultsScore } from "../../derived/game-periods";
 
 export interface ResultArtifact {
@@ -20,16 +21,6 @@ export interface ResultArtifact {
 // fixtures/golden/results.json. These fields are optional on Game, so a
 // real (post-migration) game can legitimately have none of them set yet.
 const MISSING = "MISSING";
-
-// The legacy contract renders GameType "CHALLENGE" as "Challenge"; every
-// other type (BOTBC, LLIHC, NIHC) passes through unchanged.
-const COMPETITION_LABELS: Partial<Record<GameType, string>> = {
-  CHALLENGE: "Challenge",
-};
-
-function competitionLabel(type: GameType): string {
-  return COMPETITION_LABELS[type] ?? type;
-}
 
 // results.json (fixtures/golden/README.md). `season`/`seasonId` both
 // resolve to the season's *name* ("24/25"), matching the legacy fixture, not

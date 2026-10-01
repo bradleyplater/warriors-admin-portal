@@ -5,6 +5,8 @@ import { getPublishStatus } from "../../lib/publish/status";
 import {
   createPlayer,
   createSeason,
+  createUpcomingGame,
+  deleteUpcomingGame,
   getTheTeam,
   updatePlayer,
   updateTeam,
@@ -28,6 +30,7 @@ describe("getPublishStatus", () => {
   const createdPlayerIds: string[] = [];
   const createdSeasonIds: string[] = [];
   const createdPublishIds: string[] = [];
+  const createdUpcomingGameIds: string[] = [];
 
   // teamId is required on PlayerCreateInput but not itself under test here —
   // resolved from the real seeded team, same as createGameAction does via
@@ -64,6 +67,9 @@ describe("getPublishStatus", () => {
       await db
         .collection<{ _id: string }>("Seasons")
         .deleteMany({ _id: { $in: createdSeasonIds.splice(0) } });
+    }
+    for (const id of createdUpcomingGameIds.splice(0)) {
+      await deleteUpcomingGame(id).catch(() => undefined);
     }
     if (createdPublishIds.length > 0) {
       await db
@@ -124,6 +130,24 @@ describe("getPublishStatus", () => {
       throw new Error("Seeded dev database has no team document");
     }
     await updateTeam(team._id, { name: team.name });
+
+    const status = await getPublishStatus();
+    expect(status.hasUnpublishedChanges).toBe(true);
+  });
+
+  it("flags unpublished changes when an upcoming game is created after the last publish", async () => {
+    const publish = await runPublish();
+    createdPublishIds.push(publish._id);
+
+    // A seeded opponent, so a later publish in this file can still resolve it.
+    const game = await createUpcomingGame({
+      opponentId: "OPN100002",
+      date: "2099-10-03",
+      time: "20:30",
+      location: "HOME",
+      type: "CHALLENGE",
+    });
+    createdUpcomingGameIds.push(game._id);
 
     const status = await getPublishStatus();
     expect(status.hasUnpublishedChanges).toBe(true);

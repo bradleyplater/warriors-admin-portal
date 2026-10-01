@@ -19,6 +19,9 @@ export async function ensureIndexes(db: Db): Promise<void> {
         { unique: true, collation: { locale: "en", strength: 2 } },
       ),
     db.collection(COLLECTION_NAMES.opponent).createIndex({ updatedAt: -1 }),
+    db.collection(COLLECTION_NAMES.upcomingGame).createIndex({ date: 1, time: 1 }),
+    db.collection(COLLECTION_NAMES.upcomingGame).createIndex({ opponentId: 1 }),
+    db.collection(COLLECTION_NAMES.upcomingGame).createIndex({ updatedAt: -1 }),
     db
       .collection(COLLECTION_NAMES.player)
       .createIndex(

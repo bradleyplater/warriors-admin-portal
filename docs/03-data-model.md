@@ -122,6 +122,23 @@ Changes from the old shape (applied by the migration):
 
 The logo file lives in `S3_BUCKET` and is served by the CDN. The key's extension always matches `contentType`, which is also the object's S3 `Content-Type`. Every upload gets a fresh key, so replacing a logo never needs a CDN invalidation; the old object is deleted once the document points at the new one. The website never receives the opponents list: `results.json` is enriched at publish time with each game's opponent name and, when there is one, `logoImage` = the logo key.
 
+### UpcomingGame — new (add-upcoming-games)
+
+```ts
+{
+  _id: string,             // "UPG######"
+  opponentId: string,      // → Opponent; name and logo resolved at read/publish time
+  date: string,            // "YYYY-MM-DD", UK wall-clock — a string, not a Date, so no BST/GMT conversion
+  time: string,            // "HH:mm", 24-hour, UK wall-clock
+  location: "HOME" | "AWAY",
+  venue?: string,          // required for AWAY, absent for HOME (the home rink is a publish-time constant)
+  type: "CHALLENGE" | "LLIHC" | "BOTBC",
+  createdAt: Date, updatedAt: Date
+}
+```
+
+The scheduled fixture list, published as `upcoming-games.json`. Games dated before today stay in the collection (listed under Past on `/upcoming-games`) but are left out of the published file. Not linked to `Game`: the result is still entered as a new game once it's played.
+
 ### Publishes — new
 
 ```ts
@@ -198,7 +215,8 @@ Used by the old export system. Untouched during migration; deleted on 2026-09-26
 - **Goals:** scorer/assists must be rostered; assists distinct from scorer and each other; `second` 0–59; minute within game length (60 regulation; SO goals sit outside periods).
 - **Penalties:** offender rostered or the literal `BENCH`; duration > 0. Bench PIMs count toward team totals only.
 - **Awards/netminder:** must be rostered.
-- **Opponent:** name non-empty (trimmed) and unique ignoring case; logo optional, SVG/PNG/JPEG/WebP up to 5 MB. A game's `opponentId` must reference an existing opponent, and an opponent any game references cannot be deleted.
+- **Opponent:** name non-empty (trimmed) and unique ignoring case; logo optional, SVG/PNG/JPEG/WebP up to 5 MB. A game's or upcoming game's `opponentId` must reference an existing opponent, and an opponent any game or upcoming game references cannot be deleted.
+- **UpcomingGame:** a real calendar date and a valid 24-hour time; a venue for away games and none for home games; NIHC can't be scheduled.
 - **Season:** id `SSN` + 4 digits; name `##/##`; both consistent with each other.
 
 ## Derived stats (the stats engine)
@@ -213,6 +231,7 @@ All computed from `Game` documents — never stored as editable data:
 
 - `Game`: `{ seasonId: 1, date: -1 }`, `{ "team.roster.playerId": 1 }`, `{ "opponentTeam.opponentId": 1 }`, `{ updatedAt: -1 }`
 - `Opponent`: unique `{ name: 1 }` with collation `{ locale: "en", strength: 2 }` (case-insensitive); `{ updatedAt: -1 }`
+- `UpcomingGame`: `{ date: 1, time: 1 }`, `{ opponentId: 1 }`, `{ updatedAt: -1 }`
 - `Player`: unique partial index on `{ number: 1 }` where `active: true`; `{ updatedAt: -1 }`
 - `Seasons` / `Team`: `{ updatedAt: -1 }`
 

@@ -153,7 +153,11 @@ test.describe("opponents", () => {
     await openEditPage(page, "Rivals HC");
     await page.getByRole("button", { name: "Delete opponent" }).click();
 
-    await expect(page.getByText(/is used by \d+ games?, so it can't be deleted/)).toBeVisible();
+    // Rivals HC is also on the seeded fixture list, so the message names
+    // upcoming games too.
+    await expect(
+      page.getByText(/is used by \d+ games?( and \d+ upcoming games?)?, so it can't be deleted/),
+    ).toBeVisible();
     await page.goto("/opponents");
     await expect(
       page.getByRole("link", { name: "Edit Rivals HC", exact: true }),

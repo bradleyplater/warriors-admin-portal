@@ -16,7 +16,7 @@ hand-edit them — see [Updating](#updating) below.
 | `results.json` | Every played game: opponent, date, roster, full score breakdown by period (goals, assists, penalties, both teams) | `contexts/DataContext.tsx`, `components/LatestResultCard`, `components/ScheduleGameCard`, `components/NextGameCard`, `routes/{game,player,records,results,roster,stats,team-stats}.tsx` |
 | `roster-config.json` | `activePlayers`: the list of player IDs on the current roster, used to filter `players.json` down to who's currently active | `routes/roster.tsx` |
 | `team.json` | Team-level season stats: games, goalsFor/Against, wins/draws/losses | `contexts/DataContext.tsx` |
-| `upcoming-games.json` | Scheduled future games: opponent, date, time, location, game type | `contexts/DataContext.tsx`, `components/NextGameCard`, `routes/schedule.tsx` |
+| `upcoming-games.json` | Scheduled future games: opponent, date, time, location, game type. Generated since add-upcoming-games; `logoImage` is now an S3 key (or `""`) and `gameType` says `BOTBC` where this capture says `BOTB` | `contexts/DataContext.tsx`, `components/NextGameCard`, `routes/schedule.tsx` |
 
 ## Not captured
 
