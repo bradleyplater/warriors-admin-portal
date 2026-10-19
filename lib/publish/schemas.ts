@@ -106,6 +106,16 @@ const ResultArtifactSchema = z.object({
       two: ResultPeriodArtifactSchema,
       three: ResultPeriodArtifactSchema,
     }),
+    // Only present when shootout goals were recorded; the legacy fixture
+    // never had it.
+    shootout: z
+      .object({
+        warriorsScore: z.number().int(),
+        opponentScore: z.number().int(),
+        goals: z.array(ResultGoalArtifactSchema),
+        opponentGoals: z.array(ResultGoalArtifactSchema),
+      })
+      .optional(),
   }),
 });
 
