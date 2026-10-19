@@ -36,7 +36,9 @@ function penalty(overrides: Partial<Penalty> = {}): Penalty {
   };
 }
 
-function opponentPenalty(overrides: Partial<OpponentPenalty> = {}): OpponentPenalty {
+function opponentPenalty(
+  overrides: Partial<OpponentPenalty> = {},
+): OpponentPenalty {
   return {
     _id: "OPP1",
     offender: "Rival Player",
@@ -55,9 +57,30 @@ describe("deriveResultsScore", () => {
       warriorsScore: 0,
       opponentScore: 0,
       period: {
-        one: { warriorsScore: 0, opponentScore: 0, goals: [], opponentGoals: [], penalties: [], opponentPenalties: [] },
-        two: { warriorsScore: 0, opponentScore: 0, goals: [], opponentGoals: [], penalties: [], opponentPenalties: [] },
-        three: { warriorsScore: 0, opponentScore: 0, goals: [], opponentGoals: [], penalties: [], opponentPenalties: [] },
+        one: {
+          warriorsScore: 0,
+          opponentScore: 0,
+          goals: [],
+          opponentGoals: [],
+          penalties: [],
+          opponentPenalties: [],
+        },
+        two: {
+          warriorsScore: 0,
+          opponentScore: 0,
+          goals: [],
+          opponentGoals: [],
+          penalties: [],
+          opponentPenalties: [],
+        },
+        three: {
+          warriorsScore: 0,
+          opponentScore: 0,
+          goals: [],
+          opponentGoals: [],
+          penalties: [],
+          opponentPenalties: [],
+        },
       },
     });
   });
@@ -104,9 +127,20 @@ describe("deriveResultsScore", () => {
   });
 
   it("maps opponent goals with the free-text scorer as playerId and an always-empty assists array", () => {
-    const result = deriveResultsScore([], [opponentGoal({ scoredBy: "B Addison", minute: 1 })], [], []);
+    const result = deriveResultsScore(
+      [],
+      [opponentGoal({ scoredBy: "B Addison", minute: 1 })],
+      [],
+      [],
+    );
     expect(result.period.one.opponentGoals).toEqual([
-      { playerId: "B Addison", assists: [], minute: 1, second: 0, type: "EVEN" },
+      {
+        playerId: "B Addison",
+        assists: [],
+        minute: 1,
+        second: 0,
+        type: "EVEN",
+      },
     ]);
   });
 
@@ -124,6 +158,72 @@ describe("deriveResultsScore", () => {
     expect(result.opponentScore).toBe(1);
   });
 
+  it("publishes shootout goals for both sides under shootout, with the raw SO counts", () => {
+    const result = deriveResultsScore(
+      [
+        goal({ minute: 5 }),
+        goal({
+          _id: "GOL2",
+          scoredBy: "PLR2",
+          assist1: "PLR3",
+          minute: 65,
+          second: 0,
+          type: "SO",
+        }),
+      ],
+      [
+        opponentGoal({ minute: 5 }),
+        opponentGoal({
+          _id: "OGL2",
+          scoredBy: "B Addison",
+          minute: 65,
+          second: 0,
+          type: "SO",
+        }),
+        opponentGoal({ _id: "OGL3", minute: 65, second: 0, type: "SO" }),
+      ],
+      [],
+      [],
+    );
+    // Opponent wins the shootout 2-1, so takes the +1.
+    expect(result.warriorsScore).toBe(1);
+    expect(result.opponentScore).toBe(2);
+    expect(result.shootout).toEqual({
+      warriorsScore: 1,
+      opponentScore: 2,
+      goals: [
+        {
+          playerId: "PLR2",
+          assists: ["PLR3"],
+          minute: 65,
+          second: 0,
+          type: "SO",
+        },
+      ],
+      opponentGoals: [
+        {
+          playerId: "B Addison",
+          assists: [],
+          minute: 65,
+          second: 0,
+          type: "SO",
+        },
+        {
+          playerId: "Rival Player",
+          assists: [],
+          minute: 65,
+          second: 0,
+          type: "SO",
+        },
+      ],
+    });
+  });
+
+  it("omits shootout when no shootout goals were recorded", () => {
+    const result = deriveResultsScore([goal()], [opponentGoal()], [], []);
+    expect(result).not.toHaveProperty("shootout");
+  });
+
   it("buckets team and opponent penalties into their period without altering the score", () => {
     const result = deriveResultsScore(
       [],
@@ -135,7 +235,13 @@ describe("deriveResultsScore", () => {
       { offender: "PLR1", minute: 45, second: 0, type: "TRIP", duration: 2 },
     ]);
     expect(result.period.one.opponentPenalties).toEqual([
-      { offender: "Rival Player", minute: 10, second: 0, type: "TRIP", duration: 2 },
+      {
+        offender: "Rival Player",
+        minute: 10,
+        second: 0,
+        type: "TRIP",
+        duration: 2,
+      },
     ]);
     expect(result.warriorsScore).toBe(0);
     expect(result.opponentScore).toBe(0);
