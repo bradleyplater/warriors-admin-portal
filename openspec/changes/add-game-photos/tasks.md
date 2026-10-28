@@ -53,7 +53,7 @@
 ## 7. Infra
 
 - [x] 7.1 In `infra/terraform/iam.tf`, add a `DeleteGamePhotos` statement with `s3:DeleteObject` on `${bucket}/games/*` and a comment like the opponent one.
-- [ ] 7.2 Run `terraform plan`, have the user review it, then apply it to prod. This step is manual and needs the user's sign-off.
+- [x] 7.2 Run `terraform plan`, have the user review it, then apply it to prod. This step is manual and needs the user's sign-off. Applied 2026-10-28.
 
 ## 8. Docs
 
