@@ -3,12 +3,13 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   experimental: {
     serverActions: {
-      // Opponent logos are uploaded through a server action (add-opponents
-      // design D3). Set just above the app's own 5 MB logo cap
-      // (lib/opponent-logos.ts) so an oversized file gets the form's
-      // field-level error rather than a framework rejection. The portal only
-      // runs locally, so there's no hosting request cap to stay under.
-      bodySizeLimit: "6mb",
+      // Opponent logos (5 MB cap, lib/opponent-logos.ts) and game photos
+      // (25 MB cap, lib/game-photos.ts) are uploaded through server actions,
+      // photos one file per call (add-game-photos design D3). Set just above
+      // the larger cap so an oversized file gets the app's own error rather
+      // than a framework rejection. The portal only runs locally, so there's
+      // no hosting request cap to stay under.
+      bodySizeLimit: "26mb",
     },
   },
 };

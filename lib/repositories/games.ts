@@ -2,7 +2,9 @@ import { getDb } from "../mongodb";
 import {
   GameSchema,
   GameCreateInputSchema,
+  MAX_PHOTOS_PER_GAME,
   type Game,
+  type GamePhoto,
   type GameCreateInput,
   type GoalCreateInput,
   type PenaltyCreateInput,
@@ -13,6 +15,8 @@ import { stampCreate, stampUpdate } from "./internal/audit";
 import { generateTopLevelId, generateEmbeddedId } from "./internal/ids";
 import {
   NotFoundError,
+  PhotoLimitReachedError,
+  PhotoNotFoundError,
   RosterPlayerReferencedError,
   type BlockedRosterPlayer,
 } from "./internal/errors";
@@ -546,4 +550,106 @@ export async function deleteGame(id: string): Promise<void> {
   if (result.deletedCount === 0) {
     throw new NotFoundError("game", id);
   }
+}
+
+// Appends a photo whose object is already in S3 (add-game-photos design D4).
+// The 6-photo limit is part of the update's filter, so two concurrent
+// uploads can never push a seventh.
+export async function addGamePhoto(gameId: string, key: string): Promise<Game> {
+  const col = await collection();
+  const updated = await col.findOneAndUpdate(
+    {
+      _id: gameId,
+      $expr: {
+        $lt: [{ $size: { $ifNull: ["$photos", []] } }, MAX_PHOTOS_PER_GAME],
+      },
+    },
+    { $push: { photos: { key } }, $set: stampUpdate() },
+    { returnDocument: "after" },
+  );
+  if (!updated) {
+    await loadExisting(col, gameId); // throws NotFoundError if it's missing
+    throw new PhotoLimitReachedError(MAX_PHOTOS_PER_GAME);
+  }
+  return GameSchema.parse(updated);
+}
+
+// Read-modify-write of just the photos array, guarded by a filter on the
+// array as it was read so a concurrent change (in practice: another tab) is
+// never silently overwritten — retried once against the fresh array.
+// Photos are addressed by key, never index (design D5), so a stale page
+// can't hit the wrong photo after a reorder.
+async function rewritePhotos(
+  gameId: string,
+  key: string,
+  change: (photos: GamePhoto[], index: number) => GamePhoto[],
+): Promise<Game> {
+  const col = await collection();
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const existing = await loadExisting(col, gameId);
+    const photos = existing.photos ?? [];
+    const index = photos.findIndex((photo) => photo.key === key);
+    if (index === -1) {
+      throw new PhotoNotFoundError(gameId, key);
+    }
+
+    const validated = GameSchema.parse({
+      ...existing,
+      photos: change(photos, index),
+      ...stampUpdate(),
+    });
+    const result = await col.updateOne(
+      { _id: gameId, photos },
+      { $set: { photos: validated.photos ?? [], updatedAt: validated.updatedAt } },
+    );
+    if (result.matchedCount === 1) {
+      return validated;
+    }
+  }
+  throw new Error(`Game "${gameId}" photos changed while updating; try again`);
+}
+
+export interface GamePhotoTextInput {
+  alt?: string;
+  caption?: string;
+}
+
+// Blank or missing text clears the field rather than storing "".
+export async function updateGamePhotoText(
+  gameId: string,
+  key: string,
+  text: GamePhotoTextInput,
+): Promise<Game> {
+  const alt = text.alt?.trim();
+  const caption = text.caption?.trim();
+  return rewritePhotos(gameId, key, (photos, index) =>
+    photos.map((photo, i) =>
+      i === index
+        ? { key: photo.key, ...(alt && { alt }), ...(caption && { caption }) }
+        : photo,
+    ),
+  );
+}
+
+// Moving the first photo earlier or the last later leaves the order as it is.
+export async function moveGamePhoto(
+  gameId: string,
+  key: string,
+  direction: "earlier" | "later",
+): Promise<Game> {
+  return rewritePhotos(gameId, key, (photos, index) => {
+    const target = direction === "earlier" ? index - 1 : index + 1;
+    if (target < 0 || target >= photos.length) {
+      return photos;
+    }
+    const reordered = [...photos];
+    [reordered[index], reordered[target]] = [reordered[target], reordered[index]];
+    return reordered;
+  });
+}
+
+export async function removeGamePhoto(gameId: string, key: string): Promise<Game> {
+  return rewritePhotos(gameId, key, (photos, index) =>
+    photos.filter((_, i) => i !== index),
+  );
 }

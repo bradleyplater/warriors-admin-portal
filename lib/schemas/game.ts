@@ -241,6 +241,70 @@ const GameBaseShape = {
   ),
 };
 
+export const MAX_PHOTOS_PER_GAME = 6;
+export const MAX_PHOTO_TEXT_LENGTH = 250;
+
+const PhotoTextSchema = z
+  .string()
+  .trim()
+  .min(1)
+  .max(
+    MAX_PHOTO_TEXT_LENGTH,
+    `Must be ${MAX_PHOTO_TEXT_LENGTH} characters or fewer`,
+  )
+  .optional();
+
+// Every stored photo is the processed WebP (add-game-photos design D2), so the
+// key alone says what the file is — no separate contentType as on opponent
+// logos. Which game the key belongs to is checked in checkGamePhotos, since
+// it needs the sibling _id.
+export const GamePhotoSchema = z.object({
+  key: z.string(),
+  alt: PhotoTextSchema,
+  caption: PhotoTextSchema,
+});
+export type GamePhoto = z.infer<typeof GamePhotoSchema>;
+
+const PHOTO_NAME = /^[A-Za-z0-9-]+\.webp$/;
+
+function checkGamePhotos(
+  game: { _id: string; photos?: GamePhoto[] },
+  ctx: z.RefinementCtx,
+) {
+  const photos = game.photos ?? [];
+  if (photos.length > MAX_PHOTOS_PER_GAME) {
+    ctx.addIssue({
+      code: "custom",
+      message: `A game can have at most ${MAX_PHOTOS_PER_GAME} photos`,
+      path: ["photos"],
+    });
+  }
+
+  // A key under another game's prefix would publish that game's photo here.
+  const prefix = `games/${game._id}/photos/`;
+  const seen = new Set<string>();
+  photos.forEach((photo, index) => {
+    if (
+      !photo.key.startsWith(prefix) ||
+      !PHOTO_NAME.test(photo.key.slice(prefix.length))
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        message: `Photo key must be a .webp file under ${prefix}`,
+        path: ["photos", index, "key"],
+      });
+    }
+    if (seen.has(photo.key)) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Photos cannot repeat the same key",
+        path: ["photos"],
+      });
+    }
+    seen.add(photo.key);
+  });
+}
+
 const GameShape = z.object({
   _id: z.string(), // "GME######"
   ...GameBaseShape,
@@ -257,11 +321,15 @@ const GameShape = z.object({
     goals: z.array(OpponentGoalSchema),
     penalties: z.array(OpponentPenaltySchema),
   }),
+  // Display order is array order (add-game-photos design D1).
+  photos: z.array(GamePhotoSchema).optional(),
   createdAt: z.date(),
   updatedAt: z.date(),
 });
 
-export const GameSchema = GameShape.superRefine(checkGameRefs);
+export const GameSchema = GameShape.superRefine(checkGameRefs).superRefine(
+  checkGamePhotos,
+);
 export type Game = z.infer<typeof GameSchema>;
 
 const GameCreateInputShape = z.object({

@@ -15,12 +15,67 @@ export interface ResultArtifact {
   competition: string;
   location: string;
   score: ResultsScore;
+  photos?: ResultPhotoArtifact[];
+}
+
+export interface ResultPhotoArtifact {
+  key: string;
+  alt: string;
+  caption?: string;
 }
 
 // Legacy sentinel for a genuinely unset award/netminder field — see
 // fixtures/golden/results.json. These fields are optional on Game, so a
 // real (post-migration) game can legitimately have none of them set yet.
 const MISSING = "MISSING";
+
+const MONTHS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
+const LONDON_DATE_PARTS = new Intl.DateTimeFormat("en-GB", {
+  timeZone: "Europe/London",
+  day: "numeric",
+  month: "numeric",
+  year: "numeric",
+});
+
+// "12 Oct 2026" on the club's calendar. Built from numeric parts because
+// en-GB's own short month varies by ICU version ("Sep" vs "Sept").
+function formatGameDate(date: Date): string {
+  const part = (type: string) =>
+    Number(
+      LONDON_DATE_PARTS.formatToParts(date).find((p) => p.type === type)?.value,
+    );
+  return `${part("day")} ${MONTHS[part("month") - 1]} ${part("year")}`;
+}
+
+// Publish fills in alt text the admin left blank (add-game-photos design
+// D8), so the website never shows an image with no description.
+function photosFor(
+  game: Game,
+  opponentName: string,
+): ResultPhotoArtifact[] | undefined {
+  const photos = game.photos ?? [];
+  if (photos.length === 0) return undefined;
+  return photos.map((photo, index) => ({
+    key: photo.key,
+    alt:
+      photo.alt ??
+      `Photo ${index + 1} of ${photos.length} from Warriors v ${opponentName}, ${formatGameDate(game.date)}`,
+    ...(photo.caption && { caption: photo.caption }),
+  }));
+}
 
 // results.json (fixtures/golden/README.md). `season`/`seasonId` both
 // resolve to the season's *name* ("24/25"), matching the legacy fixture, not
@@ -34,8 +89,12 @@ export function generateResultsArtifact(
   seasons: Season[],
   opponents: Opponent[],
 ): ResultArtifact[] {
-  const seasonNameById = new Map(seasons.map((season) => [season._id, season.name]));
-  const opponentById = new Map(opponents.map((opponent) => [opponent._id, opponent]));
+  const seasonNameById = new Map(
+    seasons.map((season) => [season._id, season.name]),
+  );
+  const opponentById = new Map(
+    opponents.map((opponent) => [opponent._id, opponent]),
+  );
 
   return [...games]
     .sort((a, b) => a.date.getTime() - b.date.getTime())
@@ -56,6 +115,8 @@ export function generateResultsArtifact(
         game.opponentTeam.penalties,
       );
 
+      const photos = photosFor(game, opponent.name);
+
       return {
         season: seasonName,
         opponentTeam: opponent.name,
@@ -69,6 +130,7 @@ export function generateResultsArtifact(
         competition: competitionLabel(game.type),
         location: game.location,
         score,
+        ...(photos && { photos }),
       };
     });
 }

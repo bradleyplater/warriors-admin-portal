@@ -53,6 +53,7 @@ interface GameFixture {
   netminderPlayerId?: string;
   manOfTheMatchPlayerId?: string;
   warriorOfTheGamePlayerId?: string;
+  photos?: { key: string; alt?: string; caption?: string }[];
   createdAt: Date;
   updatedAt: Date;
 }
@@ -261,6 +262,75 @@ describe("GameSchema", () => {
       );
     },
   );
+
+  describe("photos", () => {
+    const photoKey = (name: string, gameId = "GME221248") =>
+      `games/${gameId}/photos/${name}.webp`;
+    const issuePaths = (game: GameFixture) =>
+      GameSchema.safeParse(game).error?.issues.map((issue) => issue.path.join(".")) ??
+      [];
+
+    it("accepts a game with no photos field", () => {
+      expect(GameSchema.safeParse(baseGame()).success).toBe(true);
+    });
+
+    it("accepts valid photos and keeps their order", () => {
+      const game = baseGame();
+      game.photos = [
+        { key: photoKey("1761500000000-ab12cd"), caption: "Opening face-off" },
+        { key: photoKey("1761500000001-ef34ab"), alt: "The bench" },
+      ];
+      const result = GameSchema.safeParse(game);
+      expect(result.success).toBe(true);
+      expect(result.data?.photos?.map((photo) => photo.key)).toEqual([
+        photoKey("1761500000000-ab12cd"),
+        photoKey("1761500000001-ef34ab"),
+      ]);
+    });
+
+    it("rejects more than six photos", () => {
+      const game = baseGame();
+      game.photos = Array.from({ length: 7 }, (_, i) => ({ key: photoKey(`p${i}`) }));
+      const result = GameSchema.safeParse(game);
+      expect(result.success).toBe(false);
+      expect(result.error?.issues).toContainEqual(
+        expect.objectContaining({
+          path: ["photos"],
+          message: "A game can have at most 6 photos",
+        }),
+      );
+    });
+
+    it("rejects a key under another game's prefix", () => {
+      const game = baseGame();
+      game.photos = [{ key: photoKey("x", "GME000002") }];
+      expect(issuePaths(game)).toContain("photos.0.key");
+    });
+
+    it("rejects a non-WebP key", () => {
+      const game = baseGame();
+      game.photos = [{ key: "games/GME221248/photos/x.jpg" }];
+      expect(issuePaths(game)).toContain("photos.0.key");
+    });
+
+    it("rejects duplicate keys", () => {
+      const game = baseGame();
+      game.photos = [{ key: photoKey("x") }, { key: photoKey("x") }];
+      expect(issuePaths(game)).toContain("photos");
+    });
+
+    it("rejects an over-long caption", () => {
+      const game = baseGame();
+      game.photos = [{ key: photoKey("x"), caption: "a".repeat(251) }];
+      expect(issuePaths(game)).toContain("photos.0.caption");
+    });
+
+    it("trims alt text and captions", () => {
+      const game = baseGame();
+      game.photos = [{ key: photoKey("x"), alt: "  The bench  " }];
+      expect(GameSchema.parse(game).photos?.[0].alt).toBe("The bench");
+    });
+  });
 });
 
 describe("GameCreateInputSchema", () => {

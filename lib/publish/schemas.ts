@@ -117,6 +117,18 @@ const ResultArtifactSchema = z.object({
       })
       .optional(),
   }),
+  // The game's photos in display order (add-game-photos design D8): each an
+  // S3 key the website resolves against the CDN, like logoImage. Omitted
+  // when the game has none; the legacy fixture never had it.
+  photos: z
+    .array(
+      z.object({
+        key: z.string(),
+        alt: z.string(),
+        caption: z.string().optional(),
+      }),
+    )
+    .optional(),
 });
 
 export const ResultsArtifactSchema = z.array(ResultArtifactSchema);

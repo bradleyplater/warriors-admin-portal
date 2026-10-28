@@ -41,6 +41,14 @@ resource "aws_iam_user_policy" "app_bucket_access" {
         Resource = ["${aws_s3_bucket.app.arn}/opponents/*"]
       },
       {
+        # Deleting a game photo removes its processed object (add-game-photos
+        # design D6). Scoped to games/ only, for the same reason as above.
+        Sid      = "DeleteGamePhotos"
+        Effect   = "Allow"
+        Action   = ["s3:DeleteObject"]
+        Resource = ["${aws_s3_bucket.app.arn}/games/*"]
+      },
+      {
         # lib/publish/cdn.ts calls CreateInvalidationCommand using these
         # same credentials (docs/02-architecture.md's CDN_INVALIDATION
         # config) — scoped to this one distribution, nothing account-wide.
