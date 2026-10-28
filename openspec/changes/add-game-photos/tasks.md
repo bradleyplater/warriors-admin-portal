@@ -1,7 +1,7 @@
 ## 1. Portal: schema
 
-- [ ] 1.1 Add `GamePhotoSchema` (`key`, optional trimmed `alt`/`caption` ≤ 250) and an optional `photos` array (max 6) to `lib/schemas/game.ts`. Add a refinement that keys are unique and match `games/<_id>/photos/<name>.webp`, and export the `GamePhoto` type.
-- [ ] 1.2 Unit tests covering each `entity-schemas` scenario: no photos, valid photos, 7 photos, another game's key, a `.jpg` key, duplicate keys, an over-long caption.
+- [x] 1.1 Add `GamePhotoSchema` (`key`, optional trimmed `alt`/`caption` ≤ 250) and an optional `photos` array (max 6) to `lib/schemas/game.ts`. Add a refinement that keys are unique and match `games/<_id>/photos/<name>.webp`, and export the `GamePhoto` type.
+- [x] 1.2 Unit tests covering each `entity-schemas` scenario: no photos, valid photos, 7 photos, another game's key, a `.jpg` key, duplicate keys, an over-long caption.
 
 ## 2. Portal: image processing and storage
 

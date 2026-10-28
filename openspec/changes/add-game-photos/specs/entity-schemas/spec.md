@@ -13,7 +13,7 @@ Keys SHALL be unique within the array. The array order is the display order. A m
 - **THEN** validation succeeds
 
 #### Scenario: Game with valid photos passes
-- **WHEN** game `GAM000001` has `photos: [{ key: "games/GAM000001/photos/1761500000000-ab12cd.webp", caption: "Opening face-off" }]`
+- **WHEN** game `GME000001` has `photos: [{ key: "games/GME000001/photos/1761500000000-ab12cd.webp", caption: "Opening face-off" }]`
 - **THEN** validation succeeds
 
 #### Scenario: More than six photos is rejected
@@ -21,7 +21,7 @@ Keys SHALL be unique within the array. The array order is the display order. A m
 - **THEN** validation fails with a field-level error on `photos` saying a game can have at most 6 photos
 
 #### Scenario: Key belonging to another game is rejected
-- **WHEN** game `GAM000001` has a photo whose key is `games/GAM000002/photos/x.webp`
+- **WHEN** game `GME000001` has a photo whose key is `games/GME000002/photos/x.webp`
 - **THEN** validation fails with a field-level error on that photo's `key`
 
 #### Scenario: Non-WebP key is rejected
