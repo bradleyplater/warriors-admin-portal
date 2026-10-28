@@ -95,6 +95,11 @@ Changes from the old shape (applied by the migration):
   netminderPlayerId?: string,          // in roster
   manOfTheMatchPlayerId?: string,      // in roster — UI label "Player of the Game" (D13)
   warriorOfTheGamePlayerId?: string,   // in roster
+  photos?: [{                          // add-game-photos — at most 6, array order = display order
+    key: string,            // "games/<_id>/photos/<epochMillis>-<hex>.webp" — processed WebP in S3
+    alt?: string,           // ≤ 250 chars; publish generates one when absent
+    caption?: string        // ≤ 250 chars
+  }],
   createdAt: Date, updatedAt: Date
 }
 ```
@@ -220,6 +225,7 @@ Used by the old export system. Untouched during migration; deleted on 2026-09-26
 - **Awards/netminder:** must be rostered.
 - **Opponent:** name non-empty (trimmed) and unique ignoring case; logo optional, SVG/PNG/JPEG/WebP up to 5 MB. A game's or upcoming game's `opponentId` must reference an existing opponent, and an opponent any game or upcoming game references cannot be deleted.
 - **UpcomingGame:** a real calendar date and a valid 24-hour time; a venue for away games and none for home games; NIHC can't be scheduled.
+- **Game photos:** at most 6 per game; each key a unique `.webp` under that game's own `games/<_id>/photos/` prefix; alt text and caption trimmed, at most 250 characters. Uploads must decode as JPEG, PNG or WebP, up to 25 MB and 50 megapixels; what's stored is the processed version (upright, sRGB, fitted inside 2400×1350 without cropping or enlarging, WebP q90, all metadata including GPS stripped).
 - **Season:** id `SSN` + 4 digits; name `##/##`; both consistent with each other; `active`, when present, is a boolean.
 
 ## Derived stats (the stats engine)

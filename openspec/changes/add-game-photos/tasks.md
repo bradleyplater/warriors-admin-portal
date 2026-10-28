@@ -57,9 +57,9 @@
 
 ## 8. Docs
 
-- [ ] 8.1 Update `docs/03-data-model.md` (Game `photos`, the limit and key format) and `docs/02-architecture.md` (photo processing and the S3 `games/` prefix).
-- [ ] 8.2 Update `fixtures/golden/README.md` with the `results.json` `photos` field.
-- [ ] 8.3 Update the Obsidian vault's data-model and publish notes.
+- [x] 8.1 Update `docs/03-data-model.md` (Game `photos`, the limit and key format) and `docs/02-architecture.md` (photo processing and the S3 `games/` prefix).
+- [x] 8.2 Update `fixtures/golden/README.md` with the `results.json` `photos` field.
+- [x] 8.3 Update the Obsidian vault's data-model and publish notes.
 
 ## 9. Website (`warriors-website`)
 
