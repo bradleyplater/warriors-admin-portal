@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
+  addGamePhoto,
   addGoal,
   createGame,
   deleteGame,
@@ -12,9 +13,14 @@ import {
   editOpponentPenalty,
   editPenalty,
   getGame,
+  moveGamePhoto,
+  removeGamePhoto,
   updateGame,
+  updateGamePhotoText,
   updateGameRoster,
   NotFoundError,
+  PhotoLimitReachedError,
+  PhotoNotFoundError,
   RosterPlayerReferencedError,
 } from "../../../lib/repositories";
 import type { GameCreateInput } from "../../../lib/schemas";
@@ -881,6 +887,131 @@ describe("games repository", () => {
       expect(
         after?.team.roster.map((entry) => entry.playerId).sort(),
       ).toEqual(["PLRTEST1", "PLRTEST3", "PLRTEST4"]);
+    });
+  });
+  describe("game photos", () => {
+    const photoKey = (gameId: string, name: string) =>
+      `games/${gameId}/photos/${name}.webp`;
+
+    async function gameWithPhotos(count: number) {
+      const game = await createGame(testGameInput());
+      createdIds.push(game._id);
+      for (let i = 0; i < count; i++) {
+        await addGamePhoto(game._id, photoKey(game._id, `p${i}`));
+      }
+      return (await getGame(game._id))!;
+    }
+
+    const keysOf = (game: { photos?: { key: string }[] } | null) =>
+      (game?.photos ?? []).map((photo) => photo.key.split("/").pop());
+
+    it("adds photos to the end and advances updatedAt", async () => {
+      const game = await gameWithPhotos(2);
+      const updated = await addGamePhoto(game._id, photoKey(game._id, "new"));
+      expect(keysOf(updated)).toEqual(["p0.webp", "p1.webp", "new.webp"]);
+      expect(updated.updatedAt.getTime()).toBeGreaterThanOrEqual(game.updatedAt.getTime());
+      expect(keysOf(await getGame(game._id))).toEqual(keysOf(updated));
+    });
+
+    it("allows a sixth photo but refuses a seventh, leaving the game unchanged", async () => {
+      const game = await gameWithPhotos(5);
+      await addGamePhoto(game._id, photoKey(game._id, "sixth"));
+      await expect(
+        addGamePhoto(game._id, photoKey(game._id, "seventh")),
+      ).rejects.toBeInstanceOf(PhotoLimitReachedError);
+      expect((await getGame(game._id))?.photos).toHaveLength(6);
+    });
+
+    it("never exceeds six photos under concurrent adds", async () => {
+      const game = await gameWithPhotos(3);
+      const results = await Promise.allSettled(
+        Array.from({ length: 6 }, (_, i) =>
+          addGamePhoto(game._id, photoKey(game._id, `race${i}`)),
+        ),
+      );
+      expect(results.filter((r) => r.status === "fulfilled")).toHaveLength(3);
+      expect((await getGame(game._id))?.photos).toHaveLength(6);
+    });
+
+    it("throws NotFoundError when adding to a missing game", async () => {
+      await expect(
+        addGamePhoto("GME999999", photoKey("GME999999", "x")),
+      ).rejects.toBeInstanceOf(NotFoundError);
+    });
+
+    it("sets trimmed alt text and caption, and clears them when blank", async () => {
+      const game = await gameWithPhotos(1);
+      const key = game.photos![0].key;
+
+      const set = await updateGamePhotoText(game._id, key, {
+        alt: "  Players celebrating  ",
+        caption: "Goal celebration",
+      });
+      expect(set.photos![0]).toEqual({
+        key,
+        alt: "Players celebrating",
+        caption: "Goal celebration",
+      });
+
+      const cleared = await updateGamePhotoText(game._id, key, {
+        alt: "Players celebrating",
+        caption: "   ",
+      });
+      expect(cleared.photos![0]).toEqual({ key, alt: "Players celebrating" });
+      expect((await getGame(game._id))?.photos![0]).not.toHaveProperty("caption");
+    });
+
+    it("moves a photo earlier or later, keeping the others' order", async () => {
+      const game = await gameWithPhotos(4);
+      const third = game.photos![2].key;
+
+      const earlier = await moveGamePhoto(game._id, third, "earlier");
+      expect(keysOf(earlier)).toEqual(["p0.webp", "p2.webp", "p1.webp", "p3.webp"]);
+
+      const later = await moveGamePhoto(game._id, third, "later");
+      expect(keysOf(later)).toEqual(["p0.webp", "p1.webp", "p2.webp", "p3.webp"]);
+    });
+
+    it("leaves the order alone when moving past either end", async () => {
+      const game = await gameWithPhotos(3);
+      await moveGamePhoto(game._id, game.photos![0].key, "earlier");
+      await moveGamePhoto(game._id, game.photos![2].key, "later");
+      expect(keysOf(await getGame(game._id))).toEqual(["p0.webp", "p1.webp", "p2.webp"]);
+    });
+
+    it("removes a photo and advances updatedAt", async () => {
+      const game = await gameWithPhotos(3);
+      const removed = await removeGamePhoto(game._id, game.photos![1].key);
+      expect(keysOf(removed)).toEqual(["p0.webp", "p2.webp"]);
+      expect(removed.updatedAt.getTime()).toBeGreaterThanOrEqual(game.updatedAt.getTime());
+    });
+
+    it("throws PhotoNotFoundError for an unknown key", async () => {
+      const game = await gameWithPhotos(1);
+      const unknown = photoKey(game._id, "nope");
+      await expect(updateGamePhotoText(game._id, unknown, {})).rejects.toBeInstanceOf(
+        PhotoNotFoundError,
+      );
+      await expect(moveGamePhoto(game._id, unknown, "later")).rejects.toBeInstanceOf(
+        PhotoNotFoundError,
+      );
+      await expect(removeGamePhoto(game._id, unknown)).rejects.toBeInstanceOf(
+        PhotoNotFoundError,
+      );
+    });
+
+    // Every other game write reads, parses and replaceOne()s the whole
+    // document — photos must ride through that (design Risks).
+    it("keeps photos through ordinary game edits", async () => {
+      const game = await gameWithPhotos(2);
+      await updateGame(game._id, { location: "AWAY" });
+      await addGoal(game._id, {
+        scoredBy: "PLRTEST1",
+        minute: 3,
+        second: 0,
+        type: "EVEN",
+      });
+      expect(keysOf(await getGame(game._id))).toEqual(["p0.webp", "p1.webp"]);
     });
   });
 });

@@ -15,21 +15,21 @@
 
 ## 3. Portal: data access
 
-- [ ] 3.1 Add `PhotoLimitReachedError` and `PhotoNotFoundError` to `internal/errors.ts`.
-- [ ] 3.2 In `lib/repositories/games.ts`, add:
+- [x] 3.1 Add `PhotoLimitReachedError` and `PhotoNotFoundError` to `internal/errors.ts`.
+- [x] 3.2 In `lib/repositories/games.ts`, add:
   - `addGamePhoto(gameId, key)`: an atomic `$push` with a `$size < 6` filter that bumps `updatedAt`, and distinguishes a missing game from a full one.
   - `updateGamePhotoText(gameId, key, { alt, caption })`: positional `$set`/`$unset`.
   - `moveGamePhoto(gameId, key, "earlier" | "later")`: a swap guarded by a filter on the previous array, with one retry.
   - `removeGamePhoto(gameId, key)`: `$pull`.
   Export them all.
-- [ ] 3.3 Integration tests:
+- [x] 3.3 Integration tests:
   - Adding to a game with 5 photos works, while adding to one with 6 throws and leaves it unchanged.
   - Concurrent adds never exceed 6.
   - Text set and clear work.
   - Moving swaps neighbours, and moving the first photo earlier or the last later is a no-op.
   - Removing works.
   - Each operation advances `updatedAt`, and an unknown key throws `PhotoNotFoundError`.
-- [ ] 3.4 Regression integration test: `updateGame` and `addGoal` on a game with photos preserve `photos`.
+- [x] 3.4 Regression integration test: `updateGame` and `addGoal` on a game with photos preserve `photos`.
 
 ## 4. Portal: service and server actions
 

@@ -63,3 +63,20 @@ export class RosterPlayerReferencedError extends Error {
     this.blocked = blocked;
   }
 }
+
+export class PhotoLimitReachedError extends Error {
+  constructor(max: number) {
+    super(`A game can have at most ${max} photos`);
+    this.name = "PhotoLimitReachedError";
+  }
+}
+
+export class PhotoNotFoundError extends Error {
+  readonly key: string;
+
+  constructor(gameId: string, key: string) {
+    super(`Game "${gameId}" has no photo "${key}"`);
+    this.name = "PhotoNotFoundError";
+    this.key = key;
+  }
+}
