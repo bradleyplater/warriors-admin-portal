@@ -33,9 +33,9 @@
 
 ## 4. Portal: service and server actions
 
-- [ ] 4.1 Add a service (`lib/games/photos-service.ts`) that runs upload as validate → process → put → `addGamePhoto`, deleting the object quietly when the push fails. Also add `removePhoto` (pull, then quiet delete).
-- [ ] 4.2 Add server actions in `app/games/[id]/photos/actions.ts`: `uploadGamePhotoAction` (one file per call), `updateGamePhotoTextAction`, `moveGamePhotoAction` and `deleteGamePhotoAction`. Each should `revalidatePath` the game page.
-- [ ] 4.3 Integration tests for the service against Moto: a successful upload stores the WebP object and the key; a full game leaves no S3 object; a rejected file writes nothing; removing deletes the object.
+- [x] 4.1 Add a service (`lib/games/photos-service.ts`) that runs upload as validate → process → put → `addGamePhoto`, deleting the object quietly when the push fails. Also add `removePhoto` (pull, then quiet delete).
+- [x] 4.2 Add server actions in `app/games/[id]/photos/actions.ts`: `uploadGamePhotoAction` (one file per call), `updateGamePhotoTextAction`, `moveGamePhotoAction` and `deleteGamePhotoAction`. Each should `revalidatePath` the game page.
+- [x] 4.3 Integration tests for the service against Moto: a successful upload stores the WebP object and the key; a full game leaves no S3 object; a rejected file writes nothing; removing deletes the object.
 
 ## 5. Portal: UI
 
