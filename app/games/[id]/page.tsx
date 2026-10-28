@@ -20,6 +20,7 @@ import {
   deleteOpponentPenaltyAction,
   deletePenaltyAction,
 } from "../actions";
+import { GamePhotosSection } from "./photos/GamePhotosSection";
 
 // "#14 Dean Crosbie", with the shirt number set in the data face.
 function PlayerName({ player }: { player: Player }) {
@@ -504,6 +505,8 @@ export default async function GameDetailPage({
           </Card>
         </RecordSection>
       </div>
+
+      <GamePhotosSection game={game} />
 
       <section className="flex flex-col gap-4">
         <SectionHeading count={`${rosterPlayers.length} dressed`}>

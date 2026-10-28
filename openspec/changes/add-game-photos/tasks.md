@@ -39,10 +39,10 @@
 
 ## 5. Portal: UI
 
-- [ ] 5.1 Add the read-through route `app/games/[id]/photos/[name]/route.ts`. It returns 404 unless the key belongs to the game or when the object is missing, and serves `image/webp` with `nosniff` and immutable private cache headers.
-- [ ] 5.2 Add a Photos section on `app/games/[id]/page.tsx`. It shows an ordered thumbnail grid with the count ("3 of 6"). Each photo has alt and caption fields with save, move earlier/later (hidden at the ends) and delete with confirm. When the game has 6 photos, the add control is replaced by a limit message. Use `app/_ui` components.
-- [ ] 5.3 Add the client upload component. It takes a multi-file input, trims the selection to the remaining slots with a message for the extras, uploads files one at a time, shows per-file status (processing / added / error), then refreshes.
-- [ ] 5.4 E2E (`e2e/game-photos.spec.ts`): upload 2 photos, see the thumbnails and "2 of 6", edit a caption, reorder, delete one; fill a game to 6 and check that the add control is gone; check that the publish bar shows unpublished changes.
+- [x] 5.1 Add the read-through route `app/games/[id]/photos/[name]/route.ts`. It returns 404 unless the key belongs to the game or when the object is missing, and serves `image/webp` with `nosniff` and immutable private cache headers.
+- [x] 5.2 Add a Photos section on `app/games/[id]/page.tsx`. It shows an ordered thumbnail grid with the count ("3 of 6"). Each photo has alt and caption fields with save, move earlier/later (hidden at the ends) and delete with confirm. When the game has 6 photos, the add control is replaced by a limit message. Use `app/_ui` components.
+- [x] 5.3 Add the client upload component. It takes a multi-file input, trims the selection to the remaining slots with a message for the extras, uploads files one at a time, shows per-file status (processing / added / error), then refreshes.
+- [x] 5.4 E2E (`e2e/game-photos.spec.ts`): upload 2 photos, see the thumbnails and "2 of 6", edit a caption, reorder, delete one; fill a game to 6 and check that the add control is gone; check that the publish bar shows unpublished changes.
 
 ## 6. Portal: publish
 
