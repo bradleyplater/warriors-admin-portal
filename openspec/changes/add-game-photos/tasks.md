@@ -46,9 +46,9 @@
 
 ## 6. Portal: publish
 
-- [ ] 6.1 In `lib/publish/schemas.ts`, add optional `photos: [{ key, alt, caption? }]` to `ResultArtifactSchema`.
-- [ ] 6.2 In `lib/publish/artifacts/results.ts`, emit `photos` in order, generate the alt text (`Photo n of total from Warriors v <opponent>, d MMM yyyy`, Europe/London), omit `caption` when absent, and omit `photos` entirely when there are none.
-- [ ] 6.3 Unit tests: the spec example (2 photos, one with alt and caption, one with neither); the field is absent when there are none; the golden-fixture comparison is unchanged; the output validates against the schema.
+- [x] 6.1 In `lib/publish/schemas.ts`, add optional `photos: [{ key, alt, caption? }]` to `ResultArtifactSchema`.
+- [x] 6.2 In `lib/publish/artifacts/results.ts`, emit `photos` in order, generate the alt text (`Photo n of total from Warriors v <opponent>, d MMM yyyy`, Europe/London), omit `caption` when absent, and omit `photos` entirely when there are none.
+- [x] 6.3 Unit tests: the spec example (2 photos, one with alt and caption, one with neither); the field is absent when there are none; the golden-fixture comparison is unchanged; the output validates against the schema.
 
 ## 7. Infra
 

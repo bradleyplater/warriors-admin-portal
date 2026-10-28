@@ -136,4 +136,51 @@ describe("generateResultsArtifact", () => {
       new Date("2025-03-01").toISOString(),
     ]);
   });
+  describe("photos", () => {
+    const key = (name: string) => `games/GME1/photos/${name}.webp`;
+
+    it("emits photos in order, generating alt text the admin left blank", () => {
+      const [entry] = generateResultsArtifact(
+        [
+          game({
+            date: new Date("2026-10-12T18:30:00.000Z"),
+            opponentTeam: { opponentId: "OPN000002", goals: [], penalties: [] },
+            photos: [
+              { key: key("a"), alt: "Players celebrating", caption: "Goal celebration" },
+              { key: key("b") },
+            ],
+          }),
+        ],
+        seasons,
+        opponents,
+      );
+      expect(entry.photos).toEqual([
+        { key: key("a"), alt: "Players celebrating", caption: "Goal celebration" },
+        {
+          key: key("b"),
+          alt: "Photo 2 of 2 from Warriors v Cleveland Comets, 12 Oct 2026",
+        },
+      ]);
+      expect(entry.photos?.[1]).not.toHaveProperty("caption");
+      expect(() => ResultsArtifactSchema.parse([entry])).not.toThrow();
+    });
+
+    it("dates the generated alt text on the London calendar", () => {
+      // 00:30 BST on 1 Sep is still 31 Aug in UTC.
+      const [entry] = generateResultsArtifact(
+        [game({ date: new Date("2026-08-31T23:30:00.000Z"), photos: [{ key: key("a") }] })],
+        seasons,
+        opponents,
+      );
+      expect(entry.photos?.[0].alt).toBe("Photo 1 of 1 from Warriors v Rivals HC, 1 Sep 2026");
+    });
+
+    it("omits photos entirely when a game has none", () => {
+      const [withoutField] = generateResultsArtifact([game()], seasons, opponents);
+      const [emptyArray] = generateResultsArtifact([game({ photos: [] })], seasons, opponents);
+      expect(withoutField).not.toHaveProperty("photos");
+      expect(emptyArray).not.toHaveProperty("photos");
+      expect(serializeArtifact([emptyArray])).toBe(serializeArtifact([withoutField]));
+    });
+  });
 });
