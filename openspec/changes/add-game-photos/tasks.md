@@ -63,10 +63,10 @@
 
 ## 9. Website (`warriors-website`)
 
-- [ ] 9.1 Add optional `photos?: { key: string; alt: string; caption?: string }[]` to the `Result` type.
-- [ ] 9.2 In `app/routes/game.tsx`, pass `photos` mapped through `assetUrl` into `<GamePhotos />` and remove the placeholder comment.
-- [ ] 9.3 Tests: a game with photos renders `<img>` with CDN URLs and captions; a game without them still shows the placeholders.
-- [ ] 9.4 Open a website PR that links to the portal PR.
+- [x] 9.1 Add optional `photos?: { key: string; alt: string; caption?: string }[]` to the `Result` type.
+- [x] 9.2 In `app/routes/game.tsx`, pass `photos` mapped through `assetUrl` into `<GamePhotos />` and remove the placeholder comment.
+- [x] 9.3 Tests: a game with photos renders `<img>` with CDN URLs and captions; a game without them still shows the placeholders.
+- [x] 9.4 Open a website PR that links to the portal PR (warriors-website #25; portal #43).
 
 ## 10. Rollout (manual, with the user)
 
