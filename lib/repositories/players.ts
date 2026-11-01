@@ -16,8 +16,14 @@ async function collection() {
   return db.collection<Player>(COLLECTION_NAMES.player);
 }
 
+// excludeFromStatAwards is stored only when true: a cleared flag is unset,
+// never stored as false (lib/schemas/player.ts).
 export async function createPlayer(input: PlayerCreateInput): Promise<Player> {
-  const data = PlayerCreateInputSchema.parse(input);
+  const { excludeFromStatAwards, ...rest } =
+    PlayerCreateInputSchema.parse(input);
+  const data = excludeFromStatAwards
+    ? { ...rest, excludeFromStatAwards }
+    : rest;
   const col = await collection();
 
   const doc = await generateTopLevelId("PLR", async (id) => {
@@ -68,13 +74,20 @@ export async function updatePlayer(
   input: Partial<PlayerCreateInput>,
 ): Promise<Player> {
   const col = await collection();
+  // false unsets the flag rather than storing it, as on create.
+  const { excludeFromStatAwards, ...fields } = input;
+  const update =
+    excludeFromStatAwards === false
+      ? {
+          $set: { ...fields, ...stampUpdate() },
+          $unset: { excludeFromStatAwards: "" as const },
+        }
+      : { $set: { ...input, ...stampUpdate() } };
   let result;
   try {
-    result = await col.findOneAndUpdate(
-      { _id: id },
-      { $set: { ...input, ...stampUpdate() } },
-      { returnDocument: "after" },
-    );
+    result = await col.findOneAndUpdate({ _id: id }, update, {
+      returnDocument: "after",
+    });
   } catch (error) {
     // The number causing the collision may not be in `input` at all — e.g.
     // reactivating a player (`{ active: true }`) collides on their existing,

@@ -17,6 +17,9 @@ export function parsePlayerFormData(formData: FormData, teamId: string) {
     surname: optionalString(formData.get("surname")) ?? "",
     positions: formData.getAll("positions"),
     active: formData.get("active") !== null,
+    // Always sent, so unticking clears it on update; the repository stores
+    // only true.
+    excludeFromStatAwards: formData.get("excludeFromStatAwards") !== null,
     // Omit rather than set to `undefined`: the MongoDB driver serializes an
     // explicit `undefined` value as BSON null, which then fails the
     // optional (not nullable) schema field on read-back. A blank number is

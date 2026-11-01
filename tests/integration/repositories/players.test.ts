@@ -51,6 +51,35 @@ describe("players repository", () => {
     }
   });
 
+  it("stores the stat-awards flag only when true, and unsets it when cleared", async () => {
+    const db = await getDb();
+    const raw = async (id: string) =>
+      db.collection<{ _id: string }>("Player").findOne({ _id: id });
+
+    const plain = await createPlayer(
+      testPlayerInput({ excludeFromStatAwards: false }),
+    );
+    createdIds.push(plain._id);
+    expect(await raw(plain._id)).not.toHaveProperty("excludeFromStatAwards");
+
+    const coach = await updatePlayer(plain._id, {
+      excludeFromStatAwards: true,
+    });
+    expect(coach.excludeFromStatAwards).toBe(true);
+
+    // Leaving the field out of an update keeps it.
+    expect(
+      (await updatePlayer(plain._id, { firstName: "Zztest" }))
+        .excludeFromStatAwards,
+    ).toBe(true);
+
+    const cleared = await updatePlayer(plain._id, {
+      excludeFromStatAwards: false,
+    });
+    expect(cleared.excludeFromStatAwards).toBeUndefined();
+    expect(await raw(plain._id)).not.toHaveProperty("excludeFromStatAwards");
+  });
+
   it("creates, reads, updates, and deletes a player, stamping audit timestamps", async () => {
     const created = await createPlayer(testPlayerInput());
     createdIds.push(created._id);

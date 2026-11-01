@@ -45,6 +45,16 @@ describe("parsePlayerFormData", () => {
     }
   });
 
+  it("reads the stat-awards checkbox as a boolean either way", () => {
+    const unticked = parsePlayerFormData(baseFormData(), "TM551420");
+    expect(unticked.success && unticked.data.excludeFromStatAwards).toBe(false);
+
+    const formData = baseFormData();
+    formData.set("excludeFromStatAwards", "on");
+    const ticked = parsePlayerFormData(formData, "TM551420");
+    expect(ticked.success && ticked.data.excludeFromStatAwards).toBe(true);
+  });
+
   it("omits nickname and imagePath entirely when not submitted, rather than setting them to undefined", () => {
     const result = parsePlayerFormData(baseFormData(), "TM551420");
     expect(result.success).toBe(true);
