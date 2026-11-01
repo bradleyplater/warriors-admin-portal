@@ -28,7 +28,7 @@ const chivoMono = Chivo_Mono({
 
 export const metadata: Metadata = {
   title: "Warriors Admin Portal",
-  description: "Admin portal for managing Warriors players, games, upcoming games, opponents and seasons",
+  description: "Admin portal for managing Warriors players, games, upcoming games, opponents, awards and seasons",
 };
 
 const navItems = [
@@ -36,6 +36,7 @@ const navItems = [
   { href: "/games", label: "Games" },
   { href: "/upcoming-games", label: "Upcoming Games" },
   { href: "/opponents", label: "Opponents" },
+  { href: "/awards", label: "Awards" },
   { href: "/seasons", label: "Seasons" },
 ];
 

@@ -83,6 +83,15 @@ export function PlayerForm({ initialValues }: PlayerFormProps) {
         Active
       </Choice>
 
+      <Choice
+        type="checkbox"
+        name="excludeFromStatAwards"
+        defaultChecked={initialValues?.excludeFromStatAwards ?? false}
+      >
+        Leave out of the most goals, assists and points awards (e.g. the coach).
+        Their stats still show everywhere else.
+      </Choice>
+
       <TextField
         id="nickname"
         name="nickname"

@@ -5,5 +5,6 @@ export * from "./players";
 export * from "./games";
 export * from "./opponents";
 export * from "./upcoming-games";
+export * from "./award-evenings";
 export * from "./internal/errors";
 export { ensureIndexes } from "./internal/indexes";

@@ -31,5 +31,6 @@ export async function ensureIndexes(db: Db): Promise<void> {
     db.collection(COLLECTION_NAMES.player).createIndex({ updatedAt: -1 }),
     db.collection(COLLECTION_NAMES.seasons).createIndex({ updatedAt: -1 }),
     db.collection(COLLECTION_NAMES.team).createIndex({ updatedAt: -1 }),
+    db.collection(COLLECTION_NAMES.awardEvening).createIndex({ updatedAt: -1 }),
   ]);
 }

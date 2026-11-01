@@ -17,4 +17,6 @@ export const COLLECTION_NAMES = {
   opponent: "Opponent",
   // New with add-upcoming-games, same convention.
   upcomingGame: "UpcomingGame",
+  // New with add-awards, same convention.
+  awardEvening: "AwardEvening",
 } as const;

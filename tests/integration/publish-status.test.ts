@@ -3,11 +3,13 @@ import { getDb } from "../../lib/mongodb";
 import { runPublish } from "../../lib/publish/run";
 import { getPublishStatus } from "../../lib/publish/status";
 import {
+  createAwardEvening,
   createPlayer,
   createSeason,
   createUpcomingGame,
   deleteUpcomingGame,
   getTheTeam,
+  setAwardEveningStatus,
   updatePlayer,
   updateTeam,
 } from "../../lib/repositories";
@@ -31,6 +33,7 @@ describe("getPublishStatus", () => {
   const createdSeasonIds: string[] = [];
   const createdPublishIds: string[] = [];
   const createdUpcomingGameIds: string[] = [];
+  const createdEveningIds: string[] = [];
 
   // teamId is required on PlayerCreateInput but not itself under test here —
   // resolved from the real seeded team, same as createGameAction does via
@@ -67,6 +70,11 @@ describe("getPublishStatus", () => {
       await db
         .collection<{ _id: string }>("Seasons")
         .deleteMany({ _id: { $in: createdSeasonIds.splice(0) } });
+    }
+    if (createdEveningIds.length > 0) {
+      await db
+        .collection<{ _id: string }>("AwardEvening")
+        .deleteMany({ _id: { $in: createdEveningIds.splice(0) } });
     }
     for (const id of createdUpcomingGameIds.splice(0)) {
       await deleteUpcomingGame(id).catch(() => undefined);
@@ -148,6 +156,19 @@ describe("getPublishStatus", () => {
       type: "CHALLENGE",
     });
     createdUpcomingGameIds.push(game._id);
+
+    const status = await getPublishStatus();
+    expect(status.hasUnpublishedChanges).toBe(true);
+  });
+
+  it("flags unpublished changes when an awards evening changes after the last publish", async () => {
+    const evening = await createAwardEvening("SSN4243");
+    createdEveningIds.push(evening._id);
+    const publish = await runPublish();
+    createdPublishIds.push(publish._id);
+    expect((await getPublishStatus()).hasUnpublishedChanges).toBe(false);
+
+    await setAwardEveningStatus(evening._id, "announced");
 
     const status = await getPublishStatus();
     expect(status.hasUnpublishedChanges).toBe(true);

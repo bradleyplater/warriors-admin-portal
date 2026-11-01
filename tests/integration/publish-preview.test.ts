@@ -8,6 +8,7 @@ import {
   listSeasons,
   listOpponents,
   listUpcomingGames,
+  listAwardEvenings,
 } from "../../lib/repositories";
 import { generateAllArtifacts, writeArtifacts } from "../../lib/publish/generate";
 import {
@@ -17,6 +18,7 @@ import {
   ResultsArtifactSchema,
   UpcomingGamesArtifactSchema,
   SeasonsArtifactSchema,
+  AwardsArtifactSchema,
 } from "../../lib/publish/schemas";
 
 // Exercises the same generation + write path as `npm run publish:preview`
@@ -27,13 +29,15 @@ describe("publish preview generation", () => {
   let paths: string[];
 
   beforeAll(async () => {
-    const [players, games, seasons, opponents, upcomingGames] = await Promise.all([
-      listPlayers(),
-      listGames(),
-      listSeasons(),
-      listOpponents(),
-      listUpcomingGames(),
-    ]);
+    const [players, games, seasons, opponents, upcomingGames, awardEvenings] =
+      await Promise.all([
+        listPlayers(),
+        listGames(),
+        listSeasons(),
+        listOpponents(),
+        listUpcomingGames(),
+        listAwardEvenings(),
+      ]);
     if (players.length === 0 || games.length === 0 || seasons.length === 0) {
       throw new Error(
         "Seeded data not found — run `npm run db:seed` before the integration suite.",
@@ -47,6 +51,7 @@ describe("publish preview generation", () => {
       seasons,
       opponents,
       upcomingGames,
+      awardEvenings,
     );
     paths = await writeArtifacts(artifacts, outputDir);
   });
@@ -57,8 +62,8 @@ describe("publish preview generation", () => {
     }
   });
 
-  it("writes all six artifacts to disk", () => {
-    expect(paths).toHaveLength(6);
+  it("writes all seven artifacts to disk", () => {
+    expect(paths).toHaveLength(7);
   });
 
   it("players.json on disk validates against PlayersArtifactSchema", async () => {
@@ -93,5 +98,12 @@ describe("publish preview generation", () => {
   it("seasons.json on disk validates against SeasonsArtifactSchema", async () => {
     const contents = JSON.parse(await readFile(join(outputDir, "seasons.json"), "utf-8"));
     expect(() => SeasonsArtifactSchema.parse(contents)).not.toThrow();
+  });
+
+  it("awards.json on disk validates against AwardsArtifactSchema", async () => {
+    const contents = JSON.parse(
+      await readFile(join(outputDir, "awards.json"), "utf-8"),
+    );
+    expect(() => AwardsArtifactSchema.parse(contents)).not.toThrow();
   });
 });
