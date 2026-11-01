@@ -100,6 +100,20 @@ describe("describeAwardWinners", () => {
     ).toBe("#4 Sam Able · total not shown");
   });
 
+  it("says when a stat award's total is hidden on the website", () => {
+    expect(
+      describeAwardWinners(
+        entry({
+          category: "most-goals",
+          competition: "BOTBC",
+          winners: ["PLR1"],
+          hideTotal: true,
+        }),
+        context,
+      ).winners,
+    ).toBe("#4 Sam Able · total not shown");
+  });
+
   it("suggests the leader for an unannounced stat award, skipping the coach", () => {
     expect(
       describeAwardWinners(
