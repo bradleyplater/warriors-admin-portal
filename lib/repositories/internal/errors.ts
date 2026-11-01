@@ -28,6 +28,16 @@ export class DuplicateOpponentNameError extends Error {
   }
 }
 
+export class DuplicateAwardEveningError extends Error {
+  readonly eveningId: string;
+
+  constructor(eveningId: string) {
+    super(`Awards evening "${eveningId}" already exists`);
+    this.name = "DuplicateAwardEveningError";
+    this.eveningId = eveningId;
+  }
+}
+
 export class NotFoundError extends Error {
   constructor(collection: string, id: string) {
     super(`${collection} "${id}" not found`);
