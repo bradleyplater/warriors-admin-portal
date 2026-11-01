@@ -86,6 +86,22 @@ describe("parseAwardEntryForm", () => {
     expect(result.ok && result.input.note).toBe("Named for 2026/27");
   });
 
+  it("keeps hide-total on a stat award", () => {
+    const result = parseAwardEntryForm(
+      form({ award: "most-points", hideTotal: "on" }),
+      players,
+    );
+    expect(result.ok && result.input.hideTotal).toBe(true);
+  });
+
+  it("ignores hide-total on other awards", () => {
+    const result = parseAwardEntryForm(
+      form({ award: "mvp", hideTotal: "on" }),
+      players,
+    );
+    expect(result.ok && result.input).toEqual({ category: "mvp", winners: [] });
+  });
+
   it("requires an award", () => {
     expect(parseAwardEntryForm(form({}), players)).toEqual({
       ok: false,

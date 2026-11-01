@@ -36,11 +36,12 @@ export function describeAwardWinners(
     return {
       winners: entry.winners
         .map((id) =>
-          stat
+          stat && !entry.hideTotal
             ? `${label(id)} · ${formatStat(statAwardTotal(games, seasonId, entry.competition, stat, id), stat)}`
             : label(id),
         )
-        .join(", "),
+        .join(", ")
+        .concat(stat && entry.hideTotal ? " · total not shown" : ""),
       suggestion: null,
     };
   }

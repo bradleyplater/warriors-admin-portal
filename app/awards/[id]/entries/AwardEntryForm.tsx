@@ -156,6 +156,18 @@ export function AwardEntryForm({
         errors={state.errors.note}
       />
 
+      {award in AWARD_CATEGORIES &&
+        "stat" in AWARD_CATEGORIES[award as AwardCategory] && (
+          <Choice
+            type="checkbox"
+            name="hideTotal"
+            defaultChecked={entry?.hideTotal ?? false}
+          >
+            Don’t show the winner’s total on the website — e.g. when today’s
+            game records no longer match what was awarded on the night.
+          </Choice>
+        )}
+
       <FormActions>
         <Button type="submit" size="lg" disabled={pending}>
           {pending ? "Saving…" : submitLabel}

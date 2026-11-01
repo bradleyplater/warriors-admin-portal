@@ -1,6 +1,13 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import type { Player, Game, Opponent, Season, UpcomingGame } from "../schemas";
+import type {
+  AwardEvening,
+  Player,
+  Game,
+  Opponent,
+  Season,
+  UpcomingGame,
+} from "../schemas";
 import { todayInLondon } from "../upcoming-games/time";
 import {
   generatePlayersArtifact,
@@ -9,6 +16,7 @@ import {
   generateResultsArtifact,
   generateUpcomingGamesArtifact,
   generateSeasonsArtifact,
+  generateAwardsArtifact,
 } from "./artifacts";
 
 export interface GeneratedArtifacts {
@@ -18,6 +26,7 @@ export interface GeneratedArtifacts {
   "results.json": unknown;
   "upcoming-games.json": unknown;
   "seasons.json": unknown;
+  "awards.json": unknown;
 }
 
 // Shared by lib/publish/cli.ts (the real `npm run publish:preview` path) and
@@ -28,6 +37,7 @@ export function generateAllArtifacts(
   seasons: Season[],
   opponents: Opponent[],
   upcomingGames: UpcomingGame[],
+  awardEvenings: AwardEvening[],
   // Decides which upcoming games are still upcoming — a parameter so tests
   // are deterministic; real callers take the default.
   today: string = todayInLondon(),
@@ -39,6 +49,12 @@ export function generateAllArtifacts(
     "results.json": generateResultsArtifact(games, seasons, opponents),
     "upcoming-games.json": generateUpcomingGamesArtifact(upcomingGames, opponents, today),
     "seasons.json": generateSeasonsArtifact(seasons),
+    "awards.json": generateAwardsArtifact(
+      awardEvenings,
+      seasons,
+      players,
+      games,
+    ),
   };
 }
 

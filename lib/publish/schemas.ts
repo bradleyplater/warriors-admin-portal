@@ -154,3 +154,45 @@ export const SeasonsArtifactSchema = z.object({
   activeSeason: z.string().nullable(),
   seasons: z.array(z.string()),
 });
+
+// awards.json is new with add-awards. The legacy file in fixtures/golden is
+// the hand-written one the import read, not this contract — the website
+// moves to this shape when its awards page is rebuilt.
+const AwardWinnerArtifactSchema = z.object({
+  playerId: z.string(),
+  // Most goals/assists/points only: the winner's total in the award's games.
+  total: z.number().int().nonnegative().optional(),
+});
+
+const AwardArtifactSchema = z.object({
+  // Absent for a one-off club award.
+  category: z.string().optional(),
+  name: z.string(),
+  group: z.string(),
+  // "BOTB" or "LLIHC"; absent for a club-wide award.
+  competition: z.string().optional(),
+  stat: z.enum(["goals", "assists", "points"]).optional(),
+  // Empty until announced.
+  winners: z.array(AwardWinnerArtifactSchema),
+  // CDN key, like results.json's photos.
+  photo: z.object({ key: z.string(), alt: z.string() }).optional(),
+  note: z.string().optional(),
+});
+
+export const AwardsArtifactSchema = z.object({
+  competitions: z.array(z.string()),
+  // The recurring awards in display order, for the roll of honour.
+  categories: z.array(
+    z.object({ key: z.string(), name: z.string(), group: z.string() }),
+  ),
+  // Oldest first.
+  evenings: z.array(
+    z.object({
+      season: z.string(),
+      // 1 for the first awards evening, 2 for the second...
+      number: z.number().int().positive(),
+      status: z.enum(["categories", "announced"]),
+      awards: z.array(AwardArtifactSchema),
+    }),
+  ),
+});

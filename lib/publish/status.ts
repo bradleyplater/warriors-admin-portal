@@ -1,4 +1,5 @@
 import {
+  getAwardEveningsLatestUpdatedAt,
   getGamesLatestUpdatedAt,
   getOpponentsLatestUpdatedAt,
   getLatestSuccessfulPublish,
@@ -43,17 +44,18 @@ export async function getPublishStatus(): Promise<PublishStatus> {
     teamUpdatedAt,
     opponentsUpdatedAt,
     upcomingGamesUpdatedAt,
+    awardEveningsUpdatedAt,
     lastPublish,
-  ] =
-    await Promise.all([
-      getPlayersLatestUpdatedAt(),
-      getGamesLatestUpdatedAt(),
-      getSeasonsLatestUpdatedAt(),
-      getTeamLatestUpdatedAt(),
-      getOpponentsLatestUpdatedAt(),
-      getUpcomingGamesLatestUpdatedAt(),
-      getLatestSuccessfulPublish(),
-    ]);
+  ] = await Promise.all([
+    getPlayersLatestUpdatedAt(),
+    getGamesLatestUpdatedAt(),
+    getSeasonsLatestUpdatedAt(),
+    getTeamLatestUpdatedAt(),
+    getOpponentsLatestUpdatedAt(),
+    getUpcomingGamesLatestUpdatedAt(),
+    getAwardEveningsLatestUpdatedAt(),
+    getLatestSuccessfulPublish(),
+  ]);
 
   const latestUpdatedAt = [
     playersUpdatedAt,
@@ -62,6 +64,7 @@ export async function getPublishStatus(): Promise<PublishStatus> {
     teamUpdatedAt,
     opponentsUpdatedAt,
     upcomingGamesUpdatedAt,
+    awardEveningsUpdatedAt,
   ]
     .filter((date): date is Date => date !== null)
     .reduce<Date | null>(

@@ -100,6 +100,15 @@ describe("AwardEntrySchema", () => {
     expect(result.success).toBe(true);
   });
 
+  it("accepts hideTotal only as true", () => {
+    expect(
+      AwardEntrySchema.safeParse({ ...validEntry, hideTotal: true }).success,
+    ).toBe(true);
+    expect(
+      AwardEntrySchema.safeParse({ ...validEntry, hideTotal: false }).success,
+    ).toBe(false);
+  });
+
   it("rejects the same winner twice", () => {
     const result = AwardEntrySchema.safeParse({
       ...validEntry,

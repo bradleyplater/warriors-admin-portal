@@ -96,6 +96,10 @@ const AwardEntryShape = z.object({
   photo: AwardPhotoSchema.optional(),
   // Shown under the winner in the roll of honour, e.g. "Named for 2023/24".
   note: AwardTextSchema.optional(),
+  // Most goals/assists/points only: leave the winners' totals off the
+  // website, e.g. where today's game records no longer match what was
+  // awarded on the night. Absent means shown; never stored as false.
+  hideTotal: z.literal(true).optional(),
 });
 
 export const AwardEntrySchema = AwardEntryShape.superRefine((entry, ctx) => {

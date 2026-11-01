@@ -6,6 +6,7 @@ import {
   type AwardCompetition,
 } from "../schemas";
 import type { AwardEntryInput } from "../repositories";
+import { awardStat } from "./stat-leaders";
 
 // The award <select>'s value for "type a one-off name instead".
 export const CUSTOM_AWARD = "custom";
@@ -82,6 +83,11 @@ export function parseAwardEntryForm(
   }
 
   const note = text(formData.get("note"));
+  // Only means anything on a stat award; ignored on the rest.
+  const hideTotal =
+    category !== undefined &&
+    awardStat({ category }) !== undefined &&
+    formData.get("hideTotal") !== null;
   if (tooLong(note)) {
     errors.note = [TOO_LONG];
   }
@@ -96,6 +102,7 @@ export function parseAwardEntryForm(
       ...(competition && { competition }),
       winners,
       ...(note && { note }),
+      ...(hideTotal && { hideTotal: true as const }),
     },
   };
 }

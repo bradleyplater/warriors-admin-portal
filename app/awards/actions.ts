@@ -138,6 +138,7 @@ export async function applyStatSuggestionAction(
     customName: entry.customName,
     competition: entry.competition,
     note: entry.note,
+    hideTotal: entry.hideTotal,
     winners: leader.playerIds,
   });
   revalidateEvening(eveningId);
