@@ -1,9 +1,22 @@
 import { notFound } from "next/navigation";
-import { getAwardEvening, getSeason, listPlayers } from "@/lib/repositories";
+import {
+  getAwardEvening,
+  getSeason,
+  listGames,
+  listPlayers,
+} from "@/lib/repositories";
 import { awardCompetitionLabel, awardName } from "@/lib/awards/display";
-import { Card, PageHeader, SectionHeading } from "@/app/_ui";
-import { updateAwardEntryAction } from "../../../actions";
-import { photoName, playersForPicker } from "../../../players";
+import {
+  awardStat,
+  formatStat,
+  statAwardLeader,
+} from "@/lib/awards/stat-leaders";
+import { Button, Card, Message, PageHeader, SectionHeading } from "@/app/_ui";
+import {
+  applyStatSuggestionAction,
+  updateAwardEntryAction,
+} from "../../../actions";
+import { photoName, playerLabel, playersForPicker } from "../../../players";
 import { AwardEntryForm } from "../AwardEntryForm";
 import { AwardPhotoUploader } from "./AwardPhotoUploader";
 import { DeleteAwardPhotoButton } from "./DeleteAwardPhotoButton";
@@ -19,10 +32,28 @@ export default async function EditAwardEntryPage({
   if (!evening || !entry) {
     notFound();
   }
-  const [season, players] = await Promise.all([
+  const [season, players, games] = await Promise.all([
     getSeason(evening.seasonId),
     listPlayers(),
+    listGames(),
   ]);
+
+  // Most goals/assists/points: who leads from the games, the coach and
+  // anyone else flagged left out.
+  const stat = awardStat(entry);
+  const leader =
+    stat &&
+    statAwardLeader(games, players, evening.seasonId, entry.competition, stat);
+  const leaderNames = leader?.playerIds
+    .map((id) => {
+      const player = players.find((candidate) => candidate._id === id);
+      return player ? playerLabel(player) : id;
+    })
+    .join(" & ");
+  const leaderIsWinner =
+    leader &&
+    leader.playerIds.length === entry.winners.length &&
+    leader.playerIds.every((id) => entry.winners.includes(id));
 
   return (
     <div className="flex flex-col gap-10">
@@ -34,6 +65,37 @@ export default async function EditAwardEntryPage({
         title={awardName(entry)}
         meta={awardCompetitionLabel(entry.competition)}
       />
+
+      {stat && (
+        <div className="flex max-w-2xl flex-col items-start gap-3">
+          <Message
+            tone="info"
+            title={
+              leader
+                ? `From the games: ${leaderNames} · ${formatStat(leader.value, stat)}`
+                : `No ${stat} recorded yet`
+            }
+            data-testid="stat-suggestion"
+          >
+            Worked out from {awardCompetitionLabel(entry.competition)} games
+            this season. Players marked to leave out of the most goals, assists
+            and points awards are skipped.
+          </Message>
+          {leader && !leaderIsWinner && (
+            <form
+              action={applyStatSuggestionAction.bind(
+                null,
+                evening._id,
+                entry._id,
+              )}
+            >
+              <Button type="submit" variant="secondary" size="sm">
+                Use suggestion
+              </Button>
+            </form>
+          )}
+        </div>
+      )}
 
       <AwardEntryForm
         eveningId={evening._id}

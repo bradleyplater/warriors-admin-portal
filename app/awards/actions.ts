@@ -7,7 +7,9 @@ import {
   addAwardEntry,
   createAwardEvening,
   DuplicateAwardEveningError,
+  getAwardEvening,
   getSeason,
+  listGames,
   listPlayers,
   moveAwardEntry,
   setAwardEveningStatus,
@@ -16,6 +18,7 @@ import {
 import { AwardEveningStatusSchema } from "@/lib/schemas";
 import { parseAwardEntryForm } from "@/lib/awards/entry-form";
 import { standardAwardEntries } from "@/lib/awards/standard-set";
+import { awardStat, statAwardLeader } from "@/lib/awards/stat-leaders";
 import {
   deleteAwardEntry,
   deleteAwardPhoto,
@@ -101,6 +104,42 @@ export async function updateAwardEntryAction(
   }
 
   await updateAwardEntry(eveningId, entryId, parsed.input);
+  revalidateEvening(eveningId);
+  redirect(`/awards/${eveningId}`);
+}
+
+// Sets a stat award's winners to the current leader(s), worked out again
+// here rather than trusting the page, keeping the award's other details.
+export async function applyStatSuggestionAction(
+  eveningId: string,
+  entryId: string,
+): Promise<void> {
+  const evening = await getAwardEvening(eveningId);
+  const entry = evening?.entries.find((candidate) => candidate._id === entryId);
+  const stat = entry && awardStat(entry);
+  if (!evening || !entry || !stat) {
+    return;
+  }
+  const [games, players] = await Promise.all([listGames(), listPlayers()]);
+  const leader = statAwardLeader(
+    games,
+    players,
+    evening.seasonId,
+    entry.competition,
+    stat,
+  );
+  if (!leader) {
+    return;
+  }
+
+  // updateAwardEntry keeps the photo.
+  await updateAwardEntry(eveningId, entry._id, {
+    category: entry.category,
+    customName: entry.customName,
+    competition: entry.competition,
+    note: entry.note,
+    winners: leader.playerIds,
+  });
   revalidateEvening(eveningId);
   redirect(`/awards/${eveningId}`);
 }

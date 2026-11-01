@@ -1,7 +1,16 @@
 import { existsSync } from "node:fs";
 import sharp from "sharp";
 import { expect, test, type Page } from "@playwright/test";
-import { createSeason, DuplicateSeasonError } from "@/lib/repositories";
+import {
+  createGame,
+  createPlayer,
+  createSeason,
+  deleteGame,
+  deletePlayer,
+  DuplicateSeasonError,
+  getPlayer,
+  getTheTeam,
+} from "@/lib/repositories";
 import { getDb } from "@/lib/mongodb";
 
 // Shares the app's MONGODB_URI, like games-freshness.spec.ts, so the test can
@@ -26,6 +35,12 @@ async function removeTestData() {
   await db.collection<{ _id: string }>("Seasons").deleteOne({ _id: SEASON_ID });
 }
 
+// A BOTB game in the test season where the coach (flagged to be left out
+// of stat awards) outscores the other player, 2 goals to 1.
+let scorerId = "";
+let coachId = "";
+let gameId = "";
+
 test.beforeAll(async () => {
   await removeTestData();
   // Created after the server started, so the list also proves /awards isn't
@@ -33,9 +48,49 @@ test.beforeAll(async () => {
   await createSeason({ name: "38/39" }).catch((error: unknown) => {
     if (!(error instanceof DuplicateSeasonError)) throw error;
   });
+
+  const teamId = (await getTheTeam())!._id;
+  const testPlayer = (surname: string, excludeFromStatAwards: boolean) =>
+    createPlayer({
+      firstName: "Awardtest",
+      surname,
+      positions: ["Forward"],
+      active: false,
+      excludeFromStatAwards,
+      teamId,
+    });
+  scorerId = (await testPlayer("Scorer", false))._id;
+  coachId = (await testPlayer("Coach", true))._id;
+  const goal = (scoredBy: string, minute: number) => ({
+    scoredBy,
+    minute,
+    second: 0,
+    type: "EVEN" as const,
+  });
+  gameId = (
+    await createGame({
+      date: new Date("2038-11-01"),
+      seasonId: SEASON_ID,
+      type: "BOTBC",
+      location: "HOME",
+      team: {
+        id: teamId,
+        roster: [{ playerId: scorerId }, { playerId: coachId }],
+        goals: [goal(coachId, 1), goal(coachId, 2), goal(scorerId, 3)],
+        penalties: [],
+      },
+      opponentTeam: { opponentId: "OPN000001", goals: [], penalties: [] },
+    })
+  )._id;
 });
 
-test.afterAll(removeTestData);
+test.afterAll(async () => {
+  await deleteGame(gameId).catch(() => undefined);
+  for (const id of [scorerId, coachId]) {
+    await deletePlayer(id).catch(() => undefined);
+  }
+  await removeTestData();
+});
 
 const entries = (page: Page) => page.getByTestId("award-entry");
 
@@ -98,6 +153,48 @@ test.describe("awards", () => {
     await expect(entries(page).first()).toContainText("Jamie Ashworth");
     await expect(page.getByTestId("award-count")).toHaveText(
       "24 · 23 to be announced",
+    );
+  });
+
+  test("suggest most goals from the games, leaving out the coach", async ({
+    page,
+  }) => {
+    await page.goto(`/awards/${EVENING_ID}`);
+    const mostGoals = entries(page)
+      .filter({ hasText: "Most goals" })
+      .filter({ hasText: "BOTB" });
+    await expect(mostGoals).toContainText(
+      "Suggested: Awardtest Scorer · 1 goal",
+    );
+
+    await page.getByRole("link", { name: "Edit Most goals (BOTB)" }).click();
+    await expect(page.getByTestId("stat-suggestion")).toContainText(
+      "From the games: Awardtest Scorer · 1 goal",
+    );
+    await page.getByRole("button", { name: "Use suggestion" }).click();
+
+    await expect(page).toHaveURL(`/awards/${EVENING_ID}`);
+    await expect(mostGoals).toContainText("Awardtest Scorer · 1 goal");
+    await expect(mostGoals).not.toContainText("Suggested");
+  });
+
+  test("clearing the coach flag on the player form brings them back", async ({
+    page,
+  }) => {
+    await page.goto(`/players/${coachId}/edit`);
+    const flag = page.getByRole("checkbox", {
+      name: /Leave out of the most goals/,
+    });
+    await expect(flag).toBeChecked();
+    await flag.uncheck();
+    await page.getByRole("button", { name: "Save changes" }).click();
+    await expect(page).toHaveURL("/players");
+    expect((await getPlayer(coachId))?.excludeFromStatAwards).toBeUndefined();
+
+    await page.goto(`/awards/${EVENING_ID}`);
+    await page.getByRole("link", { name: "Edit Most goals (BOTB)" }).click();
+    await expect(page.getByTestId("stat-suggestion")).toContainText(
+      "From the games: Awardtest Coach · 2 goals",
     );
   });
 

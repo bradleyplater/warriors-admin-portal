@@ -1,5 +1,10 @@
 import { notFound } from "next/navigation";
-import { getAwardEvening, getSeason, listPlayers } from "@/lib/repositories";
+import {
+  getAwardEvening,
+  getSeason,
+  listGames,
+  listPlayers,
+} from "@/lib/repositories";
 import { AWARD_EVENING_STATUSES } from "@/lib/schemas";
 import {
   AWARD_STATUS_LABELS,
@@ -21,9 +26,26 @@ import {
   moveAwardEntryAction,
   setAwardEveningStatusAction,
 } from "../actions";
-import { photoName, playerLabel } from "../players";
+import { photoName } from "../players";
+import { describeAwardWinners, type AwardWinnerText } from "../winners";
 import { STATUS_TONES } from "../status-tones";
 import { DeleteAwardButton } from "./DeleteAwardButton";
+
+function WinnerCell({ winners, suggestion }: AwardWinnerText) {
+  if (winners) {
+    return <>{winners}</>;
+  }
+  return (
+    <>
+      <span className="text-fg-secondary">To be announced</span>
+      {suggestion && (
+        <span className="t-data block text-fg-secondary">
+          Suggested: {suggestion}
+        </span>
+      )}
+    </>
+  );
+}
 
 export default async function AwardEveningPage({
   params,
@@ -36,12 +58,13 @@ export default async function AwardEveningPage({
     notFound();
   }
 
-  const [season, players] = await Promise.all([
+  const [season, players, games] = await Promise.all([
     getSeason(evening.seasonId),
     listPlayers(),
+    listGames(),
   ]);
   const seasonName = season?.name ?? evening.seasonId;
-  const playersById = new Map(players.map((player) => [player._id, player]));
+  const winnerContext = { games, players, seasonId: evening.seasonId };
   const toAnnounce = evening.entries.filter(
     (entry) => entry.winners.length === 0,
   ).length;
@@ -161,18 +184,9 @@ export default async function AwardEveningPage({
                         {awardCompetitionLabel(entry.competition)}
                       </td>
                       <td>
-                        {entry.winners.length === 0 ? (
-                          <span className="text-fg-secondary">
-                            To be announced
-                          </span>
-                        ) : (
-                          entry.winners
-                            .map((winnerId) => {
-                              const player = playersById.get(winnerId);
-                              return player ? playerLabel(player) : winnerId;
-                            })
-                            .join(", ")
-                        )}
+                        <WinnerCell
+                          {...describeAwardWinners(entry, winnerContext)}
+                        />
                       </td>
                       <td>
                         {entry.photo ? (
