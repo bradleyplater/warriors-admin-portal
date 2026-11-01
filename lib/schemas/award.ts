@@ -62,6 +62,7 @@ export const AwardEveningStatusSchema = z.enum([
   "announced",
 ]);
 export type AwardEveningStatus = z.infer<typeof AwardEveningStatusSchema>;
+export const AWARD_EVENING_STATUSES = AwardEveningStatusSchema.options;
 
 export const MAX_AWARD_TEXT_LENGTH = 120;
 

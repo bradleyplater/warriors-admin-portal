@@ -1,11 +1,13 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { getDb } from "../../../lib/mongodb";
 import {
+  addAwardEntries,
   addAwardEntry,
   createAwardEvening,
   getAwardEvening,
   getAwardEveningsLatestUpdatedAt,
   listAwardEvenings,
+  moveAwardEntry,
   removeAwardEntry,
   setAwardEntryPhoto,
   setAwardEveningStatus,
@@ -219,5 +221,42 @@ describe("award evenings repository", () => {
     expect(latest?.getTime()).toBeGreaterThanOrEqual(
       updated.updatedAt.getTime(),
     );
+  });
+
+  it("adds several entries in order in one write", async () => {
+    await create("SSN1516");
+    await addAwardEntry("EVE1516", { category: "captain", winners: [] });
+
+    const evening = await addAwardEntries("EVE1516", [
+      { category: "mvp", competition: "BOTBC", winners: [] },
+      { category: "mvp", competition: "LLIHC", winners: [] },
+    ]);
+
+    expect(evening.entries.map((entry) => entry.competition)).toEqual([
+      undefined,
+      "BOTBC",
+      "LLIHC",
+    ]);
+    expect(new Set(evening.entries.map((entry) => entry._id)).size).toBe(3);
+  });
+
+  it("moves an entry earlier or later, and does nothing at either end", async () => {
+    const created = await create("SSN1617", {
+      entries: [
+        { category: "mvp", winners: [] },
+        { category: "captain", winners: [] },
+      ],
+    });
+    const [first, second] = created.entries.map((entry) => entry._id);
+
+    const ids = async (direction: "earlier" | "later", id: string) =>
+      (await moveAwardEntry("EVE1617", id, direction)).entries.map(
+        (entry) => entry._id,
+      );
+
+    expect(await ids("later", first!)).toEqual([second, first]);
+    expect(await ids("later", first!)).toEqual([second, first]);
+    expect(await ids("earlier", first!)).toEqual([first, second]);
+    expect(await ids("earlier", first!)).toEqual([first, second]);
   });
 });

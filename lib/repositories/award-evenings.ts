@@ -138,6 +138,39 @@ export async function addAwardEntry(
   return added!;
 }
 
+// Several at once, in order, in one write — e.g. the standard set.
+export async function addAwardEntries(
+  eveningId: string,
+  inputs: AwardEntryInput[],
+): Promise<AwardEvening> {
+  return modifyEvening(eveningId, (evening) => {
+    const entries = [...evening.entries];
+    for (const input of inputs) {
+      entries.push(newEntry(input, entries));
+    }
+    return { ...evening, entries };
+  });
+}
+
+// Swaps the entry with its neighbour. A no-op at either end, like
+// moveGamePhoto.
+export async function moveAwardEntry(
+  eveningId: string,
+  entryId: string,
+  direction: "earlier" | "later",
+): Promise<AwardEvening> {
+  return modifyEvening(eveningId, (evening) => {
+    const index = entryIndex(evening, entryId);
+    const target = direction === "earlier" ? index - 1 : index + 1;
+    if (target < 0 || target >= evening.entries.length) {
+      return evening;
+    }
+    const entries = [...evening.entries];
+    [entries[index], entries[target]] = [entries[target]!, entries[index]!];
+    return { ...evening, entries };
+  });
+}
+
 // Replaces the entry's details, keeping its id, position and photo.
 export async function updateAwardEntry(
   eveningId: string,
