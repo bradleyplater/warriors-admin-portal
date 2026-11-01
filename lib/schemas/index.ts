@@ -6,3 +6,4 @@ export * from "./opponent";
 export * from "./upcoming-game";
 export * from "./game";
 export * from "./publish";
+export * from "./award";

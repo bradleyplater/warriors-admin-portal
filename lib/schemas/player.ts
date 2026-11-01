@@ -38,6 +38,10 @@ const PlayerShape = z.object({
   // keeps stored documents portable across environments with different
   // S3 hosts/buckets (local MinIO vs prod).
   imagePath: z.string().min(1).optional(),
+  // Leaves the player out of the most goals/assists/points awards (the
+  // coach). Their stats still count everywhere else. Missing means
+  // eligible; cleared flags are unset rather than stored as false.
+  excludeFromStatAwards: z.boolean().optional(),
   teamId: z.string(), // "TM######"
   createdAt: z.date(),
   updatedAt: z.date(),
