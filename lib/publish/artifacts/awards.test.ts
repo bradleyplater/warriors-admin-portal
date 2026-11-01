@@ -125,6 +125,13 @@ describe("generateAwardsArtifact", () => {
     expect(published?.awards[0]?.winners).toEqual([{ playerId: "PLR1" }]);
   });
 
+  it("leaves totals off an award set to hide them", () => {
+    const [published] = generate([
+      evening("25/26", "announced", [{ ...mostGoals, hideTotal: true }]),
+    ]).evenings;
+    expect(published?.awards[0]?.winners).toEqual([{ playerId: "PLR1" }]);
+  });
+
   it("keeps an alt text the admin wrote", () => {
     const [published] = generate([
       evening("25/26", "announced", [
