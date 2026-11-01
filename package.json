@@ -26,6 +26,8 @@
     "backup:run:prod": "node scripts/with-env.mjs .env.production.local tsx lib/backup/run-cli.ts",
     "backup:restore": "tsx lib/backup/restore-cli.ts",
     "backup:restore:prod": "node scripts/with-env.mjs .env.production.local tsx lib/backup/restore-cli.ts",
+    "awards:import": "tsx lib/awards/import-cli.ts",
+    "awards:import:prod": "node scripts/with-env.mjs .env.production.local tsx lib/awards/import-cli.ts",
     "test:unit": "vitest run --config vitest.config.ts",
     "test:integration": "vitest run --config vitest.integration.config.ts",
     "test:e2e": "playwright test"
