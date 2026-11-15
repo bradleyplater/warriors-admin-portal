@@ -49,7 +49,14 @@ export default async function GamesPage() {
       <PageHeader
         eyebrow="Database"
         title="Games"
-        actions={<ButtonLink href="/games/new">Add game</ButtonLink>}
+        actions={
+          <>
+            <ButtonLink href="/games/import" variant="secondary">
+              Import from CSV
+            </ButtonLink>
+            <ButtonLink href="/games/new">Add game</ButtonLink>
+          </>
+        }
       />
 
       {orderedSeasons.map((season) => (
